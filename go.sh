@@ -1,1 +1,1 @@
-scons platform=switch module_etc_enabled=no module_webm_enabled=no module_websocket_enabled=no
+scons platform=switch module_etc_enabled=no module_webm_enabled=no module_websocket_enabled=no module_upnp_enabled=no

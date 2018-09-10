@@ -72,10 +72,10 @@ def configure(env):
     env['ENV']['DEVKITPRO'] = dkp
     env['ENV']['PATH'] = os.environ['PATH'] + ":{}/portlibs/switch/bin:{}/devkitA64/bin".format(dkp,dkp) # This doesn't quite work....
 
-
-    env.Prepend(CCFLAGS='-O2 -ffunction-sections -fdata-sections -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIC -ftls-model=local-exec'.split(" "))
+    arch = ["-march=armv8-a", "-mtune=cortex-a57", "-mtp=soft", "-fPIE"]
+    env.Prepend(CCFLAGS=arch + ['-ffunction-sections'])
     env.Prepend(CPPFLAGS='-D__SWITCH__ -I {}/portlibs/switch/include -isystem {}/libnx/include -DPOSH_COMPILER_GCC -DPOSH_OS_HORIZON -DPOSH_OS_STRING=\\"horizon\\"'.format(dkp,dkp).split(" "))
-    env.Prepend(LINKFLAGS='-O2 -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIC -ftls-model=local-exec -L{}/portlibs/switch/lib -L{}/libnx/lib'.format(dkp,dkp).split(" "))
+    env.Prepend(LINKFLAGS=arch + ['-specs={}/libnx/switch.specs'.format(dkp), '-L{}/portlibs/switch/lib'.format(dkp), '-L{}/libnx/lib'.format(dkp)])
 
     if (env["target"] == "release"):
         # -O3 -ffast-math is identical to -Ofast. We need to split it out so we can selectively disable
@@ -202,7 +202,7 @@ def configure(env):
 
     if not env['builtin_mbedtls']:
         # mbedTLS does not provide a pkgconfig config yet. See https://github.com/ARMmbed/mbedtls/issues/228
-        env.Append(LIBS=['mbedtls', 'mbedcrypto', 'mbedx509'])
+        env.Append(LIBS=['mbedtls', 'mbedx509', 'mbedcrypto'])
 
     if not env['builtin_libwebsockets']:
         env.ParseConfig('aarch64-none-elf-pkg-config libwebsockets --cflags --libs')
@@ -251,6 +251,6 @@ def configure(env):
 
     env.Append(CPPPATH=['#platform/switch'])
     env.Append(CPPFLAGS=['-DHORIZON_ENABLED', '-DOPENGL_ENABLED', '-DGLES_ENABLED'])
-    env.Append(LIBS=['EGL', 'glapi', 'drm_nouveau']) # nx??
+    env.Append(LIBS=['EGL', 'GLESv2', 'glapi', 'drm_nouveau', 'nx'])
 
     #-lglad -lEGL -lglapi -ldrm_nouveau 
