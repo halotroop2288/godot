@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+Import('env')
+
+files = [
+	"godot_switch.cpp",
+	"os_switch.cpp"
+]
+
+prog = env.add_program('#bin/godot', files)
+
+#if "build_angle" in env and env["build_angle"]:
+#    env.Depends(prog, [cmd])
