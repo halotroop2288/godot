@@ -6,8 +6,8 @@
 #include "main/main.h"
 #include "os_switch.h"
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char *argv[])
+{
 	OS_Switch os;
 
 	char *cwd = (char *)malloc(PATH_MAX);
