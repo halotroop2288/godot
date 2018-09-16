@@ -4,10 +4,11 @@ Import('env')
 
 files = [
 	"godot_switch.cpp",
-	"os_switch.cpp"
+	"os_switch.cpp",
+	"power_switch.cpp",
+	"context_gl_switch_egl.cpp"
 ]
 
 prog = env.add_program('#bin/godot', files)
-
-#if "build_angle" in env and env["build_angle"]:
-#    env.Depends(prog, [cmd])
+env.Command("#bin/godot.nro", prog, "/opt/devkitpro/tools/bin/elf2nro $SOURCE $TARGET")
+env.Command("#bin/godot.nso", prog, "/opt/devkitpro/tools/bin/elf2nso $SOURCE $TARGET")

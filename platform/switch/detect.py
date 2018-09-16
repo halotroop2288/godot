@@ -250,7 +250,7 @@ def configure(env):
     #    env.ParseConfig('aarch64-none-elf-pkg-config zlib --cflags --libs')
 
     env.Append(CPPPATH=['#platform/switch'])
-    env.Append(CPPFLAGS=['-DHORIZON_ENABLED', '-DOPENGL_ENABLED', '-DGLES_ENABLED'])
+    env.Append(CPPFLAGS=['-DHORIZON_ENABLED', '-DLIBC_FILEIO_ENABLED', '-DOPENGL_ENABLED', '-DGLES_ENABLED'])
     env.Append(LIBS=['EGL', 'GLESv2', 'glapi', 'drm_nouveau', 'nx'])
 
     #-lglad -lEGL -lglapi -ldrm_nouveau 

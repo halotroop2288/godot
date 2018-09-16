@@ -1,8 +1,20 @@
-#include "os/input.h"
 #include "os/os.h"
+#include "os/input.h"
+#include "power_switch.h"
+#include "drivers/gl_context/context_gl.h"
+#include "servers/visual/visual_server_raster.h"
+#include "main/input_default.h"
 
 class OS_Switch : public OS
 {
+  int video_driver_index;
+  MainLoop *main_loop;
+  VideoMode current_videomode;
+  VisualServer *visual_server;
+  InputDefault *input;
+  PowerSwitch *power_manager;
+  ContextGL *gl_context;
+
 protected:
   virtual void initialize_core();
   virtual Error initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver);
@@ -44,5 +56,12 @@ public:
   virtual void set_cursor_shape(CursorShape p_shape);
   virtual void set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot);
 
+  OS::PowerState get_power_state();
+  int get_power_seconds_left();
+  int get_power_percent_left();
+
   void run();
+  virtual void swap_buffers();
+
+  OS_Switch();
 };

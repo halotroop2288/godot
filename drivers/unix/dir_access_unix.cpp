@@ -294,7 +294,7 @@ Error DirAccessUnix::make_dir(String p_dir) {
 		return OK;
 	};
 
-	if (err == EEXIST) {
+	if (err == EEXIST || err == 1026) { // weird libnx shit, it returns the raw error code
 		return ERR_ALREADY_EXISTS;
 	};
 
