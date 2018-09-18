@@ -287,8 +287,50 @@ void OS_Switch::run()
 	}
 
 	main_loop->init();
+
+	Vector2 last_touch_pos;
 	while(appletMainLoop())
 	{
+		hidScanInput();
+		if(hidKeysDown(CONTROLLER_P1_AUTO) & KEY_TOUCH)
+		{
+			touchPosition touch;
+			hidTouchRead(&touch, 0);
+			Vector2 pos(touch.px, touch.py);
+
+			Ref<InputEventScreenTouch> st;
+			st.instance();
+			st->set_index(0);
+			st->set_position(pos);
+			st->set_pressed(true);
+			input->parse_input_event(st);
+		}
+
+		if(hidKeysHeld(CONTROLLER_P1_AUTO) & KEY_TOUCH)
+		{
+			touchPosition touch;
+			hidTouchRead(&touch, 0);
+			Vector2 pos(touch.px, touch.py);
+
+			Ref<InputEventScreenDrag> sd;
+			sd.instance();
+			sd->set_index(0);
+			sd->set_position(pos);
+			sd->set_relative(pos - last_touch_pos);
+			last_touch_pos = pos;
+			input->parse_input_event(sd);
+		}
+
+		if(hidKeysUp(CONTROLLER_P1_AUTO) & KEY_TOUCH)
+		{
+			Ref<InputEventScreenTouch> st;
+			st.instance();
+			st->set_index(0);
+			st->set_position(last_touch_pos);
+			st->set_pressed(false);
+			input->parse_input_event(st);
+		}
+
 		if (Main::iteration() == true)
 			break;
 	}

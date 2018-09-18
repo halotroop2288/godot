@@ -57,8 +57,14 @@ Error ContextGLSwitchEGL::initialize()
         goto _fail1;
     }
 
+    static const EGLint contextAttributeList[] =
+    {
+        EGL_CONTEXT_CLIENT_VERSION, 3, // request OpenGL ES 3.x
+        EGL_NONE
+    };
+
     // Create an EGL rendering context
-    context = eglCreateContext(display, config, EGL_NO_CONTEXT, NULL);
+    context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttributeList);
     if (!context)
     {
         TRACE("Context creation failed! error: %d", eglGetError());
