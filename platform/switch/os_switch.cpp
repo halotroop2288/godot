@@ -143,6 +143,7 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	visual_server->init();
 
 	input = memnew(InputDefault);
+	input->set_emulate_mouse_from_touch(true);
 	//joypad = memnew(JoypadSwitch(input));
 
 	power_manager = memnew(PowerSwitch);
@@ -169,7 +170,7 @@ void OS_Switch::delete_main_loop()
 
 void OS_Switch::finalize()
 {
-	delete_main_loop();
+	//delete_main_loop();
 
 	memdelete(input);
 	visual_server->finish();
@@ -214,7 +215,29 @@ Size2 OS_Switch::get_window_size() const { return Size2(1280, 720); }
 
 Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr)
 {
-	return FAILED;
+	if(p_blocking == true)
+	{
+		return FAILED; // we don't support this
+		
+	}
+
+	Vector<String> rebuilt_arguments;
+
+	// This is a super dumb implementation to make the editor vaguely work.
+	// It won't work if you don't exit afterwards.
+	for(const List<String>::Element *E = p_arguments.front(); E; E = E->next()) {
+		if((*E)->find(" ") >= 0)
+		{
+			rebuilt_arguments.push_back(String("\"") + E->get() + String("\""));
+		}
+		else
+		{
+			rebuilt_arguments.push_back(E->get());
+		}
+	}
+
+	envSetNextLoad(p_path.utf8().ptr(), String(" ").join(rebuilt_arguments).utf8().ptr());
+	return OK;
 }
 
 Error OS_Switch::kill(const ProcessID &p_pid)
@@ -265,7 +288,7 @@ void OS_Switch::delay_usec(uint32_t p_usec) const
 uint64_t OS_Switch::get_ticks_usec() const
 {
 	static u64 tick_freq = armGetSystemTickFreq();
-	return armGetSystemTick() / tick_freq;
+	return armGetSystemTick() / (tick_freq / 1000000);
 }
 
 bool OS_Switch::can_draw() const
