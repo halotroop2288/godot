@@ -1,3 +1,4 @@
+#include <switch.h>
 #include "context_gl_switch_egl.h"
 #include <stdio.h>
 
@@ -37,9 +38,12 @@ Error ContextGLSwitchEGL::initialize()
     EGLint numConfigs;
     static const EGLint attributeList[] =
     {
-        EGL_RED_SIZE, 1,
-        EGL_GREEN_SIZE, 1,
-        EGL_BLUE_SIZE, 1,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_ALPHA_SIZE,   8,
+        EGL_DEPTH_SIZE,   24,
+        EGL_STENCIL_SIZE, 8,
         EGL_NONE
     };
     eglChooseConfig(display, attributeList, &config, 1, &numConfigs);
@@ -50,7 +54,7 @@ Error ContextGLSwitchEGL::initialize()
     }
 
     // Create an EGL window surface
-    surface = eglCreateWindowSurface(display, config, (char*)"", NULL);
+    surface = eglCreateWindowSurface(display, config, nwindowGetDefault(), NULL);
     if (!surface)
     {
         TRACE("Surface creation failed! error: %d", eglGetError());

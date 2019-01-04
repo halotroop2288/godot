@@ -47,6 +47,7 @@ GodotThread *ThreadSwitch::create_func_switch(ThreadCreateCallback callback, voi
 	thread->callback = callback;
 	thread->userdata = userdata;
 	threadCreate(&thread->thread, thread_func, (void*)thread, 0x1000, 0x3B, -2);
+	threadStart(&thread->thread);
 	return thread;
 }
 
