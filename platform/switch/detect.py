@@ -15,8 +15,12 @@ def can_build():
         print("devkitA64 not found.. switch disabled.")
         return False
 
-    err = os.system("/opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-pkg-config --version > /dev/null")
-    if (err):
+    err = os.system("pkg-config --version > /dev/null")
+    if err:
+        print("pkg-config not found.. switch disabled.")
+        return False
+
+    if not os.path.exists("/opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-pkg-config"):
         print("aarch64-none-elf-pkg-config not found.. switch disabled.")
         return False
     return True
