@@ -1,5 +1,5 @@
+#include "switch_wrapper.h"
 #include "power_switch.h"
-#include <switch.h>
 
 PowerSwitch::PowerSwitch()
 {

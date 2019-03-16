@@ -1,3 +1,4 @@
+#include "switch_wrapper.h"
 #include <limits.h>
 #include <locale.h>
 #include <stdlib.h>
@@ -5,10 +6,6 @@
 
 #include "main/main.h"
 #include "os_switch.h"
-
-#include <switch.h>
-#include <netinet/in.h>
-
 
 int main(int argc, char *argv[])
 {

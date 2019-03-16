@@ -1,4 +1,4 @@
-#include <switch.h>
+#include "switch_wrapper.h"
 #include "os_switch.h"
 #include "context_gl_switch_egl.h"
 
@@ -8,18 +8,20 @@
 #include "drivers/unix/tcp_server_posix.h"
 #include "drivers/unix/stream_peer_tcp_posix.h"
 #include "drivers/unix/packet_peer_udp_posix.h"
-
-#include "drivers/switch/thread_switch.h"
-#include "drivers/switch/mutex_switch.h"
+#include "drivers/unix/thread_posix.h"
+#include "drivers/unix/mutex_posix.h"
 #include "drivers/switch/semaphore_switch.h"
 #include "drivers/switch/rwlock_switch.h"
+
 #include "servers/audio_server.h"
 #include "servers/visual/visual_server_wrap_mt.h"
 #include "drivers/gles3/rasterizer_gles3.h"
 #include "drivers/gles2/rasterizer_gles2.h"
 #include "main/main.h"
-#include <stdio.h>
 
+#include <stdio.h>
+#include <netinet/in.h>
+#include <inttypes.h>
 
 #define ENABLE_NXLINK
 
@@ -32,9 +34,9 @@
 
 void OS_Switch::initialize_core()
 {
-	ThreadSwitch::make_default();
+	ThreadPosix::make_default();
 	SemaphoreSwitch::make_default();
-	MutexSwitch::make_default();
+	MutexPosix::make_default();
 	RWLockSwitch::make_default();
 
 	FileAccess::make_default<FileAccessUnix>(FileAccess::ACCESS_RESOURCES);
@@ -170,8 +172,6 @@ void OS_Switch::delete_main_loop()
 
 void OS_Switch::finalize()
 {
-	//delete_main_loop();
-
 	memdelete(input);
 	visual_server->finish();
 	memdelete(visual_server);
@@ -222,7 +222,7 @@ Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, 
 	}
 
 	Vector<String> rebuilt_arguments;
-
+	rebuilt_arguments.push_back(p_path); // !!!! v important
 	// This is a super dumb implementation to make the editor vaguely work.
 	// It won't work if you don't exit afterwards.
 	for(const List<String>::Element *E = p_arguments.front(); E; E = E->next()) {
@@ -236,6 +236,12 @@ Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, 
 		}
 	}
 
+	if(__nxlink_host.s_addr != 0)
+	{
+		char nxlinked[17];
+	    sprintf(nxlinked,"%08" PRIx32 "_NXLINK_",__nxlink_host.s_addr);
+		rebuilt_arguments.push_back(nxlinked);
+	}
 	envSetNextLoad(p_path.utf8().ptr(), String(" ").join(rebuilt_arguments).utf8().ptr());
 	return OK;
 }

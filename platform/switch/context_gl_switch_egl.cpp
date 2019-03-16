@@ -1,4 +1,4 @@
-#include <switch.h>
+#include "switch_wrapper.h"
 #include "context_gl_switch_egl.h"
 #include <stdio.h>
 
@@ -17,11 +17,13 @@ ContextGLSwitchEGL::ContextGLSwitchEGL(bool gles3_context)
 
 ContextGLSwitchEGL::~ContextGLSwitchEGL()
 {
+    TRACE("Deleting EGL!\n");
 	cleanup();
 }
 
 Error ContextGLSwitchEGL::initialize()
 {
+    TRACE("Starting EGL init!");
     // Connect to the EGL default display
     display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (!display)
@@ -92,8 +94,10 @@ _fail0:
 
 void ContextGLSwitchEGL::cleanup()
 {
+    TRACE("Cleaning up!!!!!!");
     if (display)
     {
+        eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
         if (context)
         {
             eglDestroyContext(display, context);
@@ -107,6 +111,7 @@ void ContextGLSwitchEGL::cleanup()
         eglTerminate(display);
         display = NULL;
     }
+    TRACE("done cleaning up!!!!!!");
 }
 
 void ContextGLSwitchEGL::reset()
@@ -114,7 +119,6 @@ void ContextGLSwitchEGL::reset()
 	cleanup();
 	initialize();
 }
-
 
 void ContextGLSwitchEGL::release_current()
 {
