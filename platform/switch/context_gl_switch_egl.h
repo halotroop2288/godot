@@ -27,5 +27,5 @@ public:
 	void cleanup();
 
 	ContextGLSwitchEGL(bool gles3);
-	~ContextGLSwitchEGL();
+	virtual ~ContextGLSwitchEGL();
 };

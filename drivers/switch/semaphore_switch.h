@@ -2,10 +2,11 @@
 #if defined(HORIZON_ENABLED)
 
 #include "os/semaphore.h"
-#include <switch.h>
-class SemaphoreSwitch : public GodotSemaphore {
-	Semaphore semaphore;
-	static GodotSemaphore *create_semaphore_switch();
+#include "switch_wrapper.h"
+
+class SemaphoreSwitch : public Semaphore {
+	LibnxSemaphore semaphore;
+	static Semaphore *create_semaphore_switch();
 
 public:
 	virtual Error wait();

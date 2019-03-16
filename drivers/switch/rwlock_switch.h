@@ -1,7 +1,7 @@
 #pragma once
 #if defined(HORIZON_ENABLED)
 
-#include <switch.h>
+#include "switch_wrapper.h"
 #include "os/rw_lock.h"
 
 class RWLockSwitch : public RWLock {

@@ -2,7 +2,6 @@
 
 #include "rwlock_switch.h"
 #include "os/memory.h"
-#include <switch.h>
 
 bool rwlockTryReadLock(RwLock* r)
 {

@@ -2,7 +2,6 @@
 
 #include "semaphore_switch.h"
 #include "os/memory.h"
-#include <switch.h>
 
 Error SemaphoreSwitch::wait()
 {
@@ -26,7 +25,7 @@ void SemaphoreSwitch::make_default()
 	create_func = create_semaphore_switch;
 }
 
-GodotSemaphore *SemaphoreSwitch::create_semaphore_switch()
+Semaphore *SemaphoreSwitch::create_semaphore_switch()
 {
 	return memnew(SemaphoreSwitch);
 }

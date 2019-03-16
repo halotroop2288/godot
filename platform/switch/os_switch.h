@@ -1,7 +1,7 @@
 #include "os/os.h"
 #include "os/input.h"
 #include "power_switch.h"
-#include "drivers/gl_context/context_gl.h"
+#include "context_gl_switch_egl.h"
 #include "servers/visual/visual_server_raster.h"
 #include "main/input_default.h"
 
@@ -13,7 +13,7 @@ class OS_Switch : public OS
   VisualServer *visual_server;
   InputDefault *input;
   PowerSwitch *power_manager;
-  ContextGL *gl_context;
+  ContextGLSwitchEGL *gl_context;
 
 protected:
   virtual void initialize_core();
