@@ -17,13 +17,11 @@ ContextGLSwitchEGL::ContextGLSwitchEGL(bool gles3_context)
 
 ContextGLSwitchEGL::~ContextGLSwitchEGL()
 {
-    TRACE("Deleting EGL!\n");
 	cleanup();
 }
 
 Error ContextGLSwitchEGL::initialize()
 {
-    TRACE("Starting EGL init!");
     // Connect to the EGL default display
     display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (!display)
@@ -79,7 +77,6 @@ Error ContextGLSwitchEGL::initialize()
 
     // Connect the context to the surface
     eglMakeCurrent(display, surface, surface, context);
-    TRACE("egl shit done!!\n");
     return OK;
 
 _fail2:
@@ -94,7 +91,6 @@ _fail0:
 
 void ContextGLSwitchEGL::cleanup()
 {
-    TRACE("Cleaning up!!!!!!");
     if (display)
     {
         eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
@@ -111,7 +107,6 @@ void ContextGLSwitchEGL::cleanup()
         eglTerminate(display);
         display = NULL;
     }
-    TRACE("done cleaning up!!!!!!");
 }
 
 void ContextGLSwitchEGL::reset()
@@ -142,6 +137,5 @@ int ContextGLSwitchEGL::get_window_height()
 
 void ContextGLSwitchEGL::swap_buffers()
 {
-    TRACE("Swap!");
 	eglSwapBuffers(display, surface);
 }
