@@ -1,7 +1,7 @@
 #if defined(HORIZON_ENABLED)
 
 #include "semaphore_switch.h"
-#include "os/memory.h"
+#include "core/os/memory.h"
 
 Error SemaphoreSwitch::wait()
 {

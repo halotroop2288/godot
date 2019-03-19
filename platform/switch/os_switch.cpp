@@ -5,9 +5,7 @@
 #include "drivers/unix/file_access_unix.h"
 #include "drivers/unix/dir_access_unix.h"
 #include "drivers/unix/ip_unix.h"
-#include "drivers/unix/tcp_server_posix.h"
-#include "drivers/unix/stream_peer_tcp_posix.h"
-#include "drivers/unix/packet_peer_udp_posix.h"
+#include "drivers/unix/net_socket_posix.h"
 #include "drivers/unix/thread_posix.h"
 #include "drivers/unix/mutex_posix.h"
 #include "drivers/switch/semaphore_switch.h"
@@ -48,9 +46,7 @@ void OS_Switch::initialize_core()
 	DirAccess::make_default<DirAccessUnix>(DirAccess::ACCESS_FILESYSTEM);
 
 #ifndef NO_NETWORK
-	TCPServerPosix::make_default();
-	StreamPeerTCPPosix::make_default();
-	PacketPeerUDPPosix::make_default();
+	NetSocketPosix::make_default();
 	IP_Unix::make_default();
 #endif
 }
@@ -259,6 +255,11 @@ bool OS_Switch::has_environment(const String &p_var) const
 String OS_Switch::get_environment(const String &p_var) const
 {
 	return "";
+}
+
+bool OS_Switch::set_environment(const String &p_var, const String &p_value) const
+{
+	return false;
 }
 
 String OS_Switch::get_name()
