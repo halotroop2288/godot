@@ -2,7 +2,7 @@
 #if defined(HORIZON_ENABLED)
 
 #include "switch_wrapper.h"
-#include "os/rw_lock.h"
+#include "core/os/rw_lock.h"
 
 class RWLockSwitch : public RWLock {
 	RwLock rwlock;

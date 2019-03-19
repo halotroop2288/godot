@@ -1,7 +1,7 @@
 #pragma once
 #if defined(HORIZON_ENABLED)
 
-#include "os/semaphore.h"
+#include "core/os/semaphore.h"
 #include "switch_wrapper.h"
 
 class SemaphoreSwitch : public Semaphore {

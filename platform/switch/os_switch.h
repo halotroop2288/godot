@@ -1,5 +1,5 @@
-#include "os/os.h"
-#include "os/input.h"
+#include "core/os/os.h"
+#include "core/os/input.h"
 #include "power_switch.h"
 #include "context_gl_switch_egl.h"
 #include "servers/visual/visual_server_raster.h"
@@ -45,6 +45,7 @@ public:
 
   virtual bool has_environment(const String &p_var) const;
   virtual String get_environment(const String &p_var) const;
+  virtual bool set_environment(const String &p_var, const String &p_value) const;
   virtual String get_name();
   virtual MainLoop *get_main_loop() const;
   virtual Date get_date(bool local = false) const;

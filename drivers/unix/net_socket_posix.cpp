@@ -31,7 +31,7 @@
 #include "net_socket_posix.h"
 
 #ifndef UNIX_SOCKET_UNAVAILABLE
-#if defined(UNIX_ENABLED)
+#if defined(UNIX_ENABLED) || defined(HORIZON_ENABLED)
 
 #include <errno.h>
 #include <netdb.h>
@@ -50,7 +50,7 @@
 #include <netinet/in.h>
 
 #include <sys/socket.h>
-#ifdef JAVASCRIPT_ENABLED
+#if defined(JAVASCRIPT_ENABLED) || defined(HORIZON_ENABLED)
 #include <arpa/inet.h>
 #endif
 
