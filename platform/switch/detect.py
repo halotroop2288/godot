@@ -255,7 +255,7 @@ def configure(env):
 
     env.Append(CPPPATH=['#platform/switch'])
     env.Append(CPPFLAGS=['-DHORIZON_ENABLED', '-DLIBC_FILEIO_ENABLED', '-DOPENGL_ENABLED', '-DGLES_ENABLED', '-DPTHREAD_ENABLED'])
-    env.Append(CPPFLAGS=['-DPTHREAD_NO_RENAME', '-D_POSIX_READER_WRITER_LOCKS'])
+    env.Append(CPPFLAGS=['-DPTHREAD_NO_RENAME'])
     env.Append(LIBS=['EGL', 'GLESv2', 'glapi', 'drm_nouveau', 'nx'])
 
     #-lglad -lEGL -lglapi -ldrm_nouveau 
