@@ -64,30 +64,6 @@ public:
 		return logo;
 	}
 	
-	virtual bool poll_devices() {
-		return false;
-	}
-
-	virtual int get_device_count() const {
-		return 2;
-	}
-
-	virtual String get_device_name(int p_device) const {
-		if(p_device) {
-			return "smdc:";
-		} else {
-			return "romfs:";
-		}
-	}
-	
-	virtual String get_device_info(int p_device) const {
-		if(p_device) {
-			return "smdc:";
-		} else {
-			return "romfs:";
-		}
-	}
-	
 	virtual Error run(const Ref<EditorExportPreset> &p_preset, int p_device, int p_debug_flags) {
 		return OK;
 	}
@@ -119,7 +95,7 @@ public:
 		}
 
 		DirAccess *da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
-		Error err = da->copy(template_path, p_path, 755);
+		Error err = da->copy(template_path, p_path, 0755);
 		if (err == OK) {
 			String pck_path = p_path.get_basename() + ".pck";
 
