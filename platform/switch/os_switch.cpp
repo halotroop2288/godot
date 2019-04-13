@@ -183,7 +183,7 @@ bool OS_Switch::_check_internal_feature_support(const String &p_feature) { retur
 
 void OS_Switch::alert(const String &p_alert, const String &p_title)
 {
-	printf("got alert %s", p_alert.c_str());
+	printf("got alert %ls", p_alert.c_str());
 }
 String OS_Switch::get_stdin_string(bool p_block) { return ""; }
 Point2 OS_Switch::get_mouse_position() const
