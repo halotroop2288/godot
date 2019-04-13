@@ -8,8 +8,8 @@
 #include "drivers/unix/net_socket_posix.h"
 #include "drivers/unix/thread_posix.h"
 #include "drivers/unix/mutex_posix.h"
-#include "drivers/switch/semaphore_switch.h"
-#include "drivers/switch/rwlock_switch.h"
+#include "drivers/unix/rw_lock_posix.h"
+#include "drivers/unix/semaphore_posix.h"
 
 #include "servers/audio_server.h"
 #include "servers/visual/visual_server_wrap_mt.h"
@@ -33,9 +33,9 @@
 void OS_Switch::initialize_core()
 {
 	ThreadPosix::make_default();
-	SemaphoreSwitch::make_default();
+	SemaphorePosix::make_default();
 	MutexPosix::make_default();
-	RWLockSwitch::make_default();
+	RWLockPosix::make_default();
 
 	FileAccess::make_default<FileAccessUnix>(FileAccess::ACCESS_RESOURCES);
 	FileAccess::make_default<FileAccessUnix>(FileAccess::ACCESS_USERDATA);
