@@ -30,7 +30,9 @@
 
 #include "export.h"
 
+#include "core/os/file_access.h"
 #include "editor/editor_export.h"
+#include "editor/editor_node.h"
 #include "platform/switch/logo.gen.h"
 #include "scene/resources/texture.h"
 
@@ -91,7 +93,9 @@ public:
 	}
 
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
-		return true;
+		String err;
+		return exists_export_template("switch_debug.nro", &err) 
+			&& exists_export_template("switch_release.nro", &err);
 	}
 
 	virtual List<String> get_binary_extensions(const Ref<EditorExportPreset> &p_preset) const {
@@ -101,7 +105,39 @@ public:
 	}
 
 	virtual Error export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags = 0) {
-		return OK;
+
+		if (!DirAccess::exists(p_path.get_base_dir())) {
+			return ERR_FILE_BAD_PATH;
+		}
+
+		String template_path = p_debug ? find_export_template("switch_debug.nro")
+										: find_export_template("switch_release.nro");
+
+		if (template_path != String() && !FileAccess::exists(template_path)) {
+			EditorNode::get_singleton()->show_warning(TTR("Template file not found:") + "\n" + template_path);
+			return ERR_FILE_NOT_FOUND;
+		}
+
+		DirAccess *da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
+		Error err = da->copy(template_path, p_path, 755);
+		if (err == OK) {
+			String pck_path = p_path.get_basename() + ".pck";
+
+			Vector<SharedObject> so_files;
+
+			err = save_pack(p_preset, pck_path, &so_files);
+
+			if (err == OK && !so_files.empty()) {
+				//if shared object files, copy them
+				da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
+				for (int i = 0; i < so_files.size() && err == OK; i++) {
+					err = da->copy(so_files[i].path, p_path.get_base_dir().plus_file(so_files[i].path.get_file()));
+				}
+			}
+		}
+
+		memdelete(da);
+		return err;
 	}
 
 	virtual void get_platform_features(List<String> *r_features) {
