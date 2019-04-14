@@ -71,20 +71,20 @@ void JoypadSwitch::process_joypads() {
 		// Axes
 		if (pad_old[index].l_pos.dx != pads[index].l_pos.dx) {
 			// TODO: send axis events
-			pad_old[index].l_pos.dx = pad[index].l_pos.dx;
+			pad_old[index].l_pos.dx = pads[index].l_pos.dx;
 			
 		}
 		if (pad_old[index].l_pos.dy != pads[index].l_pos.dy) {
 			// TODO: send axis events
-			pad_old[index].l_pos.dy = -pad[index].l_pos.dy;
+			pad_old[index].l_pos.dy = -pads[index].l_pos.dy;
 		}
 		if (pad_old[index].r_pos.dx != pads[index].r_pos.dx) {
 			// TODO: send axis events
-			pad_old[index].r_pos.dx = pad[index].r_pos.dx;
+			pad_old[index].r_pos.dx = pads[index].r_pos.dx;
 		}
 		if (pad_old[index].r_pos.dy != pads[index].r_pos.dy) {
 			// TODO: send axis events
-			pad_old[index].r_pos.dy = -pad[index].r_pos.dy;
+			pad_old[index].r_pos.dy = -pads[index].r_pos.dy;
 		}
 
 		// Buttons
