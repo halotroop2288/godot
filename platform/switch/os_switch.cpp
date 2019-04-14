@@ -142,7 +142,7 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 
 	input = memnew(InputDefault);
 	input->set_emulate_mouse_from_touch(true);
-	//joypad = memnew(JoypadSwitch(input));
+	joypad = memnew(JoypadSwitch(input));
 
 	power_manager = memnew(PowerSwitch);
 
@@ -169,6 +169,7 @@ void OS_Switch::delete_main_loop()
 void OS_Switch::finalize()
 {
 	memdelete(input);
+	memdelete(joypad);
 	visual_server->finish();
 	memdelete(visual_server);
 	memdelete(power_manager);
@@ -360,6 +361,8 @@ void OS_Switch::run()
 			st->set_pressed(false);
 			input->parse_input_event(st);
 		}
+
+		joypad->process_joypads();
 
 		if (Main::iteration() == true)
 			break;

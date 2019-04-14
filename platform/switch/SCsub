@@ -6,6 +6,7 @@ files = [
 	"godot_switch.cpp",
 	"os_switch.cpp",
 	"power_switch.cpp",
+	"joypad_switch.cpp",
 	"context_gl_switch_egl.cpp"
 ]
 

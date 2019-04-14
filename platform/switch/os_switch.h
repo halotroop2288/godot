@@ -3,6 +3,7 @@
 #include "power_switch.h"
 #include "context_gl_switch_egl.h"
 #include "servers/visual/visual_server_raster.h"
+#include "joypad_switch.h"
 #include "main/input_default.h"
 
 class OS_Switch : public OS
@@ -14,6 +15,7 @@ class OS_Switch : public OS
   InputDefault *input;
   PowerSwitch *power_manager;
   ContextGLSwitchEGL *gl_context;
+  JoypadSwitch *joypad;
 
 protected:
   virtual void initialize_core();
