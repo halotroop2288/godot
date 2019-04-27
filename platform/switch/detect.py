@@ -44,7 +44,7 @@ def get_opts():
 
 def get_flags():
     return [
-            ('builtin_bullet', False), # Godot needs an unreleased Bullet version (2.88).
+            ('builtin_bullet', False),
             ('builtin_enet', True), # Not in portlibs.
             ('builtin_freetype', False),
             ('builtin_libogg', False),
@@ -54,9 +54,9 @@ def get_flags():
             ('builtin_libvpx', True), # Not in portlibs.
             ('builtin_libwebp', True), # Not in portlibs.
             ('builtin_libwebsockets', True), # Not in portlibs.
-            ('builtin_mbedtls', False), # Hmmmmm, modules/mbedtls/stream_peer_mbed_tls.cpp:32:10: fatal error: mbedtls/platform_util.h: No such file or directory
+            ('builtin_mbedtls', False),
             ('builtin_miniupnpc', True),
-            ('builtin_opus', True), # Portlibs are missing opusfile.
+            ('builtin_opus', False),
             ('builtin_pcre2', False),
             ('builtin_squish', True), # Not in portlibs.
             ('builtin_zlib', False),
