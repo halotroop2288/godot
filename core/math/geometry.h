@@ -30,7 +30,6 @@
 
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
-#include <alloca.h>
 
 #include "core/math/delaunay.h"
 #include "core/math/face3.h"
