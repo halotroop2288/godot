@@ -69,23 +69,10 @@ void JoypadSwitch::process_joypads() {
 		pads[index].buttons = hidKeysHeld(pads[index].id);
 
 		// Axes
-		if (pad_old[index].l_pos.dx != pads[index].l_pos.dx) {
-			// TODO: send axis events
-			pad_old[index].l_pos.dx = pads[index].l_pos.dx;
-			
-		}
-		if (pad_old[index].l_pos.dy != pads[index].l_pos.dy) {
-			// TODO: send axis events
-			pad_old[index].l_pos.dy = -pads[index].l_pos.dy;
-		}
-		if (pad_old[index].r_pos.dx != pads[index].r_pos.dx) {
-			// TODO: send axis events
-			pad_old[index].r_pos.dx = pads[index].r_pos.dx;
-		}
-		if (pad_old[index].r_pos.dy != pads[index].r_pos.dy) {
-			// TODO: send axis events
-			pad_old[index].r_pos.dy = -pads[index].r_pos.dy;
-		}
+		input->joy_axis(index, 0, {100, (float) (pads[index].l_pos.dx / 32767.0f)});
+		input->joy_axis(index, 1, {100, (float) (-pads[index].l_pos.dy / 32767.0f)});
+		input->joy_axis(index, 2, {100, (float) (pads[index].r_pos.dx / 32767.0f)});
+		input->joy_axis(index, 3, {100, (float) (-pads[index].r_pos.dy / 32767.0f)});
 
 		// Buttons
 		changed = pad_old[index].buttons ^ pads[index].buttons;
