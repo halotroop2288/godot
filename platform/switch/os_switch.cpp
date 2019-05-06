@@ -383,6 +383,14 @@ int OS_Switch::get_power_percent_left() {
 	return power_manager->get_power_percent_left();
 }
 
+String OS_Switch::get_executable_path() const {
+	return switch_execpath;
+}
+
+void OS_Switch::set_executable_path(const char *p_execpath) {
+	switch_execpath = p_execpath;
+}
+
 OS_Switch::OS_Switch()
 {
 	video_driver_index = 0;
