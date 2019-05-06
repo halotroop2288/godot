@@ -16,6 +16,7 @@ class OS_Switch : public OS
   PowerSwitch *power_manager;
   ContextGLSwitchEGL *gl_context;
   JoypadSwitch *joypad;
+  String switch_execpath;
 
 protected:
   virtual void initialize_core();
@@ -44,6 +45,9 @@ public:
 
   virtual Error execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id = NULL, String *r_pipe = NULL, int *r_exitcode = NULL, bool read_stderr = false);
   virtual Error kill(const ProcessID &p_pid);
+
+  virtual String get_executable_path() const;
+  virtual void set_executable_path(const char *p_execpath);
 
   virtual bool has_environment(const String &p_var) const;
   virtual String get_environment(const String &p_var) const;

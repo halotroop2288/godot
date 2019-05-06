@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
 	nxlinkStdio();
 
 	OS_Switch os;
+	os.set_executable_path(argv[0]);
 
 	char *cwd = (char *)malloc(PATH_MAX);
 	getcwd(cwd, PATH_MAX);
