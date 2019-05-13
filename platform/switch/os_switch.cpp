@@ -123,7 +123,7 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	if (gl_initialization_error) {
 		OS::get_singleton()->alert("Your video card driver does not support any of the supported OpenGL versions.\n"
 								   "Please update your drivers or if you have a very old or integrated GPU upgrade it.",
-				"Unable to initialize Video driver");
+								   "Unable to initialize Video driver");
 		return ERR_UNAVAILABLE;
 	}
 
@@ -142,6 +142,10 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 
 	input = memnew(InputDefault);
 	input->set_emulate_mouse_from_touch(true);
+	// TODO: handle joypads/joycons status
+	for(int i=0; i<8; i++) {
+		input->joy_connection_changed(i, true, "pad" + (char)i, "");
+	}
 	joypad = memnew(JoypadSwitch(input));
 
 	power_manager = memnew(PowerSwitch);
@@ -180,7 +184,14 @@ void OS_Switch::finalize_core()
 {
 }
 
-bool OS_Switch::_check_internal_feature_support(const String &p_feature) { return false; }
+bool OS_Switch::_check_internal_feature_support(const String &p_feature) {
+
+	if (p_feature == "arm64-v8a") {
+		return true;
+	}
+
+	return false;
+}
 
 void OS_Switch::alert(const String &p_alert, const String &p_title)
 {
@@ -236,7 +247,7 @@ Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, 
 	if(__nxlink_host.s_addr != 0)
 	{
 		char nxlinked[17];
-	    sprintf(nxlinked,"%08" PRIx32 "_NXLINK_",__nxlink_host.s_addr);
+		sprintf(nxlinked,"%08" PRIx32 "_NXLINK_",__nxlink_host.s_addr);
 		rebuilt_arguments.push_back(nxlinked);
 	}
 	envSetNextLoad(p_path.utf8().ptr(), String(" ").join(rebuilt_arguments).utf8().ptr());
@@ -309,8 +320,6 @@ void OS_Switch::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape
 
 void OS_Switch::run()
 {
-	bool force_quit = false;
-
 	if (!main_loop)
 	{
 		TRACE("no main loop???\n");
@@ -362,7 +371,7 @@ void OS_Switch::run()
 			input->parse_input_event(st);
 		}
 
-		joypad->process_joypads();
+		joypad->process();
 
 		if (Main::iteration() == true)
 			break;
