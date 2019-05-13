@@ -34,8 +34,6 @@
 #include "core/os/mutex.h"
 #include "core/os/thread.h"
 
-//#include <alsa/asoundlib.h>
-
 class AudioDriverSwitch: public AudioDriver {
 
 	Thread *thread;
