@@ -77,7 +77,7 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 			memdelete(gl_context);
 			gl_context = NULL;
 
-			if (GLOBAL_GET("rendering/quality/driver/driver_fallback") == "Best" || editor) {
+			if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor) {
 				if (p_video_driver == VIDEO_DRIVER_GLES2) {
 					gl_initialization_error = true;
 					break;
@@ -99,7 +99,7 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 				RasterizerGLES3::make_current();
 				break;
 			} else {
-				if (GLOBAL_GET("rendering/quality/driver/driver_fallback") == "Best" || editor) {
+				if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor) {
 					p_video_driver = VIDEO_DRIVER_GLES2;
 					gles3_context = false;
 					continue;
@@ -185,11 +185,6 @@ void OS_Switch::finalize_core()
 }
 
 bool OS_Switch::_check_internal_feature_support(const String &p_feature) {
-
-	if (p_feature == "arm64-v8a") {
-		return true;
-	}
-
 	return false;
 }
 
@@ -226,7 +221,6 @@ Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, 
 	if(p_blocking == true)
 	{
 		return FAILED; // we don't support this
-		
 	}
 
 	Vector<String> rebuilt_arguments;

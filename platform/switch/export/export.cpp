@@ -44,7 +44,17 @@ class EditorExportPlatformSwitch : public EditorExportPlatform {
 	
 public:
 
-	virtual void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) {}
+	virtual void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) {
+		String driver = ProjectSettings::get_singleton()->get("rendering/quality/driver/driver_name");
+		if (driver == "GLES2") {
+			r_features->push_back("etc");
+		} else if (driver == "GLES3") {
+			r_features->push_back("etc2");
+			if (ProjectSettings::get_singleton()->get("rendering/quality/driver/fallback_to_gles2")) {
+				r_features->push_back("etc");
+			}
+		}
+	}
 
 	virtual void get_export_options(List<ExportOption> *r_options) {}
 	
@@ -70,8 +80,9 @@ public:
 
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
 		String err;
-		return exists_export_template("switch_debug.nro", &err) 
-			&& exists_export_template("switch_release.nro", &err);
+		//return exists_export_template("switch_debug.nro", &err)
+		//	&& exists_export_template("switch_release.nro", &err);
+		return exists_export_template("switch_release.nro", &err);
 	}
 
 	virtual List<String> get_binary_extensions(const Ref<EditorExportPreset> &p_preset) const {
@@ -86,8 +97,9 @@ public:
 			return ERR_FILE_BAD_PATH;
 		}
 
-		String template_path = p_debug ? find_export_template("switch_debug.nro")
-										: find_export_template("switch_release.nro");
+		//String template_path = p_debug ? find_export_template("switch_debug.nro")
+		//								: find_export_template("switch_release.nro");
+		String template_path = find_export_template("switch_release.nro");
 
 		if (template_path != String() && !FileAccess::exists(template_path)) {
 			EditorNode::get_singleton()->show_warning(TTR("Template file not found:") + "\n" + template_path);
