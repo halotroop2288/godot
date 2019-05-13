@@ -41,7 +41,7 @@ class JoypadSwitch {
 public:
 	JoypadSwitch(InputDefault *in);
 	~JoypadSwitch();
-	void process_joypads();
+	void process();
 	
 private:
 	typedef struct JoypadState {

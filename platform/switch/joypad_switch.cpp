@@ -57,7 +57,7 @@ JoypadSwitch::JoypadSwitch(InputDefault *in) {
 JoypadSwitch::~JoypadSwitch() {
 }
 
-void JoypadSwitch::process_joypads() {
+void JoypadSwitch::process() {
 
 	u64 changed;
 	static JoypadState pad_old[JOYPADS_MAX];
