@@ -31,27 +31,27 @@
 #include "joypad_switch.h"
 
 static HidControllerID pad_id[JOYPADS_MAX] = {
-    CONTROLLER_P1_AUTO, CONTROLLER_PLAYER_2,
-    CONTROLLER_PLAYER_3, CONTROLLER_PLAYER_4,
-    CONTROLLER_PLAYER_5, CONTROLLER_PLAYER_6,
-    CONTROLLER_PLAYER_7, CONTROLLER_PLAYER_8
+	CONTROLLER_P1_AUTO, CONTROLLER_PLAYER_2,
+	CONTROLLER_PLAYER_3, CONTROLLER_PLAYER_4,
+	CONTROLLER_PLAYER_5, CONTROLLER_PLAYER_6,
+	CONTROLLER_PLAYER_7, CONTROLLER_PLAYER_8
 };
 
 // from editor "Project Settings > Input Map"
 static const HidControllerKeys pad_mapping[] = {
-    KEY_B, KEY_A, KEY_Y, KEY_X,
-    KEY_L, KEY_R, KEY_ZL, KEY_ZR,
-    KEY_LSTICK, KEY_RSTICK,
-    KEY_MINUS, KEY_PLUS,
-    KEY_DUP, KEY_DDOWN, KEY_DLEFT, KEY_DRIGHT
+	KEY_B, KEY_A, KEY_Y, KEY_X,
+	KEY_L, KEY_R, KEY_ZL, KEY_ZR,
+	KEY_LSTICK, KEY_RSTICK,
+	KEY_MINUS, KEY_PLUS,
+	KEY_DUP, KEY_DDOWN, KEY_DLEFT, KEY_DRIGHT
 };
 
 JoypadSwitch::JoypadSwitch(InputDefault *in) {
 	input = in;
 	button_count = sizeof(pad_mapping) / sizeof(*pad_mapping);
 	for (int i = 0; i < JOYPADS_MAX; i++) {
-        pads[i].id = pad_id[i];
-    }
+		pads[i].id = pad_id[i];
+	}
 }
 
 JoypadSwitch::~JoypadSwitch() {
@@ -60,7 +60,7 @@ JoypadSwitch::~JoypadSwitch() {
 void JoypadSwitch::process_joypads() {
 
 	u64 changed;
-    static JoypadState pad_old[JOYPADS_MAX];
+	static JoypadState pad_old[JOYPADS_MAX];
 
 	for(int index = 0; index < JOYPADS_MAX; index++) {
 
