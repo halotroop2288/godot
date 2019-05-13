@@ -185,6 +185,10 @@ void OS_Switch::finalize_core()
 }
 
 bool OS_Switch::_check_internal_feature_support(const String &p_feature) {
+	if (p_feature == "mobile") {
+		//TODO support etc2 only if GLES3 driver is selected
+		return true;
+	}
 	return false;
 }
 

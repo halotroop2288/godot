@@ -36,6 +36,8 @@
 #include "platform/switch/logo.gen.h"
 #include "scene/resources/texture.h"
 
+#define TEMPLATE_RELEASE "switch_release.nro"
+
 class EditorExportPlatformSwitch : public EditorExportPlatform {
 
 	GDCLASS(EditorExportPlatformSwitch, EditorExportPlatform)
@@ -54,6 +56,10 @@ public:
 				r_features->push_back("etc");
 			}
 		}
+	}
+
+	virtual void get_platform_features(List<String> *r_features) {
+		r_features->push_back("mobile");
 	}
 
 	virtual void get_export_options(List<ExportOption> *r_options) {}
@@ -79,10 +85,22 @@ public:
 	}
 
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
+
 		String err;
-		//return exists_export_template("switch_debug.nro", &err)
-		//	&& exists_export_template("switch_release.nro", &err);
-		return exists_export_template("switch_release.nro", &err);
+		r_missing_templates = find_export_template(TEMPLATE_RELEASE) == String();
+
+		bool valid = !r_missing_templates;
+		String etc_error = test_etc2();
+		if (etc_error != String()) {
+			err += etc_error;
+			valid = false;
+		}
+
+		if (!err.empty()) {
+			r_error = err;
+		}
+
+		return valid;
 	}
 
 	virtual List<String> get_binary_extensions(const Ref<EditorExportPreset> &p_preset) const {
@@ -97,9 +115,7 @@ public:
 			return ERR_FILE_BAD_PATH;
 		}
 
-		//String template_path = p_debug ? find_export_template("switch_debug.nro")
-		//								: find_export_template("switch_release.nro");
-		String template_path = find_export_template("switch_release.nro");
+		String template_path = find_export_template(TEMPLATE_RELEASE);
 
 		if (template_path != String() && !FileAccess::exists(template_path)) {
 			EditorNode::get_singleton()->show_warning(TTR("Template file not found:") + "\n" + template_path);
@@ -126,9 +142,6 @@ public:
 
 		memdelete(da);
 		return err;
-	}
-
-	virtual void get_platform_features(List<String> *r_features) {
 	}
 	
 	virtual void resolve_platform_feature_priorities(const Ref<EditorExportPreset> &p_preset, Set<String> &p_features) {
