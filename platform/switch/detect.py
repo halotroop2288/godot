@@ -51,8 +51,8 @@ def get_flags():
             ('builtin_libpng', False),
             ('builtin_libtheora', False),
             ('builtin_libvorbis', False),
-            ('builtin_libvpx', True), # Not in portlibs.
-            ('builtin_libwebp', True), # Not in portlibs.
+            ('builtin_libvpx', False),
+            ('builtin_libwebp', False),
             ('builtin_libwebsockets', True), # Not in portlibs.
             ('builtin_mbedtls', False),
             ('builtin_miniupnpc', True),
