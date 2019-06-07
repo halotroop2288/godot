@@ -224,6 +224,17 @@ public:
 			icon = 0;
 		}
 
+		// don't overwrite icon if size > dummy icon size
+		if(icon_size > asset_hdr->icon.size) {
+			printf("error: new icon size (%li) > %li\n", icon_size, asset_hdr->icon.size);
+			if(icon) {
+				free(icon_data);
+			}
+			free(asset_hdr);
+			free(nro_hdr);
+			return ERR_INVALID_DATA;
+		}
+
 		printf("ICON: writing new icon, %li bytes @ %li\n", icon_size, icon_offset);
 		wrote = write_bytes(nro_path, icon_offset, icon_size, icon_data);
 		if (wrote != icon_size) {
