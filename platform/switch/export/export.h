@@ -28,4 +28,89 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include <string>
+#include <cstring>
+
+typedef uint64_t u64;
+typedef uint32_t u32;
+typedef uint8_t u8;
+
+typedef struct {
+	u32 FileOff;
+	u32 Size;
+} NsoSegment;
+
+typedef struct {
+	u32 unused;
+	u32 modOffset;
+	u8 Padding[8];
+} NroStart;
+
+typedef struct {
+	u8 Magic[4];
+	u32 Unk1;
+	u32 size;
+	u32 Unk2;
+	NsoSegment Segments[3];
+	u32 bssSize;
+	u32 Unk3;
+	u8 BuildId[0x20];
+	u8 Padding[0x20];
+} NroHeader;
+
+typedef struct {
+	u64 offset;
+	u64 size;
+} AssetSection;
+
+typedef struct {
+	u8 magic[4];
+	u32 version;
+	AssetSection icon;
+	AssetSection nacp;
+	AssetSection romfs;
+} AssetHeader;
+
+typedef struct {
+	char name[0x200];
+	char author[0x100];
+} NacpLanguageEntry;
+
+typedef struct {
+	NacpLanguageEntry lang[12];
+	NacpLanguageEntry lang_unk[4];//?
+
+	u8 x3000_unk[0x24];////Normally all-zero?
+	u32 x3024_unk;
+	u32 x3028_unk;
+	u32 x302C_unk;
+	u32 x3030_unk;
+	u32 x3034_unk;
+	u64 titleid0;
+
+	u8 x3040_unk[0x20];
+	char version[0x10];
+
+	u64 titleid_dlcbase;
+	u64 titleid1;
+
+	u32 x3080_unk;
+	u32 x3084_unk;
+	u32 x3088_unk;
+	u8 x308C_unk[0x24];//zeros?
+
+	u64 titleid2;
+	u64 titleids[7];//"Array of application titleIDs, normally the same as the above app-titleIDs. Only set for game-updates?"
+
+	u32 x30F0_unk;
+	u32 x30F4_unk;
+
+	u64 titleid3;//"Application titleID. Only set for game-updates?"
+
+	char bcat_passphrase[0x40];
+	u8 x3140_unk[0xEC0];//Normally all-zero?
+} NacpStruct;
+
+int update_nro(const char *nro_path, const char *icon_path, const char *title, const char *author, const char *version);
+
 void register_switch_exporter();

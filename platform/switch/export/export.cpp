@@ -62,7 +62,13 @@ public:
 		r_features->push_back("mobile");
 	}
 
-	virtual void get_export_options(List<ExportOption> *r_options) {}
+	virtual void get_export_options(List<ExportOption> *r_options) {
+		String title = ProjectSettings::get_singleton()->get("application/config/name");
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/title", PROPERTY_HINT_PLACEHOLDER_TEXT, title), title));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/author", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Author"), "Stary & Cpasjuste"));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/version", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Version"), "1.0"));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/icon_256x256", PROPERTY_HINT_FILE, "*.jpg"), ""));
+	}
 	
 	virtual String get_name() const {
 		return "Switch";
@@ -125,6 +131,13 @@ public:
 		DirAccess *da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 		Error err = da->copy(template_path, p_path, 0755);
 		if (err == OK) {
+			// update nro icon/title/author/version
+			String title = p_preset->get("application/title");
+			String author = p_preset->get("application/author");
+			String version = p_preset->get("application/version");
+			String icon = p_preset->get("application/icon_256x256");
+			int res = update_nro(p_path.ascii().ptr(), icon.ascii().ptr(), title.ascii().ptr(), author.ascii().ptr(), version.ascii().ptr());
+
 			String pck_path = p_path.get_basename() + ".pck";
 
 			Vector<SharedObject> so_files;
@@ -158,8 +171,213 @@ public:
 	}
 };
 
+///
+/// SWITCH NRO UTILS
+///
+unsigned char *read_file(const char *fn, size_t *len_out) {
+
+	FILE *fd = fopen(fn, "rb");
+	if (fd == nullptr) {
+		printf("read_file: error: fopen failed\n");
+		return nullptr;
+	}
+
+	fseek(fd, 0, SEEK_END);
+	size_t len = ftell(fd);
+	fseek(fd, 0, SEEK_SET);
+
+	auto buf = (unsigned char *) malloc(len);
+	if (buf == nullptr) {
+		printf("read_file: error: malloc failed\n");
+		fclose(fd);
+		return nullptr;
+	}
+
+	size_t rc = fread(buf, 1, len, fd);
+	if (rc != len) {
+		fclose(fd);
+		free(buf);
+		printf("read_file: error: fread failed\n");
+		return nullptr;
+	}
+
+	fclose(fd);
+
+	*len_out = len;
+	return buf;
+}
+
+unsigned char *read_bytes(const char *fn, size_t off, size_t len) {
+
+	FILE *fd = fopen(fn, "rb");
+	if (fd == nullptr) {
+		printf("read_bytes: error: fopen failed\n");
+		return nullptr;
+	}
+
+	fseek(fd, 0, SEEK_END);
+	size_t size = ftell(fd);
+	if (off + len > size) {
+		printf("read_bytes: error: offset + len > size\n");
+		fclose(fd);
+		return nullptr;
+	}
+
+	auto buf = (unsigned char *) malloc(len);
+	if (buf == nullptr) {
+		printf("read_file: error: malloc failed\n");
+		fclose(fd);
+		return nullptr;
+	}
+
+	fseek(fd, off, SEEK_SET);
+	size_t rc = fread(buf, 1, len, fd);
+	if (rc != len) {
+		fclose(fd);
+		free(buf);
+		printf("read_file: error: fread failed\n");
+		return nullptr;
+	}
+
+	fclose(fd);
+
+	return buf;
+}
+
+size_t write_bytes(const char *fn, size_t off, size_t len, const unsigned char *data) {
+
+	FILE *fd = fopen(fn, "rb+");
+	if (fd == nullptr) {
+		printf("write_bytes: error: fopen failed\n");
+		return 0;
+	}
+
+	fseek(fd, 0, SEEK_END);
+	size_t size = ftell(fd);
+	if (off + len > size) {
+		printf("write_bytes: error: offset + len > size\n");
+		fclose(fd);
+		return 0;
+	}
+
+	fseek(fd, off, SEEK_SET);
+	size_t rc = fwrite(data, 1, len, fd);
+	if (rc != len) {
+		fclose(fd);
+		printf("write_bytes: error: fwrite failed, written = %li\n", rc);
+		return 0;
+	}
+
+	fclose(fd);
+
+	return rc;
+}
+
+int update_nro(const char *nro_path, const char *icon_path, const char *title, const char *author, const char *version) {
+
+	NroHeader *nro_hdr;
+	AssetHeader *asset_hdr;
+	NacpStruct *nacp;
+
+	// read nro header to memory
+	nro_hdr = reinterpret_cast<NroHeader *>(read_bytes(nro_path, sizeof(NroStart), sizeof(NroHeader)));
+	if (nro_hdr == nullptr) {
+		printf("error: could not read nro header\n");
+		return -1;
+	}
+	// is nro header valid?
+	if (strncmp((char *) nro_hdr->Magic, "NRO0", 4) != 0) {
+		printf("error: nro magic not found\n");
+		free(nro_hdr);
+		return -1;
+	}
+	// nro header read success
+	printf("NRO: magic: %s, header size: %i\n", nro_hdr->Magic, nro_hdr->size);
+
+	// read asset header to memory
+	asset_hdr = reinterpret_cast<AssetHeader *>(read_bytes(nro_path, nro_hdr->size, sizeof(AssetHeader)));
+	if (asset_hdr == nullptr) {
+		printf("error: could not read asset header\n");
+		free(nro_hdr);
+		return -1;
+	}
+	// is asset header valid?
+	if (strncmp((char *) asset_hdr->magic, "ASET", 4) != 0) {
+		printf("error: asset magic not found\n");
+		free(asset_hdr);
+		free(nro_hdr);
+		return -1;
+	}
+	// asset header read success
+	printf("ASSET: magic: %s, version: %i, icon offset: %li, icon size: %li\n",
+		   asset_hdr->magic, asset_hdr->version, asset_hdr->icon.offset, asset_hdr->icon.size);
+
+	// update icon
+	size_t icon_size = 0;
+	size_t icon_offset = nro_hdr->size + asset_hdr->icon.offset;
+	unsigned char *icon_data = read_file(icon_path, &icon_size);
+	if (icon_data == nullptr) {
+		printf("error: could not read icon data\n");
+		free(asset_hdr);
+		free(nro_hdr);
+		return -1;
+	}
+	size_t wrote = write_bytes(nro_path, icon_offset, icon_size, icon_data);
+	if (wrote != icon_size) {
+		printf("error: could not write icon data\n");
+		free(icon_data);
+		free(asset_hdr);
+		free(nro_hdr);
+		return -1;
+	}
+	free(icon_data);
+
+	// update asset header
+	asset_hdr->icon.size = icon_size;
+	wrote = write_bytes(nro_path, nro_hdr->size, sizeof(AssetHeader), (const unsigned char *) asset_hdr);
+	if (wrote != sizeof(AssetHeader)) {
+		printf("error: could not write asset header\n");
+		free(asset_hdr);
+		free(nro_hdr);
+		return -1;
+	}
+
+	// read nacp to memory
+	size_t nacp_offset = nro_hdr->size + asset_hdr->nacp.offset;
+	nacp = reinterpret_cast<NacpStruct *>(read_bytes(nro_path, nacp_offset, asset_hdr->nacp.size));
+	if (nacp == nullptr) {
+		printf("error: could not read nacp\n");
+		free(asset_hdr);
+		free(nro_hdr);
+		return -1;
+	}
+	// nacp read success
+	printf("NACP: title: %s, author: %s\n", nacp->lang[0].name, nacp->lang[0].author);
+	// update nacp title and author
+	for (int i = 0; i < 12; i++) {
+		strncpy(nacp->lang[i].name, title, sizeof(nacp->lang[i].name) - 1);
+		strncpy(nacp->lang[i].author, author, sizeof(nacp->lang[i].author) - 1);
+	}
+	strncpy(nacp->version, version, sizeof(nacp->version) - 1);
+	// write nacp back
+	wrote = write_bytes(nro_path, nacp_offset, asset_hdr->nacp.size, (const unsigned char *) nacp);
+	if (wrote != asset_hdr->nacp.size) {
+		printf("error: could not write nacp\n");
+		free(nacp);
+		free(asset_hdr);
+		free(nro_hdr);
+		return -1;
+	}
+
+	free(nacp);
+	free(asset_hdr);
+	free(nro_hdr);
+
+	return 0;
+}
+
 void register_switch_exporter() {
-	
+
 	Ref<EditorExportPlatformSwitch> exporter = Ref<EditorExportPlatformSwitch>(memnew(EditorExportPlatformSwitch));
 	EditorExport::get_singleton()->add_export_platform(exporter);
 }
