@@ -13,5 +13,5 @@ files = [
 
 prog = env.add_program('#bin/godot', files)
 build_target = env['target']
-env.Command("#bin/switch_" + env['target'] + ".nro", prog, "/opt/devkitpro/tools/bin/elf2nro $SOURCE $TARGET --icon=platform/switch/icon_dummy.jpg")
+env.Command("#bin/switch_" + env['target'] + ".nro", prog, "/opt/devkitpro/tools/bin/elf2nro $SOURCE $TARGET --icon=platform/switch/icon_dummy.jpg --nacp=platform/switch/nacp_default.nacp")
 env.Command("#bin/switch_" + env['target'] + ".nso", prog, "/opt/devkitpro/tools/bin/elf2nso $SOURCE $TARGET")
