@@ -34,6 +34,7 @@
 #include "editor/editor_export.h"
 #include "editor/editor_node.h"
 #include "platform/switch/logo.gen.h"
+#include "platform/switch/icon_default.h"
 #include "scene/resources/texture.h"
 
 #define TEMPLATE_RELEASE "switch_release.nro"
@@ -67,7 +68,7 @@ public:
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/title", PROPERTY_HINT_PLACEHOLDER_TEXT, title), title));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/author", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Author"), "Stary & Cpasjuste"));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/version", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Version"), "1.0"));
-		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/icon_256x256", PROPERTY_HINT_FILE, "*.jpg"), ""));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/icon_256x256", PROPERTY_HINT_GLOBAL_FILE, "*.jpg"), ""));
 	}
 	
 	virtual String get_name() const {
@@ -115,6 +116,9 @@ public:
 		return list;
 	}
 
+	virtual void resolve_platform_feature_priorities(const Ref<EditorExportPreset> &p_preset, Set<String> &p_features) {
+	}
+
 	virtual Error export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags = 0) {
 
 		if (!DirAccess::exists(p_path.get_base_dir())) {
@@ -136,7 +140,11 @@ public:
 			String author = p_preset->get("application/author");
 			String version = p_preset->get("application/version");
 			String icon = p_preset->get("application/icon_256x256");
-			int res = update_nro(p_path.ascii().ptr(), icon.ascii().ptr(), title.ascii().ptr(), author.ascii().ptr(), version.ascii().ptr());
+
+			err = update_nro(p_path.ascii().ptr(), icon.ascii().ptr(), title.ascii().ptr(), author.ascii().ptr(), version.ascii().ptr());
+			if(err != OK) {
+				return ERR_BUG;
+			}
 
 			String pck_path = p_path.get_basename() + ".pck";
 
@@ -156,8 +164,129 @@ public:
 		memdelete(da);
 		return err;
 	}
-	
-	virtual void resolve_platform_feature_priorities(const Ref<EditorExportPreset> &p_preset, Set<String> &p_features) {
+
+	Error update_nro(const char *nro_path, const char *icon_path, const char *title, const char *author, const char *version) {
+
+		NroHeader *nro_hdr;
+		AssetHeader *asset_hdr;
+		NacpStruct *nacp;
+
+		printf("\nupdate_nro: %s, %s, %s, %s, %s\n", nro_path, icon_path, title, author, version);
+
+		// read nro header to memory
+		printf("NRO: reading nro header, %li bytes @ %li\n", sizeof(NroHeader), sizeof(NroStart));
+		nro_hdr = reinterpret_cast<NroHeader *>(read_bytes(nro_path, sizeof(NroStart), sizeof(NroHeader)));
+		if (nro_hdr == nullptr) {
+			printf("error: could not read nro header\n");
+			return ERR_INVALID_DATA;
+		}
+		// is nro header valid?
+		printf("NRO: checking nro header magic\n");
+		if (strncmp((char *) nro_hdr->Magic, "NRO0", 4) != 0) {
+			printf("error: nro magic not found\n");
+			free(nro_hdr);
+			return ERR_INVALID_DATA;
+		}
+		// nro header read success
+		printf("NRO: magic: %s, asset header offset: %i\n", nro_hdr->Magic, nro_hdr->size);
+
+		// read asset header to memory
+		printf("ASSET: reading asset header, %li bytes @ %i\n", sizeof(AssetHeader), nro_hdr->size);
+		asset_hdr = reinterpret_cast<AssetHeader *>(read_bytes(nro_path, nro_hdr->size, sizeof(AssetHeader)));
+		if (asset_hdr == nullptr) {
+			printf("error: could not read asset header\n");
+			free(nro_hdr);
+			return ERR_INVALID_DATA;
+		}
+		// is asset header valid?
+		printf("ASSET: checking asset header magic\n");
+		if (strncmp((char *) asset_hdr->magic, "ASET", 4) != 0) {
+			printf("error: asset magic not found\n");
+			free(asset_hdr);
+			free(nro_hdr);
+			return ERR_INVALID_DATA;
+		}
+		// asset header read success
+		printf("ASSET: magic: %s, version: %i, icon offset: %li, icon size: %li\n",
+			   asset_hdr->magic, asset_hdr->version, asset_hdr->icon.offset, asset_hdr->icon.size);
+
+		// update icon
+		int icon = 1;
+		size_t wrote = 0;
+		size_t icon_size = 0;
+		size_t icon_offset = nro_hdr->size + asset_hdr->icon.offset;
+		printf("ICON: reading new icon from %s\n", icon_path);
+		unsigned char *icon_data = read_file(icon_path, &icon_size);
+		if (icon_data == nullptr) {
+			printf("ICON: no icon set in editor, using default icon\n");
+			icon_data = (unsigned char *) icon_default;
+			icon_size = icon_default_size;
+			icon = 0;
+		}
+
+		printf("ICON: writing new icon, %li bytes @ %li\n", icon_size, icon_offset);
+		wrote = write_bytes(nro_path, icon_offset, icon_size, icon_data);
+		if (wrote != icon_size) {
+			printf("error: could not write icon data\n");
+			if(icon) {
+				free(icon_data);
+			}
+			free(asset_hdr);
+			free(nro_hdr);
+			return ERR_INVALID_DATA;
+		}
+		if(icon) {
+			free(icon_data);
+		}
+
+		// update asset header
+		printf("ASSET: writing new asset header, %li bytes @ %i\n", sizeof(AssetHeader), nro_hdr->size);
+		asset_hdr->icon.size = icon_size;
+		wrote = write_bytes(nro_path, nro_hdr->size, sizeof(AssetHeader), (const unsigned char *) asset_hdr);
+		if (wrote != sizeof(AssetHeader)) {
+			printf("error: could not write asset header\n");
+			free(asset_hdr);
+			free(nro_hdr);
+			return ERR_INVALID_DATA;
+		}
+
+		// read nacp to memory
+		if(asset_hdr->nacp.size > 0) {
+			// asset_hdr->nacp.size should always be > 0 as we pack it with elf2nro @SCsub
+			size_t nacp_offset = nro_hdr->size + asset_hdr->nacp.offset;
+			printf("NACP: reading nacp, %li bytes @ %li\n", asset_hdr->nacp.size, nacp_offset);
+			nacp = reinterpret_cast<NacpStruct *>(read_bytes(nro_path, nacp_offset, asset_hdr->nacp.size));
+			if (nacp == nullptr) {
+				printf("error: could not read nacp\n");
+				free(asset_hdr);
+				free(nro_hdr);
+				return ERR_INVALID_DATA;
+			}
+			// nacp read success
+			// update nacp title and author
+			for (int i = 0; i < 12; i++) {
+				strncpy(nacp->lang[i].name, title, sizeof(nacp->lang[i].name) - 1);
+				strncpy(nacp->lang[i].author, author, sizeof(nacp->lang[i].author) - 1);
+			}
+			strncpy(nacp->version, version, sizeof(nacp->version) - 1);
+			// write nacp back
+			printf("NACP: writing new nacp, %li bytes @ %li\n", asset_hdr->nacp.size, nacp_offset);
+			wrote = write_bytes(nro_path, nacp_offset, asset_hdr->nacp.size, (const unsigned char *) nacp);
+			if (wrote != asset_hdr->nacp.size) {
+				printf("error: could not write nacp\n");
+				free(nacp);
+				free(asset_hdr);
+				free(nro_hdr);
+				return ERR_INVALID_DATA;
+			}
+			free(nacp);
+		}
+
+		printf("update_nro: done\n");
+		free(asset_hdr);
+		free(nro_hdr);
+
+		return OK;
 	}
 
 	EditorExportPlatformSwitch() {
@@ -271,109 +400,6 @@ size_t write_bytes(const char *fn, size_t off, size_t len, const unsigned char *
 	fclose(fd);
 
 	return rc;
-}
-
-int update_nro(const char *nro_path, const char *icon_path, const char *title, const char *author, const char *version) {
-
-	NroHeader *nro_hdr;
-	AssetHeader *asset_hdr;
-	NacpStruct *nacp;
-
-	// read nro header to memory
-	nro_hdr = reinterpret_cast<NroHeader *>(read_bytes(nro_path, sizeof(NroStart), sizeof(NroHeader)));
-	if (nro_hdr == nullptr) {
-		printf("error: could not read nro header\n");
-		return -1;
-	}
-	// is nro header valid?
-	if (strncmp((char *) nro_hdr->Magic, "NRO0", 4) != 0) {
-		printf("error: nro magic not found\n");
-		free(nro_hdr);
-		return -1;
-	}
-	// nro header read success
-	printf("NRO: magic: %s, header size: %i\n", nro_hdr->Magic, nro_hdr->size);
-
-	// read asset header to memory
-	asset_hdr = reinterpret_cast<AssetHeader *>(read_bytes(nro_path, nro_hdr->size, sizeof(AssetHeader)));
-	if (asset_hdr == nullptr) {
-		printf("error: could not read asset header\n");
-		free(nro_hdr);
-		return -1;
-	}
-	// is asset header valid?
-	if (strncmp((char *) asset_hdr->magic, "ASET", 4) != 0) {
-		printf("error: asset magic not found\n");
-		free(asset_hdr);
-		free(nro_hdr);
-		return -1;
-	}
-	// asset header read success
-	printf("ASSET: magic: %s, version: %i, icon offset: %li, icon size: %li\n",
-		   asset_hdr->magic, asset_hdr->version, asset_hdr->icon.offset, asset_hdr->icon.size);
-
-	// update icon
-	size_t icon_size = 0;
-	size_t icon_offset = nro_hdr->size + asset_hdr->icon.offset;
-	unsigned char *icon_data = read_file(icon_path, &icon_size);
-	if (icon_data == nullptr) {
-		printf("error: could not read icon data\n");
-		free(asset_hdr);
-		free(nro_hdr);
-		return -1;
-	}
-	size_t wrote = write_bytes(nro_path, icon_offset, icon_size, icon_data);
-	if (wrote != icon_size) {
-		printf("error: could not write icon data\n");
-		free(icon_data);
-		free(asset_hdr);
-		free(nro_hdr);
-		return -1;
-	}
-	free(icon_data);
-
-	// update asset header
-	asset_hdr->icon.size = icon_size;
-	wrote = write_bytes(nro_path, nro_hdr->size, sizeof(AssetHeader), (const unsigned char *) asset_hdr);
-	if (wrote != sizeof(AssetHeader)) {
-		printf("error: could not write asset header\n");
-		free(asset_hdr);
-		free(nro_hdr);
-		return -1;
-	}
-
-	// read nacp to memory
-	size_t nacp_offset = nro_hdr->size + asset_hdr->nacp.offset;
-	nacp = reinterpret_cast<NacpStruct *>(read_bytes(nro_path, nacp_offset, asset_hdr->nacp.size));
-	if (nacp == nullptr) {
-		printf("error: could not read nacp\n");
-		free(asset_hdr);
-		free(nro_hdr);
-		return -1;
-	}
-	// nacp read success
-	printf("NACP: title: %s, author: %s\n", nacp->lang[0].name, nacp->lang[0].author);
-	// update nacp title and author
-	for (int i = 0; i < 12; i++) {
-		strncpy(nacp->lang[i].name, title, sizeof(nacp->lang[i].name) - 1);
-		strncpy(nacp->lang[i].author, author, sizeof(nacp->lang[i].author) - 1);
-	}
-	strncpy(nacp->version, version, sizeof(nacp->version) - 1);
-	// write nacp back
-	wrote = write_bytes(nro_path, nacp_offset, asset_hdr->nacp.size, (const unsigned char *) nacp);
-	if (wrote != asset_hdr->nacp.size) {
-		printf("error: could not write nacp\n");
-		free(nacp);
-		free(asset_hdr);
-		free(nro_hdr);
-		return -1;
-	}
-
-	free(nacp);
-	free(asset_hdr);
-	free(nro_hdr);
-
-	return 0;
 }
 
 void register_switch_exporter() {

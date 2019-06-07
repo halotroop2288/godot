@@ -111,6 +111,8 @@ typedef struct {
 	u8 x3140_unk[0xEC0];//Normally all-zero?
 } NacpStruct;
 
-int update_nro(const char *nro_path, const char *icon_path, const char *title, const char *author, const char *version);
+unsigned char *read_file(const char *fn, size_t *len_out);
+unsigned char *read_bytes(const char *fn, size_t off, size_t len);
+size_t write_bytes(const char *fn, size_t off, size_t len, const unsigned char *data);
 
 void register_switch_exporter();
