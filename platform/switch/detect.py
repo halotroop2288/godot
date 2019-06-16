@@ -54,14 +54,13 @@ def get_flags():
         ('builtin_libwebp', False),
         ('builtin_libwebsockets', True), # Not in portlibs.
         ('builtin_mbedtls', False),
-        ('builtin_miniupnpc', True),
+        ('builtin_miniupnpc', False),
         ('builtin_opus', False),
         ('builtin_pcre2', False),
         ('builtin_squish', True), # Not in portlibs.
         ('builtin_zlib', False),
         ('builtin_zstd', True), # Not in portlibs.
         ('module_websocket_enabled', False),
-        ('module_upnp_enabled', False),
         ]
 
 
