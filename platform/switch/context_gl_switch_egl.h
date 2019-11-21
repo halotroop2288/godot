@@ -1,8 +1,8 @@
 #pragma once
-#include "drivers/gl_context/context_gl.h"
+#include "core/os/os.h"
 #include <EGL/egl.h>    // EGL library
 
-class ContextGLSwitchEGL : public ContextGL
+class ContextGLSwitchEGL
 {
 	bool gles3_context;
 	bool vsync;

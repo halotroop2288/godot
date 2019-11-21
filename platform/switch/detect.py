@@ -43,7 +43,7 @@ def get_opts():
 def get_flags():
     return [
         ("tools", False),
-        ('builtin_bullet', False),
+        ('builtin_bullet', True), # Godot likes to depend on really new versions of bullet.
         ('builtin_enet', True), # Not in portlibs.
         ('builtin_freetype', False),
         ('builtin_libogg', False),

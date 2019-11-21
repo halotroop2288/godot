@@ -89,6 +89,7 @@ GLuint RasterizerStorageGLES2::system_fbo = 0;
 #ifndef GLES_OVER_GL
 #define glClearDepth glClearDepthf
 
+#if defined IPHONE_ENABLED || defined ANDROID_ENABLED
 // enable extensions manually for android and ios
 #ifndef UWP_ENABLED
 #include <dlfcn.h> // needed to load extensions
@@ -100,7 +101,7 @@ GLuint RasterizerStorageGLES2::system_fbo = 0;
 //void *glRenderbufferStorageMultisampleAPPLE;
 //void *glResolveMultisampleFramebufferAPPLE;
 #define glRenderbufferStorageMultisample glRenderbufferStorageMultisampleAPPLE
-#elif defined(ANDROID_ENABLED)
+#elif defined ANDROID_ENABLED || defined HORIZON_ENABLED
 
 #include <GLES2/gl2ext.h>
 PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC glRenderbufferStorageMultisampleEXT;
@@ -6303,8 +6304,6 @@ void RasterizerStorageGLES2::initialize() {
 #if defined ANDROID_ENABLED || defined HORIZON_ENABLED
 	config.s3tc_supported = false;
 #endif
-#endif
-
 #endif
 
 #ifdef GLES_OVER_GL
