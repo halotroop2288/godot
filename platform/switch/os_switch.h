@@ -45,7 +45,7 @@ public:
   virtual int get_current_video_driver() const;
   virtual Size2 get_window_size() const;
 
-  virtual Error execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id = NULL, String *r_pipe = NULL, int *r_exitcode = NULL, bool read_stderr = false);
+  virtual Error execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id = NULL, String *r_pipe = NULL, int *r_exitcode = NULL, bool read_stderr = false, Mutex *p_pipe_mutex = NULL);
   virtual Error kill(const ProcessID &p_pid);
 
   virtual String get_executable_path() const;
@@ -54,7 +54,7 @@ public:
   virtual bool has_environment(const String &p_var) const;
   virtual String get_environment(const String &p_var) const;
   virtual bool set_environment(const String &p_var, const String &p_value) const;
-  virtual String get_name();
+  virtual String get_name() const;
   virtual MainLoop *get_main_loop() const;
   virtual Date get_date(bool local = false) const;
   virtual Time get_time(bool local = false) const;

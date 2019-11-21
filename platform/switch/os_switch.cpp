@@ -220,7 +220,7 @@ void OS_Switch::get_fullscreen_mode_list(List<OS::VideoMode> *p_list, int p_scre
 int OS_Switch::get_current_video_driver() const { return video_driver_index; }
 Size2 OS_Switch::get_window_size() const { return Size2(1280, 720); }
 
-Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr)
+Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex)
 {
 	if(p_blocking == true)
 	{
@@ -272,7 +272,7 @@ bool OS_Switch::set_environment(const String &p_var, const String &p_value) cons
 	return false;
 }
 
-String OS_Switch::get_name()
+String OS_Switch::get_name() const
 {
 	return "Switch";
 }
