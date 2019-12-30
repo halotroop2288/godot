@@ -326,48 +326,67 @@ void OS_Switch::run()
 
 	main_loop->init();
 
-	Vector2 last_touch_pos;
+
+	int last_touch_count = 0;
+	// maximum of 16 touches
+	Vector2 last_touch_pos[16];
+	touchPosition touch;
+
 	while(appletMainLoop())
 	{
 		hidScanInput();
-		if(hidKeysDown(CONTROLLER_P1_AUTO) & KEY_TOUCH)
+		int touch_count = hidTouchCount();
+		if(touch_count != last_touch_count)
 		{
-			touchPosition touch;
-			hidTouchRead(&touch, 0);
-			Vector2 pos(touch.px, touch.py);
+			// gained new touches, add them
+			if(touch_count > last_touch_count)
+			{
+				printf("%i -> %i\n", touch_count, last_touch_count);
+				for(int i = last_touch_count; i < touch_count; i++)
+				{
+					hidTouchRead(&touch, i);
+					Vector2 pos(touch.px, touch.py);
 
-			Ref<InputEventScreenTouch> st;
-			st.instance();
-			st->set_index(0);
-			st->set_position(pos);
-			st->set_pressed(true);
-			input->parse_input_event(st);
+					Ref<InputEventScreenTouch> st;
+					st.instance();
+					st->set_index(i);
+					st->set_position(pos);
+					st->set_pressed(true);
+					input->parse_input_event(st);
+				}
+			}
+			else // lost touches
+			{
+				printf("%i -> %i\n", touch_count, last_touch_count);
+				for(int i = touch_count; i < last_touch_count; i++)
+				{
+					Ref<InputEventScreenTouch> st;
+					st.instance();
+					st->set_index(i);
+					st->set_position(last_touch_pos[i]);
+					st->set_pressed(false);
+					input->parse_input_event(st);
+				}
+			}
+		}
+		else
+		{
+			for(int i = 0; i < touch_count; i++)
+			{
+				hidTouchRead(&touch, i);
+				Vector2 pos(touch.px, touch.py);
+
+				Ref<InputEventScreenDrag> sd;
+				sd.instance();
+				sd->set_index(i);
+				sd->set_position(pos);
+				sd->set_relative(pos - last_touch_pos[i]);
+				last_touch_pos[i] = pos;
+				input->parse_input_event(sd);
+			}
 		}
 
-		if(hidKeysHeld(CONTROLLER_P1_AUTO) & KEY_TOUCH)
-		{
-			touchPosition touch;
-			hidTouchRead(&touch, 0);
-			Vector2 pos(touch.px, touch.py);
-
-			Ref<InputEventScreenDrag> sd;
-			sd.instance();
-			sd->set_index(0);
-			sd->set_position(pos);
-			sd->set_relative(pos - last_touch_pos);
-			last_touch_pos = pos;
-			input->parse_input_event(sd);
-		}
-
-		if(hidKeysUp(CONTROLLER_P1_AUTO) & KEY_TOUCH)
-		{
-			Ref<InputEventScreenTouch> st;
-			st.instance();
-			st->set_index(0);
-			st->set_position(last_touch_pos);
-			st->set_pressed(false);
-			input->parse_input_event(st);
-		}
+		last_touch_count = touch_count;
 
 		joypad->process();
 
