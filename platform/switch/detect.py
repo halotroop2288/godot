@@ -165,8 +165,8 @@ def configure(env):
     if not env['builtin_bullet']:
         # We need at least version 2.88
         import subprocess
-        bullet_version = subprocess.check_output(['aarch64-none-elf-pkg-config', 'bullet', '--modversion'], encoding='utf-8').strip()
-        if bullet_version < "2.88":
+        bullet_version = subprocess.check_output(['aarch64-none-elf-pkg-config', 'bullet', '--modversion']).strip()
+        if str(bullet_version) < "2.88":
             # Abort as system bullet was requested but too old
             print("Bullet: System version {0} does not match minimal requirements ({1}). Aborting.".format(bullet_version, "2.88"))
             sys.exit(255)
