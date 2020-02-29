@@ -1,0 +1,55 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build-editor-linux:
+    runs-on: ubuntu-16.04
+    steps:
+    - uses: actions/checkout@v2
+    - run: scripts/build-linux.sh
+    - name: Upload Linux editor binary
+      uses: actions/upload-artifact@v1
+      with:
+        name: godot-linux
+        path: bin/godot.x11.opt.tools.64
+    - name: Upload Linux AppImage
+      uses: actions/upload-artifact@v1
+      with:
+        name: godot-linux-appimage
+        path: godot-linux-nightly-x86_64.AppImage
+
+  build-editor-windows-cross:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: scripts/build-windows-cross.sh
+    - name: Upload windows exe
+      uses: actions/upload-artifact@v1
+      with:
+        name: godot-windows
+        path: bin/godot.windows.opt.tools.64.exe
+
+  build-editor-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: scripts/build-macos.sh
+    - name: Upload macOS dmg
+      uses: actions/upload-artifact@v1
+      with:
+        name: godot-macos
+        path: godot-macos-nightly-x86_64.dmg
+
+  build-switch:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkita64
+
+    steps:
+    - uses: actions/checkout@v2
+    - run: bash -c 'scripts/build-switch.sh'
+    - name: Upload Switch nro
+      uses: actions/upload-artifact@v1
+      with:
+        name: godot-switch
+        path: bin/switch_release_debug.nro
