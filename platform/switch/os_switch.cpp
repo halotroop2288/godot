@@ -326,7 +326,7 @@ s32 last_cursor = 0;
 void keyboard_string_changed_callback(const char *str, SwkbdChangedStringArg *arg)
 {
 	// We get a string changed event on appear, and another one on setting text.
-	if(g_eat_string_events) 
+	if(g_eat_string_events)
 	{
 		last_len = arg->stringLen;
 		g_eat_string_events--;
@@ -344,7 +344,7 @@ void keyboard_string_changed_callback(const char *str, SwkbdChangedStringArg *ar
 	last_len = arg->stringLen;
 }
 
-void keyboard_moved_cursor_callback(const char *str, SwkbdMovedCursorArg *arg) 
+void keyboard_moved_cursor_callback(const char *str, SwkbdMovedCursorArg *arg)
 {
 	if(arg->cursorPos < last_cursor)
 	{
@@ -358,13 +358,13 @@ void keyboard_moved_cursor_callback(const char *str, SwkbdMovedCursorArg *arg)
 	last_cursor = arg->cursorPos;
 }
 
-void keyboard_decided_enter_callback(const char *str, SwkbdDecidedEnterArg *arg) 
+void keyboard_decided_enter_callback(const char *str, SwkbdDecidedEnterArg *arg)
 {
 	OS_Switch::get_singleton()->key(KEY_ENTER, true);
 	g_swkbd_open = false;
 }
 
-void keyboard_decided_cancel_callback() 
+void keyboard_decided_cancel_callback()
 {
 	g_swkbd_open = false;
 }
