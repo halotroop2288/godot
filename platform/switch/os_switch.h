@@ -20,6 +20,8 @@ class OS_Switch : public OS
   AudioDriverSwitch driver_switch;
   String switch_execpath;
 
+  SwkbdInline inline_keyboard;
+
 protected:
   virtual void initialize_core();
   virtual Error initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver);
@@ -69,8 +71,19 @@ public:
   int get_power_seconds_left();
   int get_power_percent_left();
 
+  virtual bool has_touchscreen_ui_hint() const;
+
+  virtual bool has_virtual_keyboard() const;
+  virtual void show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect = Rect2(), int p_max_input_length = -1);
+  virtual void hide_virtual_keyboard();
+  virtual int get_virtual_keyboard_height() const;
+
   void run();
   virtual void swap_buffers();
+
+  void key(uint32_t p_key, bool p_pressed);
+
+  static OS_Switch *get_singleton();
 
   OS_Switch();
 };
