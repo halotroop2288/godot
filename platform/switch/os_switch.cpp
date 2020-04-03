@@ -299,7 +299,7 @@ OS::TimeZoneInfo OS_Switch::get_time_zone_info() const
 
 void OS_Switch::delay_usec(uint32_t p_usec) const
 {
-	svcSleepThread(p_usec);
+	svcSleepThread((int64_t)p_usec * 1000ll);
 }
 
 uint64_t OS_Switch::get_ticks_usec() const
