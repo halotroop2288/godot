@@ -17,6 +17,8 @@
 #include "drivers/gles2/rasterizer_gles2.h"
 #include "main/main.h"
 
+#include "core/os/keyboard.h"
+
 #include <stdio.h>
 #include <netinet/in.h>
 #include <inttypes.h>
@@ -316,6 +318,67 @@ bool OS_Switch::can_draw() const
 void OS_Switch::set_cursor_shape(CursorShape p_shape) {}
 void OS_Switch::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {}
 
+bool g_swkbd_open = false;
+int g_eat_string_events = 0;
+u32 last_len = 0;
+s32 last_cursor = 0;
+
+void keyboard_string_changed_callback(const char *str, SwkbdChangedStringArg *arg)
+{
+	// We get a string changed event on appear, and another one on setting text.
+	if(g_eat_string_events) 
+	{
+		last_len = arg->stringLen;
+		g_eat_string_events--;
+		return;
+	}
+
+	if(arg->stringLen < last_len)
+	{
+		OS_Switch::get_singleton()->key(KEY_BACKSPACE, true);
+	}
+	else if(arg->stringLen != 0)
+	{
+		OS_Switch::get_singleton()->key(str[arg->stringLen-1], true);
+	}
+	last_len = arg->stringLen;
+}
+
+void keyboard_moved_cursor_callback(const char *str, SwkbdMovedCursorArg *arg) 
+{
+	if(arg->cursorPos < last_cursor)
+	{
+		OS_Switch::get_singleton()->key(KEY_LEFT, true);
+	}
+	else
+	{
+		OS_Switch::get_singleton()->key(KEY_RIGHT, true);
+	}
+
+	last_cursor = arg->cursorPos;
+}
+
+void keyboard_decided_enter_callback(const char *str, SwkbdDecidedEnterArg *arg) 
+{
+	OS_Switch::get_singleton()->key(KEY_ENTER, true);
+	g_swkbd_open = false;
+}
+
+void keyboard_decided_cancel_callback() 
+{
+	g_swkbd_open = false;
+}
+
+void OS_Switch::key(uint32_t p_key, bool p_pressed) {
+	Ref<InputEventKey> ev;
+	ev.instance();
+	ev->set_echo(false);
+	ev->set_pressed(p_pressed);
+	ev->set_scancode(p_key);
+	ev->set_unicode(p_key);
+	input->parse_input_event(ev);
+};
+
 void OS_Switch::run()
 {
 	if (!main_loop)
@@ -326,6 +389,11 @@ void OS_Switch::run()
 
 	main_loop->init();
 
+	swkbdInlineLaunchForLibraryApplet(&inline_keyboard, SwkbdInlineMode_AppletDisplay, 0);
+	swkbdInlineSetChangedStringCallback(&inline_keyboard, keyboard_string_changed_callback);
+	swkbdInlineSetMovedCursorCallback(&inline_keyboard, keyboard_moved_cursor_callback);
+	swkbdInlineSetDecidedEnterCallback(&inline_keyboard, keyboard_decided_enter_callback);
+	swkbdInlineSetDecidedCancelCallback(&inline_keyboard, keyboard_decided_cancel_callback);
 
 	int last_touch_count = 0;
 	// maximum of 16 touches
@@ -335,67 +403,119 @@ void OS_Switch::run()
 	while(appletMainLoop())
 	{
 		hidScanInput();
-		int touch_count = hidTouchCount();
-		if(touch_count != last_touch_count)
+		if(g_swkbd_open)
 		{
-			// gained new touches, add them
-			if(touch_count > last_touch_count)
+			for(int i = 0; i < last_touch_count; i++) 
 			{
-				printf("%i -> %i\n", touch_count, last_touch_count);
-				for(int i = last_touch_count; i < touch_count; i++)
-				{
-					hidTouchRead(&touch, i);
-					Vector2 pos(touch.px, touch.py);
-
-					Ref<InputEventScreenTouch> st;
-					st.instance();
-					st->set_index(i);
-					st->set_position(pos);
-					st->set_pressed(true);
-					input->parse_input_event(st);
-				}
-			}
-			else // lost touches
-			{
-				printf("%i -> %i\n", touch_count, last_touch_count);
-				for(int i = touch_count; i < last_touch_count; i++)
-				{
-					Ref<InputEventScreenTouch> st;
-					st.instance();
-					st->set_index(i);
-					st->set_position(last_touch_pos[i]);
-					st->set_pressed(false);
-					input->parse_input_event(st);
-				}
+				Ref<InputEventScreenTouch> st;
+				st.instance();
+				st->set_index(i);
+				st->set_position(last_touch_pos[i]);
+				st->set_pressed(false);
+				input->parse_input_event(st);
 			}
 		}
 		else
 		{
-			for(int i = 0; i < touch_count; i++)
+			int touch_count = hidTouchCount();
+			if(touch_count != last_touch_count)
 			{
-				hidTouchRead(&touch, i);
-				Vector2 pos(touch.px, touch.py);
+				// gained new touches, add them
+				if(touch_count > last_touch_count)
+				{
+					printf("%i -> %i\n", last_touch_count, touch_count);
+					for(int i = last_touch_count; i < touch_count; i++)
+					{
+						hidTouchRead(&touch, i);
+						Vector2 pos(touch.px, touch.py);
 
-				Ref<InputEventScreenDrag> sd;
-				sd.instance();
-				sd->set_index(i);
-				sd->set_position(pos);
-				sd->set_relative(pos - last_touch_pos[i]);
-				last_touch_pos[i] = pos;
-				input->parse_input_event(sd);
+						Ref<InputEventScreenTouch> st;
+						st.instance();
+						st->set_index(i);
+						st->set_position(pos);
+						st->set_pressed(true);
+						input->parse_input_event(st);
+					}
+				}
+				else // lost touches
+				{
+					printf("%i -> %i\n", last_touch_count, touch_count);
+					for(int i = touch_count; i < last_touch_count; i++)
+					{
+						Ref<InputEventScreenTouch> st;
+						st.instance();
+						st->set_index(i);
+						st->set_position(last_touch_pos[i]);
+						st->set_pressed(false);
+						input->parse_input_event(st);
+					}
+				}
 			}
+			else
+			{
+				for(int i = 0; i < touch_count; i++)
+				{
+					hidTouchRead(&touch, i);
+					Vector2 pos(touch.px, touch.py);
+
+					Ref<InputEventScreenDrag> sd;
+					sd.instance();
+					sd->set_index(i);
+					sd->set_position(pos);
+					sd->set_relative(pos - last_touch_pos[i]);
+					last_touch_pos[i] = pos;
+					input->parse_input_event(sd);
+				}
+			}
+
+			last_touch_count = touch_count;
 		}
 
-		last_touch_count = touch_count;
-
 		joypad->process();
+
+		swkbdInlineUpdate(&inline_keyboard, NULL);
 
 		if (Main::iteration() == true)
 			break;
 	}
+
+	swkbdInlineClose(&inline_keyboard);
 	main_loop->finish();
 }
 
+bool OS_Switch::has_touchscreen_ui_hint() const {
+	return true;
+}
+
+bool OS_Switch::has_virtual_keyboard() const {
+	return true;
+}
+
+int OS_Switch::get_virtual_keyboard_height() const {
+	return 300;
+}
+
+void OS_Switch::show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect, int p_max_input_length) {
+	if(!g_swkbd_open)
+	{
+		g_swkbd_open = true;
+
+		SwkbdAppearArg appear_arg;
+		swkbdInlineMakeAppearArg(&appear_arg, SwkbdType_Normal);
+		swkbdInlineSetInputText(&inline_keyboard, p_existing_text.utf8().get_data());
+		swkbdInlineSetCursorPos(&inline_keyboard, p_existing_text.size()-1);
+
+		g_eat_string_events = 2;
+
+		swkbdInlineAppear(&inline_keyboard, &appear_arg);
+	}
+}
+
+void OS_Switch::hide_virtual_keyboard() {
+	printf("Hiding kbd!\n");
+	g_swkbd_open = false;
+	swkbdInlineDisappear(&inline_keyboard);
+}
 
 OS::PowerState OS_Switch::get_power_state() {
 	return power_manager->get_power_state();
@@ -417,6 +537,13 @@ void OS_Switch::set_executable_path(const char *p_execpath) {
 	switch_execpath = p_execpath;
 }
 
+
+
+OS_Switch *OS_Switch::get_singleton() {
+
+	return (OS_Switch *)OS::get_singleton();
+};
+
 OS_Switch::OS_Switch()
 {
 	video_driver_index = 0;
@@ -426,4 +553,7 @@ OS_Switch::OS_Switch()
 	power_manager = nullptr;
 	gl_context = nullptr;
 	AudioDriverManager::add_driver(&driver_switch);
+
+	swkbdInlineCreate(&inline_keyboard);
 }
+

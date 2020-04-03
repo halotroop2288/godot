@@ -39,11 +39,11 @@ static HidControllerID pad_id[JOYPADS_MAX] = {
 
 // from editor "Project Settings > Input Map"
 static const HidControllerKeys pad_mapping[] = {
-	KEY_B, KEY_A, KEY_Y, KEY_X,
-	KEY_L, KEY_R, KEY_ZL, KEY_ZR,
-	KEY_LSTICK, KEY_RSTICK,
-	KEY_MINUS, KEY_PLUS,
-	KEY_DUP, KEY_DDOWN, KEY_DLEFT, KEY_DRIGHT
+	LIBNX_KEY_B, LIBNX_KEY_A, LIBNX_KEY_Y, LIBNX_KEY_X,
+	LIBNX_KEY_L, LIBNX_KEY_R, LIBNX_KEY_ZL, LIBNX_KEY_ZR,
+	LIBNX_KEY_LSTICK, LIBNX_KEY_RSTICK,
+	LIBNX_KEY_MINUS, LIBNX_KEY_PLUS,
+	LIBNX_KEY_DUP, LIBNX_KEY_DDOWN, LIBNX_KEY_DLEFT, LIBNX_KEY_DRIGHT
 };
 
 JoypadSwitch::JoypadSwitch(InputDefault *in) {
