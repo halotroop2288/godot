@@ -36,6 +36,7 @@
 #include "platform/switch/logo.gen.h"
 #include "platform/switch/icon_default.h"
 #include "scene/resources/texture.h"
+#include "core/io/packet_peer_udp.h"
 
 #define TEMPLATE_RELEASE "switch_release.nro"
 
@@ -44,7 +45,81 @@ class EditorExportPlatformSwitch : public EditorExportPlatform {
 	GDCLASS(EditorExportPlatformSwitch, EditorExportPlatform)
 
 	Ref<ImageTexture> logo;
-	
+
+	Vector<String> devices;
+	volatile bool devices_changed;
+	Mutex *device_lock;
+	Thread *device_thread;
+	volatile bool quit_request;
+
+	static void _device_poll_thread(void *ud) {
+		EditorExportPlatformSwitch *ea = (EditorExportPlatformSwitch *)ud;
+
+		PacketPeerUDP peer;
+		if(peer.listen(28771) != OK)
+		{
+			// ???
+		}
+		
+		peer.set_broadcast_enabled(true);
+		peer.set_dest_address(IP_Address("255.255.255.255"), 28280);
+
+		const uint8_t *packet_buff;
+		int packet_len;
+
+		while(!ea->quit_request) {
+			bool different = false;
+
+			peer.put_packet((unsigned char*)"nxboot", strlen("nxboot"));
+			OS::get_singleton()->delay_usec(500000); // delay 500ms to allow for actual replies
+			
+			Vector<String> ndevices;	
+
+			while(peer.get_packet(&packet_buff, packet_len) != ERR_UNAVAILABLE)
+			{
+				IP_Address a = peer.get_packet_address();
+				ndevices.push_back(String(a));
+			}
+			
+			ndevices.sort();
+
+			ea->device_lock->lock();
+
+			if(ndevices.size() != ea->devices.size()) 
+			{
+				different = true;
+			}
+			else
+			{
+				for (int i = 0; i < ea->devices.size(); i++)
+				{
+					if (ea->devices[i] != ndevices[i])
+					{
+						different = true;
+						break;
+					}
+				}
+			}
+
+			if(different)
+			{
+				ea->devices = ndevices;
+				ea->devices_changed = true;
+			}
+
+			ea->device_lock->unlock();
+
+			uint64_t sleep = OS::get_singleton()->get_power_state() == OS::POWERSTATE_ON_BATTERY ? 1000 : 100;
+			uint64_t wait = 3000000;
+			uint64_t time = OS::get_singleton()->get_ticks_usec();
+			while (OS::get_singleton()->get_ticks_usec() - time < wait) {
+				OS::get_singleton()->delay_usec(1000 * sleep);
+				if (ea->quit_request)
+					break;
+			}
+		}
+	}
+
 public:
 
 	virtual void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) {
@@ -86,8 +161,100 @@ public:
 	virtual Ref<Texture> get_run_icon() const {
 		return logo;
 	}
-	
+
+	virtual bool poll_export() {
+		bool dc = devices_changed;
+		if (dc) {
+			// don't clear unless we're reporting true, to avoid race
+			devices_changed = false;
+		}
+		return dc;
+	}
+
+	virtual int get_options_count() const {
+		device_lock->lock();
+		int dc = devices.size();
+		device_lock->unlock();
+
+		return dc;
+	}
+
+	virtual String get_options_tooltip() const {
+		return TTR("Select device from the list");
+	}
+
+	virtual String get_option_label(int p_index) const {
+		ERR_FAIL_INDEX_V(p_index, devices.size(), "");
+		device_lock->lock();
+		String s = devices[p_index];
+		device_lock->unlock();
+		return s;
+	}
+
+	virtual String get_option_tooltip(int p_index) const {
+		ERR_FAIL_INDEX_V(p_index, devices.size(), "");
+		device_lock->lock();
+		String s = devices[p_index];
+		device_lock->unlock();
+		return s;
+	}
 	virtual Error run(const Ref<EditorExportPreset> &p_preset, int p_device, int p_debug_flags) {
+		String can_export_error;
+		bool can_export_missing_templates;
+		if (!can_export(p_preset, can_export_error, can_export_missing_templates)) {
+			EditorNode::add_io_error(can_export_error);
+			return ERR_UNCONFIGURED;
+		}
+
+		EditorProgress ep("run", "Running", 2);
+
+		// Export_temp APK.
+		if (ep.step("Exporting...", 0)) {
+			return ERR_SKIP;
+		}
+
+		String tmp_export_path = EditorSettings::get_singleton()->get_cache_dir().plus_file("tmpexport.pck");
+		Error err = export_project(p_preset, true, tmp_export_path, p_debug_flags);
+
+		if (err != OK) {
+			DirAccess::remove_file_or_error(tmp_export_path);
+			return err;
+		}
+
+		print_line("Sending..");
+		if (ep.step("Sending...", 1)) {
+			DirAccess::remove_file_or_error(tmp_export_path);
+			return err;
+		}
+
+		String nxlink = EditorSettings::get_singleton()->get("export/switch/nxlink");
+		if (FileAccess::exists(nxlink)) {
+			List<String> args;
+			int ec;
+
+			args.push_back(tmp_export_path);
+			args.push_back("-a");
+			args.push_back(devices[p_device]);
+			args.push_back("-p");
+			args.push_back("TempExport.pck");
+			args.push_back("--args");
+
+			Vector<String> inner_args;
+			// todo: editor arg
+			inner_args.push_back("-v");
+
+			// TODO: hack!!! fix this lmao
+			inner_args.push_back("--main-pack");
+			inner_args.push_back("sdmc:/switch/TempExport.pck");
+
+			// I don't know why no platforms actually use this method??
+			gen_export_flags(inner_args, p_debug_flags);
+			args.push_back(String(" ").join(inner_args));
+
+			OS::get_singleton()->execute(nxlink, args, true, NULL, NULL, &ec);
+		}
+
+		DirAccess::remove_file_or_error(tmp_export_path);
 		return OK;
 	}
 
@@ -301,10 +468,14 @@ public:
 	}
 
 	EditorExportPlatformSwitch() {
-		
 		Ref<Image> img = memnew(Image(_switch_logo));
 		logo.instance();
 		logo->create_from_image(img);
+
+		device_lock = Mutex::create();
+		devices_changed = true;
+		quit_request = false;
+		device_thread = Thread::create(_device_poll_thread, this);
 	}
 	
 	~EditorExportPlatformSwitch() {
@@ -414,6 +585,13 @@ size_t write_bytes(const char *fn, size_t off, size_t len, const unsigned char *
 }
 
 void register_switch_exporter() {
+	String exe_ext;
+	if (OS::get_singleton()->get_name() == "Windows") {
+		exe_ext = "*.exe";
+	}
+
+	EDITOR_DEF("export/switch/nxlink", "");
+	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "export/switch/nxlink", PROPERTY_HINT_GLOBAL_FILE, exe_ext));
 
 	Ref<EditorExportPlatformSwitch> exporter = Ref<EditorExportPlatformSwitch>(memnew(EditorExportPlatformSwitch));
 	EditorExport::get_singleton()->add_export_platform(exporter);
