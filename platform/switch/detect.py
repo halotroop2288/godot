@@ -52,15 +52,14 @@ def get_flags():
         ('builtin_libvorbis', False),
         ('builtin_libvpx', False),
         ('builtin_libwebp', False),
-        ('builtin_libwebsockets', True), # Not in portlibs.
+        ('builtin_wslay', False),
         ('builtin_mbedtls', False),
         ('builtin_miniupnpc', False),
         ('builtin_opus', False),
         ('builtin_pcre2', False),
         ('builtin_squish', True), # Not in portlibs.
         ('builtin_zlib', False),
-        ('builtin_zstd', True), # Not in portlibs.
-        ('module_websocket_enabled', False),
+        ('builtin_zstd', False),
         ]
 
 
@@ -214,8 +213,8 @@ def configure(env):
         # mbedTLS does not provide a pkgconfig config yet. See https://github.com/ARMmbed/mbedtls/issues/228
         env.Append(LIBS=['mbedtls', 'mbedx509', 'mbedcrypto'])
 
-    if not env['builtin_libwebsockets']:
-        env.ParseConfig('aarch64-none-elf-pkg-config libwebsockets --cflags --libs')
+    if not env['builtin_wslay']:
+        env.ParseConfig('aarch64-none-elf-pkg-config libwslay --cflags --libs')
 
     if not env['builtin_miniupnpc']:
         # No pkgconfig file so far, hardcode default paths.
