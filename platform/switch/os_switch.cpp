@@ -493,6 +493,10 @@ bool OS_Switch::has_virtual_keyboard() const {
 
 int OS_Switch::get_virtual_keyboard_height() const {
 	// todo: actually figure this out
+	if(!g_swkbd_open)
+	{
+		return 0;
+	}
 	return 300;
 }
 
