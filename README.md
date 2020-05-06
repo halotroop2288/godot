@@ -13,7 +13,7 @@ If additional debugging is required, sending the nro via nxlink (make sure to se
 You shouldn't need to build the engine if you use a release as the templates should be included - these instructions are for development!
 
 Install these packages from devkitPro pacman:  
-`switch-pkg-config switch-freetype switch-bulletphysics switch-libtheora switch-libpcre2 switch-mesa switch-opusfile switch-mbedtls switch-libwebp switch-libvpx switch-miniupnpc`  
+`switch-pkg-config switch-freetype switch-bulletphysics switch-libtheora switch-libpcre2 switch-mesa switch-opusfile switch-mbedtls switch-libwebp switch-libvpx switch-miniupnpc switch-libzstd switch-wslay`  
 then run `scons platform=switch` in the root of the repo.
 
 # How can I get help?
