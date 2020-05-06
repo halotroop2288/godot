@@ -36,26 +36,26 @@ typedef uint32_t u32;
 typedef uint8_t u8;
 
 typedef struct {
-	u32 FileOff;
-	u32 Size;
+	u32 file_off;
+	u32 size;
 } NsoSegment;
 
 typedef struct {
 	u32 unused;
 	u32 modOffset;
-	u8 Padding[8];
+	u8 padding[8];
 } NroStart;
 
 typedef struct {
-	u8 Magic[4];
-	u32 Unk1;
+	u8 magic[4];
+	u32 unk1;
 	u32 size;
-	u32 Unk2;
-	NsoSegment Segments[3];
-	u32 bssSize;
-	u32 Unk3;
-	u8 BuildId[0x20];
-	u8 Padding[0x20];
+	u32 unk2;
+	NsoSegment segments[3];
+	u32 bss_size;
+	u32 unk3;
+	u8 build_id[0x20];
+	u8 padding[0x20];
 } NroHeader;
 
 typedef struct {
