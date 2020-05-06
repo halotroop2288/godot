@@ -139,6 +139,7 @@ public:
 
 	virtual void get_export_options(List<ExportOption> *r_options) {
 		String title = ProjectSettings::get_singleton()->get("application/config/name");
+		r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "application/fused_build"), true));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/title", PROPERTY_HINT_PLACEHOLDER_TEXT, title), title));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/author", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Author"), "Stary & Cpasjuste"));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/version", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Version"), "1.0"));
@@ -212,17 +213,17 @@ public:
 			return ERR_SKIP;
 		}
 
-		String tmp_export_path = EditorSettings::get_singleton()->get_cache_dir().plus_file("tmpexport.pck");
-		Error err = export_project(p_preset, true, tmp_export_path, p_debug_flags);
+		String tmp_pack_path = EditorSettings::get_singleton()->get_cache_dir().plus_file("tmpexport.pck");
+		Error err = save_pack(p_preset, tmp_pack_path);
 
 		if (err != OK) {
-			DirAccess::remove_file_or_error(tmp_export_path);
+			DirAccess::remove_file_or_error(tmp_pack_path);
 			return err;
 		}
 
 		print_line("Sending...");
 		if (ep.step("Sending...", 1)) {
-			DirAccess::remove_file_or_error(tmp_export_path);
+			DirAccess::remove_file_or_error(tmp_pack_path);
 			return err;
 		}
 
@@ -231,7 +232,7 @@ public:
 			List<String> args;
 			int ec;
 
-			args.push_back(tmp_export_path);
+			args.push_back(tmp_pack_path);
 			args.push_back("-a");
 			args.push_back(devices[p_device]);
 			args.push_back("-p");
@@ -252,12 +253,11 @@ public:
 			OS::get_singleton()->execute(nxlink, args, true, NULL, NULL, &ec);
 		}
 
-		DirAccess::remove_file_or_error(tmp_export_path);
+		DirAccess::remove_file_or_error(tmp_pack_path);
 		return OK;
 	}
 
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
-
 		String err;
 		r_missing_templates = find_export_template(TEMPLATE_RELEASE) == String();
 
@@ -277,7 +277,7 @@ public:
 
 	virtual List<String> get_binary_extensions(const Ref<EditorExportPreset> &p_preset) const {
 		List<String> list;
-		list.push_back("pck");
+		list.push_back("nro");
 		return list;
 	}
 
@@ -288,62 +288,176 @@ public:
 		if (!DirAccess::exists(p_path.get_base_dir())) {
 			return ERR_FILE_BAD_PATH;
 		}
-		String template_path = find_export_template(TEMPLATE_RELEASE);
-
-		if (template_path != String() && !FileAccess::exists(template_path)) {
-			EditorNode::get_singleton()->show_warning(TTR("Template file not found:") + "\n" + template_path);
+		
+		String nro_path = find_export_template(TEMPLATE_RELEASE);
+		if (nro_path != String() && !FileAccess::exists(nro_path)) {
+			EditorNode::get_singleton()->show_warning(TTR("Template file not found:") + "\n" + nro_path);
 			return ERR_FILE_NOT_FOUND;
 		}
+
 		DirAccess *da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
-		Error err = da->copy(template_path, p_path, 0755);
+		Error err = save_pack(p_preset, p_path.get_basename() + ".pck");
+
 		if (err == OK) {
 			// update nro icon/title/author/version
 			String title = p_preset->get("application/title");
 			String author = p_preset->get("application/author");
 			String version = p_preset->get("application/version");
 			String icon = p_preset->get("application/icon_256x256");
-			if(icon != "" && DirAccess::exists(icon))
+			
+			NacpStruct *nacp = memnew(NacpStruct);
+			memset(nacp, 0, sizeof(NacpStruct));
+			create_nacp(nacp, title, author, version);
+
+			if(p_preset->get("application/fused_build"))
 			{
-				err = da->copy(icon, p_path.get_basename() + ".jpg", 0755);
+				EditorNode::get_singleton()->show_warning(TTR("Fused builds aren't implemented yet."));
+				/* TODO: romfs */
+
+				String empty_string = "";
+				err = create_nro(nro_path, p_path, nacp, icon, empty_string);
 				if(err != OK) {
-					return ERR_BUG;
+					return err;
+				}
+
+				memdelete(nacp);
+				return ERR_BUG;
+			}
+			else
+			{
+				String empty_string = "";
+				err = create_nro(nro_path, p_path, nacp, icon, empty_string);
+				if(err != OK) {
+					return err;
 				}
 			}
 
-			String nacp_path = p_path.get_basename() + ".nacp";
-			err = create_nacp(nacp_path, title, author, version);
-			if(err != OK) {
-				return ERR_BUG;
-			}
-				
-			String pck_path = p_path.get_basename() + ".pck";
-			err = save_pack(p_preset, pck_path);
+			memdelete(nacp);
 		}
 
 		memdelete(da);
 		return err;
 	}
 
-	Error create_nacp(String &nacp_path, String& title, String& author, String& version) {
+	void copy_chunked(FileAccess *src, FileAccess *dst, size_t len, size_t chunk_size = 0x100000) {
+		uint8_t *buffer = (uint8_t*)malloc(chunk_size);
+		while(len > chunk_size)
+		{
+			size_t amt = src->get_buffer(buffer, chunk_size);
+			dst->store_buffer(buffer, amt);
+			len -= amt;
+		}
+
+		src->get_buffer(buffer, len);
+		dst->store_buffer(buffer, len);
+
+		free(buffer);
+	}
+
+	Error create_nro(const String &template_path, const String &output_path, NacpStruct *nacp, String &icon_path, String &romfs_path)
+	{
+		NroHeader nro_header;
+		AssetHeader asset_header;
+
+		FileAccess *template_f = FileAccess::open(template_path, FileAccess::READ);
+		FileAccess *nro = FileAccess::open(output_path, FileAccess::WRITE);
+
+		if(!template_f || !nro) return ERR_FILE_NOT_FOUND;
+
+		template_f->seek(sizeof(NroStart));
+		template_f->get_buffer((uint8_t*) &nro_header, sizeof(NroHeader));
+
+		if(memcmp(nro_header.magic, "NRO0", 4) != 0) {
+			template_f->close();
+			memdelete(template_f);
+			nro->close();
+			memdelete(nro);
+			return ERR_INVALID_DATA;
+		}
+
+		// copy nro body to output
+		template_f->seek(0);
+		copy_chunked(template_f, nro, nro_header.size);
+
+		template_f->seek(nro_header.size);
+		template_f->get_buffer((uint8_t*) &asset_header, sizeof(AssetHeader));
+		if(memcmp(asset_header.magic, "ASET", 4) != 0) {
+			template_f->close();
+			memdelete(template_f);
+			nro->close();
+			memdelete(nro);
+			return ERR_INVALID_DATA;
+		}
+
+		AssetHeader new_asset_header;
+		memset(&new_asset_header, 0, sizeof(AssetHeader));
+
+		// write dummy asset header here
+		nro->store_buffer((uint8_t*)&new_asset_header, sizeof(AssetHeader));
+
+		memcpy(new_asset_header.magic, "ASET", 4);
+		new_asset_header.version = 0;
+		new_asset_header.icon.offset = nro->get_position() - nro_header.size;
+
+		if(icon_path != "" && DirAccess::exists(icon_path)) {
+			// replace icon
+			FileAccess *icon = FileAccess::open(icon_path, FileAccess::READ);
+			size_t icon_len = icon->get_len();
+			copy_chunked(icon, nro, icon_len);
+
+			new_asset_header.icon.size = icon_len;
+			icon->close();
+			memdelete(icon);
+		}
+		else {
+			// copy icon
+			template_f->seek(nro_header.size + asset_header.icon.offset);
+			copy_chunked(template_f, nro, asset_header.icon.size);
+			new_asset_header.icon.size = asset_header.icon.size;
+		}
+
+		// write new nacp
+		new_asset_header.nacp.offset = nro->get_position() - nro_header.size;
+		new_asset_header.nacp.size = sizeof(NacpStruct);
+		nro->store_buffer((uint8_t*)nacp, sizeof(NacpStruct));
+
+		asset_header.romfs.offset = nro->get_position() - nro_header.size;
+
+		if(romfs_path != "" && DirAccess::exists(romfs_path)) {
+			FileAccess *romfs = FileAccess::open(romfs_path, FileAccess::READ);
+			size_t romfs_len = romfs->get_len();
+			copy_chunked(romfs, nro, romfs_len);
+
+			new_asset_header.romfs.size = romfs_len;
+			romfs->close();
+			memdelete(romfs);
+		} else {
+			template_f->seek(nro_header.size + asset_header.romfs.offset);
+			copy_chunked(template_f, nro, asset_header.romfs.size);
+		}
+
+		// Go back and actually write the asset header
+		nro->seek(nro_header.size);
+		nro->store_buffer((uint8_t*)&new_asset_header, sizeof(AssetHeader));
+
+		template_f->close();
+		memdelete(template_f);
+		nro->close();
+		memdelete(nro);
+
+		return OK;
+	}
+
+	void create_nacp(NacpStruct *nacp, String& title, String& author, String& version) {
 		const char *title_cstr = title.utf8().ptr();
 		const char *author_cstr = author.utf8().ptr();
 		const char *version_cstr = version.utf8().ptr();
-
-		NacpStruct *nacp = (NacpStruct *)malloc(sizeof(NacpStruct));
-		memset(nacp, 0, sizeof(NacpStruct));
 
 		for (int i = 0; i < 12; i++) {
 			strncpy(nacp->lang[i].name, title_cstr, sizeof(nacp->lang[i].name) - 1);
 			strncpy(nacp->lang[i].author, author_cstr, sizeof(nacp->lang[i].author) - 1);
 		}
 		strncpy(nacp->version, version_cstr, sizeof(nacp->version) - 1);
-		
-		FileAccess *nacp_file = FileAccess::open(nacp_path, FileAccess::WRITE);
-		nacp_file->store_buffer((const uint8_t*)nacp, sizeof(NacpStruct));
-		nacp_file->close();
-		free(nacp);
-
-		return OK;
 	}
 
 	EditorExportPlatformSwitch() {
