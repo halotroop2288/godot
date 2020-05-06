@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt-get update && sudo apt-get upgrade
+sudo apt-get update
 sudo apt-get install build-essential scons pkg-config libx11-dev libxcursor-dev libxinerama-dev \
     libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libfreetype6-dev libudev-dev libxi-dev \
     libxrandr-dev yasm
