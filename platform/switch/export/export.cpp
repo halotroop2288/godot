@@ -38,6 +38,7 @@
 #include "core/io/packet_peer_udp.h"
 
 #define TEMPLATE_RELEASE "switch_release.nro"
+#define TEMPLATE_APPLET_SPLASH "switch_applet_splash.rgba.gz"
 
 class EditorExportPlatformSwitch : public EditorExportPlatform {
 
@@ -259,7 +260,9 @@ public:
 
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
 		String err;
-		r_missing_templates = find_export_template(TEMPLATE_RELEASE) == String();
+		r_missing_templates =
+			find_export_template(TEMPLATE_RELEASE) == String() || 
+			find_export_template(TEMPLATE_APPLET_SPLASH) == String();
 
 		bool valid = !r_missing_templates;
 		String etc_error = test_etc2();
@@ -297,44 +300,80 @@ public:
 
 		DirAccess *da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 		Error err = save_pack(p_preset, p_path.get_basename() + ".pck");
-
-		if (err == OK) {
-			// update nro icon/title/author/version
-			String title = p_preset->get("application/title");
-			String author = p_preset->get("application/author");
-			String version = p_preset->get("application/version");
-			String icon = p_preset->get("application/icon_256x256");
-			
-			NacpStruct *nacp = memnew(NacpStruct);
-			memset(nacp, 0, sizeof(NacpStruct));
-			create_nacp(nacp, title, author, version);
-
-			if(p_preset->get("application/fused_build"))
-			{
-				EditorNode::get_singleton()->show_warning(TTR("Fused builds aren't implemented yet."));
-				/* TODO: romfs */
-
-				String empty_string = "";
-				err = create_nro(nro_path, p_path, nacp, icon, empty_string);
-				if(err != OK) {
-					return err;
-				}
-
-				memdelete(nacp);
-				return ERR_BUG;
-			}
-			else
-			{
-				String empty_string = "";
-				err = create_nro(nro_path, p_path, nacp, icon, empty_string);
-				if(err != OK) {
-					return err;
-				}
-			}
-
-			memdelete(nacp);
+		if (err != OK) {
+			memdelete(da);
+			return err;
 		}
 
+		// update nro icon/title/author/version
+		String title = p_preset->get("application/title");
+		String author = p_preset->get("application/author");
+		String version = p_preset->get("application/version");
+		String icon = p_preset->get("application/icon_256x256");
+
+		NacpStruct *nacp = memnew(NacpStruct);
+		memset(nacp, 0, sizeof(NacpStruct));
+		create_nacp(nacp, title, author, version);
+
+		if(p_preset->get("application/fused_build"))
+		{
+			String build_romfs = EditorSettings::get_singleton()->get("export/switch/build_romfs");
+			if (build_romfs != String() && FileAccess::exists(build_romfs)) {
+				String cache = EditorSettings::get_singleton()->get_cache_dir();
+				String romfs_dir = cache.plus_file("romfs");
+				String romfs_bin_path = cache.plus_file("romfs.bin");
+
+				da->make_dir(romfs_dir);
+				err = save_pack(p_preset, romfs_dir.plus_file("game.pck"));
+				if(err == OK) {
+					String applet_splash = find_export_template(TEMPLATE_APPLET_SPLASH);
+					if (FileAccess::exists(applet_splash)) {
+						da->copy(applet_splash, romfs_dir.plus_file("applet_splash.rgba.gz"));
+
+						List<String> args;
+						int ec;
+						args.push_back(romfs_dir);
+						args.push_back(romfs_bin_path);
+						OS::get_singleton()->execute(build_romfs, args, true, NULL, NULL, &ec);
+						if(ec == 0) {
+							err = create_nro(nro_path, p_path, nacp, icon, romfs_bin_path);
+							DirAccess::remove_file_or_error(romfs_bin_path);
+						}
+						else {
+							EditorNode::get_singleton()->show_warning(TTR("build_romfs failed!"));
+							err = ERR_BUG;
+						}
+					}
+					else {
+						EditorNode::get_singleton()->show_warning(TTR("Template file not found:") + "\n" + applet_splash);
+						err = ERR_FILE_NOT_FOUND;
+					}
+				}
+				else {
+					EditorNode::get_singleton()->show_warning(TTR("Pack export failed!"));
+				}
+
+				DirAccess::remove_file_or_error(romfs_dir);
+			}
+			else {
+				EditorNode::get_singleton()->show_warning(TTR("build_romfs binary not found! Set its path in Editor Settings."));
+				err = ERR_FILE_NOT_FOUND;
+			}
+		}
+		else
+		{
+			String empty_string = "";
+
+			err = save_pack(p_preset, p_path.get_basename() + ".pck");
+			if(err == OK) {
+				err = create_nro(nro_path, p_path, nacp, icon, empty_string);
+			}
+			else {
+				EditorNode::get_singleton()->show_warning(TTR("Pack export failed!"));
+			}
+		}
+
+		memdelete(nacp);
 		memdelete(da);
 		return err;
 	}
@@ -399,7 +438,7 @@ public:
 		new_asset_header.version = 0;
 		new_asset_header.icon.offset = nro->get_position() - nro_header.size;
 
-		if(icon_path != "" && DirAccess::exists(icon_path)) {
+		if(icon_path != String() && FileAccess::exists(icon_path)) {
 			// replace icon
 			FileAccess *icon = FileAccess::open(icon_path, FileAccess::READ);
 			size_t icon_len = icon->get_len();
@@ -421,9 +460,9 @@ public:
 		new_asset_header.nacp.size = sizeof(NacpStruct);
 		nro->store_buffer((uint8_t*)nacp, sizeof(NacpStruct));
 
-		asset_header.romfs.offset = nro->get_position() - nro_header.size;
+		new_asset_header.romfs.offset = nro->get_position() - nro_header.size;
 
-		if(romfs_path != "" && DirAccess::exists(romfs_path)) {
+		if(romfs_path != String() && FileAccess::exists(romfs_path)) {
 			FileAccess *romfs = FileAccess::open(romfs_path, FileAccess::READ);
 			size_t romfs_len = romfs->get_len();
 			copy_chunked(romfs, nro, romfs_len);
@@ -434,6 +473,8 @@ public:
 		} else {
 			template_f->seek(nro_header.size + asset_header.romfs.offset);
 			copy_chunked(template_f, nro, asset_header.romfs.size);
+
+			new_asset_header.romfs.size = asset_header.romfs.size;
 		}
 
 		// Go back and actually write the asset header
@@ -484,6 +525,9 @@ void register_switch_exporter() {
 
 	EDITOR_DEF("export/switch/nxlink", "");
 	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "export/switch/nxlink", PROPERTY_HINT_GLOBAL_FILE, exe_ext));
+
+	EDITOR_DEF("export/switch/build_romfs", "");
+	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "export/switch/build_romfs", PROPERTY_HINT_GLOBAL_FILE, exe_ext));
 
 	Ref<EditorExportPlatformSwitch> exporter = Ref<EditorExportPlatformSwitch>(memnew(EditorExportPlatformSwitch));
 	EditorExport::get_singleton()->add_export_platform(exporter);
