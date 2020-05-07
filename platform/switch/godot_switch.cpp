@@ -16,11 +16,11 @@ int main(int argc, char *argv[])
 	socketInitializeDefault();
 	nxlinkStdio();
 
+	romfsInit();
+
 	int apptype = appletGetAppletType();
 	if(apptype != AppletType_Application && apptype != AppletType_SystemApplication)
 	{
-		romfsInit();
-
 		NWindow* win = nwindowGetDefault();
 		Framebuffer fb;
 		framebufferCreate(&fb, win, FB_WIDTH, FB_HEIGHT, PIXEL_FORMAT_RGBA_8888, 1);
@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
 	chdir(cwd);
 	free(cwd);
 
+	romfsExit();
 	socketExit();
 	return os.get_exit_code();
 }
