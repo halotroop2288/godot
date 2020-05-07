@@ -244,10 +244,6 @@ public:
 			// todo: editor arg
 			inner_args.push_back("-v");
 
-			// TODO: hack!!! fix this lmao
-			inner_args.push_back("--main-pack");
-			inner_args.push_back("sdmc:/switch/TempExport.pck");
-
 			gen_export_flags(inner_args, p_debug_flags);
 			args.push_back(String(" ").join(inner_args));
 
