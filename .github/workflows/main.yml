@@ -74,7 +74,22 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: godot-switch
+      
+      - id: get_version
+        name: Get the version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        shell: bash
+
       - run: scripts/create-template.sh
+
+      - uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: "Stary2001/godot-forwarder"
+          version: "latest"
+          file: "godot-forwarder.nro"
+      
+      - run: scripts/create-switch-release.sh ${{ steps.get_version.outputs.VERSION }}
+      
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -82,11 +97,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          release_name: Release ${{ steps.get_version.outputs.VERSION }}
           body: |
-            Release created by CI for ${{ github.ref }}
+            Release created by CI for ${{ steps.get_version.outputs.VERSION }}
           draft: true
           prerelease: false
+      
       - name: Upload Windows editor
         id: upload-windows
         uses: actions/upload-release-asset@v1
@@ -97,6 +113,7 @@ jobs:
           asset_path: ./godot.windows.opt.tools.64.exe
           asset_name: godot.windows.opt.tools.64.exe
           asset_content_type: application/octet-stream
+      
       - name: Upload macOS editor
         id: upload-macos
         uses: actions/upload-release-asset@v1
@@ -107,6 +124,7 @@ jobs:
           asset_path: ./godot-macos-nightly-x86_64.dmg
           asset_name: godot-macos-nightly-x86_64.dmg
           asset_content_type: application/octet-stream
+      
       - name: Upload Linux editor
         id: upload-linux
         uses: actions/upload-release-asset@v1
@@ -117,13 +135,25 @@ jobs:
           asset_path: ./godot.x11.opt.tools.64
           asset_name: godot.x11.opt.tools.64
           asset_content_type: application/octet-stream
+      
       - name: Upload Switch template
-        id: upload-switch
+        id: upload-switch-template
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./godot_templates_switch_only.tpz
-          asset_name: godot_templates_${{ github.ref }}_switch_only.tpz
+          asset_name: godot_templates_${{ steps.get_version.outputs.VERSION }}_switch_only.tpz
+          asset_content_type: application/zip
+      
+      - name: Upload Switch release
+        id: upload-switch-release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./godot-switch.zip
+          asset_name: godot-switch-${{ steps.get_version.outputs.VERSION }}.zip
           asset_content_type: application/zip
