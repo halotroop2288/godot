@@ -45,10 +45,6 @@ public:
 	Vector<uint8_t> editor_id_vec;
 protected:
 	virtual void _export_begin(const Set<String> &p_features, bool p_debug, const String &p_path, int p_flags) {
-		// Create file
-		//Ref<EditorExportPreset> p_preset = get_export_preset();
-
-		//String editor_id = p_preset->get("application/custom_editor_id");
 		if(editor_id_vec.size() != 0)
 		{
 			add_file("custom_editor_id", editor_id_vec, false);
