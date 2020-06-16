@@ -40,6 +40,22 @@
 #define TEMPLATE_RELEASE "switch_release.nro"
 #define TEMPLATE_APPLET_SPLASH "switch_applet_splash.rgba.gz"
 
+class ExportPluginSwitch : public EditorExportPlugin {
+public:
+	Vector<uint8_t> editor_id_vec;
+protected:
+	virtual void _export_begin(const Set<String> &p_features, bool p_debug, const String &p_path, int p_flags) {
+		// Create file
+		//Ref<EditorExportPreset> p_preset = get_export_preset();
+
+		//String editor_id = p_preset->get("application/custom_editor_id");
+		if(editor_id_vec.size() != 0)
+		{
+			add_file("custom_editor_id", editor_id_vec, false);
+		}
+	}
+};
+
 class EditorExportPlatformSwitch : public EditorExportPlatform {
 
 	GDCLASS(EditorExportPlatformSwitch, EditorExportPlatform)
@@ -51,6 +67,8 @@ class EditorExportPlatformSwitch : public EditorExportPlatform {
 	Mutex *device_lock;
 	Thread *device_thread;
 	volatile bool quit_request;
+
+	ExportPluginSwitch *export_plugin;
 
 	static void _device_poll_thread(void *ud) {
 		EditorExportPlatformSwitch *ea = (EditorExportPlatformSwitch *)ud;
@@ -140,7 +158,8 @@ public:
 
 	virtual void get_export_options(List<ExportOption> *r_options) {
 		String title = ProjectSettings::get_singleton()->get("application/config/name");
-		r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "application/fused_build"), true));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "application/fused_build"), false));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/custom_editor_id"), ""));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/title", PROPERTY_HINT_PLACEHOLDER_TEXT, title), title));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/author", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Author"), "Stary & Cpasjuste"));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/version", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Version"), "1.0"));
@@ -215,6 +234,7 @@ public:
 		}
 
 		String tmp_pack_path = EditorSettings::get_singleton()->get_cache_dir().plus_file("tmpexport.pck");
+
 		Error err = save_pack(p_preset, tmp_pack_path);
 
 		if (err != OK) {
@@ -283,7 +303,39 @@ public:
 	virtual void resolve_platform_feature_priorities(const Ref<EditorExportPreset> &p_preset, Set<String> &p_features) {
 	}
 
+	virtual Error export_pack(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags = 0) {
+		// XXX i hate this - we have to do this _before_ the export notifier
+		String custom_editor_id = p_preset->get("application/custom_editor_id");
+		export_plugin->editor_id_vec.clear();
+
+		if(custom_editor_id != "") {
+			// XXX what the hell is this
+			const char *chars = custom_editor_id.utf8().ptr();
+			for(size_t i = 0; i < strlen(chars); i++) {
+				export_plugin->editor_id_vec.push_back(chars[i]);
+			}
+		}
+
+		ExportNotifier notifier(*this, p_preset, p_debug, p_path, p_flags);
+
+		return save_pack(p_preset, p_path);
+	}
+
 	virtual Error export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags = 0) {
+		// XXX i hate this - we have to do this _before_ the export notifier
+		String custom_editor_id = p_preset->get("application/custom_editor_id");
+		export_plugin->editor_id_vec.clear();
+
+		if(custom_editor_id != "") {
+			// XXX what the hell is this
+			const char *chars = custom_editor_id.utf8().ptr();
+			for(size_t i = 0; i < strlen(chars); i++) {
+				export_plugin->editor_id_vec.push_back(chars[i]);
+			}
+		}
+
+		ExportNotifier notifier(*this, p_preset, p_debug, p_path, p_flags);
+
 		if (!DirAccess::exists(p_path.get_base_dir())) {
 			return ERR_FILE_BAD_PATH;
 		}
@@ -295,12 +347,8 @@ public:
 		}
 
 		DirAccess *da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
-		Error err = save_pack(p_preset, p_path.get_basename() + ".pck");
-		if (err != OK) {
-			memdelete(da);
-			return err;
-		}
 
+		Error err;
 		// update nro icon/title/author/version
 		String title = p_preset->get("application/title");
 		String author = p_preset->get("application/author");
@@ -506,9 +554,13 @@ public:
 		devices_changed = true;
 		quit_request = false;
 		device_thread = Thread::create(_device_poll_thread, this);
+
+		export_plugin = memnew(ExportPluginSwitch);
+		EditorExport::get_singleton()->add_export_plugin(export_plugin);
 	}
 	
 	~EditorExportPlatformSwitch() {
+		memdelete(export_plugin);
 	}
 };
 
