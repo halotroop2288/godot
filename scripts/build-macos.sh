@@ -3,7 +3,7 @@
 brew update
 brew install coreutils scons yasm
 
-scons platform=osx tools=yes target=release_debug
+scons platform=osx tools=yes target=release
 
 # Create macOS editor DMG image
 mkdir artifacts

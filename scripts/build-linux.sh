@@ -7,7 +7,7 @@ sudo apt-get install build-essential scons pkg-config libx11-dev libxcursor-dev 
 
 # There's a compiler error. Let's uhhhhhh silence it.
 # TODO: Fix this.
-scons platform=x11 tools=yes target=release_debug \
+scons platform=x11 tools=yes target=release \
       udev=yes use_static_cpp=yes progress=no CXXFLAGS=-fno-strict-aliasing -j2
 
 # Create Linux editor AppImage
