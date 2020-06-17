@@ -83,6 +83,8 @@ jobs:
       - run: scripts/create-template.sh
 
       - uses: dsaltares/fetch-gh-release-asset@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           repo: "Stary2001/godot-forwarder"
           version: "latest"
