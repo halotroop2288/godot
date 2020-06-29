@@ -48,8 +48,8 @@ static const AudioRendererConfig arConfig =
 
 Error AudioDriverSwitch::init_device() {
 	
-	int latency = GLOBAL_DEF("audio/output_latency", DEFAULT_OUTPUT_LATENCY);
-	mix_rate = GLOBAL_DEF("audio/mix_rate", 48000);
+	int latency = GLOBAL_GET("audio/output_latency");
+	mix_rate = GLOBAL_GET("audio/mix_rate");
 	channels = 2;
 	speaker_mode = SPEAKER_MODE_STEREO;
 	buffer_size = closest_power_of_2(latency * mix_rate / 1000);
