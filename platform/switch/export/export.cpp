@@ -556,7 +556,8 @@ public:
 	}
 	
 	~EditorExportPlatformSwitch() {
-		memdelete(export_plugin);
+		// DO NOT free it
+		//memdelete(export_plugin);
 	}
 };
 
