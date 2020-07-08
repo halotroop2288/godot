@@ -13,11 +13,6 @@ jobs:
       with:
         name: godot-linux
         path: bin/godot.x11.opt.tools.64
-    - name: Upload Linux AppImage
-      uses: actions/upload-artifact@v1
-      with:
-        name: godot-linux-appimage
-        path: godot-linux-nightly-x86_64.AppImage
 
   build-editor-windows-cross:
     runs-on: ubuntu-latest
