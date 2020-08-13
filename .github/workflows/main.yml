@@ -75,7 +75,7 @@ jobs:
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
         shell: bash
 
-      - run: scripts/create-template.sh
+      - run: scripts/create-template.sh ${{ steps.get_version.outputs.VERSION }}
 
       - uses: dsaltares/fetch-gh-release-asset@master
         env:
