@@ -188,8 +188,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./godot-${{ steps.get_version.outputs.VERSION }}-linux.tar.gz
-          asset_name: godot-linux.tar.gz
+          asset_path: ./godot-linux.tar.gz
+          asset_name: godot-${{ steps.get_version.outputs.VERSION }}-linux.tar.gz
           asset_content_type: application/zip
       
       - name: Upload Switch template
