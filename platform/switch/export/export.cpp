@@ -245,6 +245,15 @@ public:
 		}
 
 		String nxlink = EditorSettings::get_singleton()->get("export/switch/nxlink");
+		// If we can't find it, look for a bundled copy.
+		if(nxlink == "") {
+			String exe_ext;
+			if (OS::get_singleton()->get_name() == "Windows") {
+				exe_ext = "*.exe";
+			}
+			nxlink = OS::get_singleton()->get_executable_path().get_base_dir() + "/nxlink" + exe_ext;
+		}
+
 		if (FileAccess::exists(nxlink)) {
 			List<String> args;
 			int ec;
@@ -264,6 +273,9 @@ public:
 			args.push_back(String(" ").join(inner_args));
 
 			OS::get_singleton()->execute(nxlink, args, true, NULL, NULL, &ec);
+		}
+		else {
+			EditorNode::get_singleton()->show_warning(TTR("nxlink binary not found! Set its path in Editor Settings."));
 		}
 
 		DirAccess::remove_file_or_error(tmp_pack_path);
@@ -358,6 +370,16 @@ public:
 		if(p_preset->get("application/fused_build"))
 		{
 			String build_romfs = EditorSettings::get_singleton()->get("export/switch/build_romfs");
+
+			// If we can't find it, look for a bundled copy.
+			if(build_romfs == "") {
+				String exe_ext;
+				if (OS::get_singleton()->get_name() == "Windows") {
+					exe_ext = "*.exe";
+				}
+				build_romfs = OS::get_singleton()->get_executable_path().get_base_dir() + "/build_romfs" + exe_ext;
+			}
+
 			if (build_romfs != String() && FileAccess::exists(build_romfs)) {
 				String cache = EditorSettings::get_singleton()->get_cache_dir();
 				String romfs_dir = cache.plus_file("romfs");
