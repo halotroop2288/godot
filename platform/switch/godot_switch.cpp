@@ -1,3 +1,33 @@
+/*************************************************************************/
+/*  godot_switch.cpp                                                     */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
+/*************************************************************************/
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
+
 #include "switch_wrapper.h"
 #include <limits.h>
 #include <locale.h>
@@ -11,31 +41,28 @@
 #define FB_WIDTH 1280
 #define FB_HEIGHT 720
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	socketInitializeDefault();
 	nxlinkStdio();
 
 	romfsInit();
 
 	int apptype = appletGetAppletType();
-	if(apptype != AppletType_Application && apptype != AppletType_SystemApplication)
-	{
-		NWindow* win = nwindowGetDefault();
+	if (apptype != AppletType_Application && apptype != AppletType_SystemApplication) {
+		NWindow *win = nwindowGetDefault();
 		Framebuffer fb;
 		framebufferCreate(&fb, win, FB_WIDTH, FB_HEIGHT, PIXEL_FORMAT_RGBA_8888, 1);
 		framebufferMakeLinear(&fb);
 
 		u32 stride;
-		u32* framebuf = (u32*) framebufferBegin(&fb, &stride);
-		
+		u32 *framebuf = (u32 *)framebufferBegin(&fb, &stride);
+
 		FILE *splash = fopen("romfs:/applet_splash.rgba.gz", "rb");
-		if(splash)
-		{
+		if (splash) {
 			fseek(splash, 0, SEEK_END);
 			size_t splash_size = ftell(splash);
-			
-			u8 *compressed_splash = (u8*)malloc(splash_size);
+
+			u8 *compressed_splash = (u8 *)malloc(splash_size);
 			memset(compressed_splash, 0, splash_size);
 			fseek(splash, 0, SEEK_SET);
 
@@ -47,41 +74,35 @@ int main(int argc, char *argv[])
 			struct z_stream_s stream;
 			memset(&stream, 0, sizeof(stream));
 			stream.zalloc = NULL;
-			
+
 			stream.zfree = NULL;
 			stream.next_in = compressed_splash;
 			stream.avail_in = splash_size;
-			stream.next_out = (u8*)framebuf;
+			stream.next_out = (u8 *)framebuf;
 			stream.avail_out = stride * FB_HEIGHT;
 
-			if(inflateInit2(&stream, 16+MAX_WBITS) == Z_OK)
-			{
+			if (inflateInit2(&stream, 16 + MAX_WBITS) == Z_OK) {
 				int err = 0;
-				if((err = inflate(&stream, 0)) != Z_STREAM_END)
-				{
+				if ((err = inflate(&stream, 0)) != Z_STREAM_END) {
 					// idk
 				}
 
 				inflateEnd(&stream);
 			}
-		}
-		else
-		{
+		} else {
 			// this REALLY shouldn't fail. Hm.
 		}
 
 		framebufferEnd(&fb);
 
-		while(appletMainLoop())
-		{
+		while (appletMainLoop()) {
 			hidScanInput();
-			if(hidKeysDown(CONTROLLER_P1_AUTO) & 
-				~(LIBNX_KEY_TOUCH|
-					LIBNX_KEY_LSTICK_LEFT|LIBNX_KEY_LSTICK_RIGHT|
-					LIBNX_KEY_LSTICK_UP|LIBNX_KEY_LSTICK_DOWN|
-					LIBNX_KEY_RSTICK_LEFT|LIBNX_KEY_RSTICK_RIGHT|
-					LIBNX_KEY_RSTICK_UP|LIBNX_KEY_RSTICK_DOWN))
-			{
+			if (hidKeysDown(CONTROLLER_P1_AUTO) &
+					~(LIBNX_KEY_TOUCH |
+							LIBNX_KEY_LSTICK_LEFT | LIBNX_KEY_LSTICK_RIGHT |
+							LIBNX_KEY_LSTICK_UP | LIBNX_KEY_LSTICK_DOWN |
+							LIBNX_KEY_RSTICK_LEFT | LIBNX_KEY_RSTICK_RIGHT |
+							LIBNX_KEY_RSTICK_UP | LIBNX_KEY_RSTICK_DOWN)) {
 				break;
 			}
 		}
@@ -90,7 +111,7 @@ int main(int argc, char *argv[])
 
 		romfsExit();
 		socketExit();
-		
+
 		return 0;
 	}
 
@@ -108,8 +129,7 @@ int main(int argc, char *argv[])
 		return 255;
 	}
 
-	if (Main::start())
-	{
+	if (Main::start()) {
 		os.run(); // it is actually the OS that decides how to run
 	}
 	Main::cleanup();

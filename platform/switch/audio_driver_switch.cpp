@@ -1,12 +1,12 @@
 /*************************************************************************/
-/*  audio_driver_switch.cpp                                                */
+/*  audio_driver_switch.cpp                                              */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,21 +33,20 @@
 #include "core/os/os.h"
 #include "core/project_settings.h"
 
-#include <malloc.h>
 #include <errno.h>
+#include <malloc.h>
 
-static const AudioRendererConfig arConfig =
-{
-	.output_rate     = AudioRendererOutputRate_48kHz,
-	.num_voices      = 24,
-	.num_effects     = 0,
-	.num_sinks       = 1,
-	.num_mix_objs    = 1,
+static const AudioRendererConfig arConfig = {
+	.output_rate = AudioRendererOutputRate_48kHz,
+	.num_voices = 24,
+	.num_effects = 0,
+	.num_sinks = 1,
+	.num_mix_objs = 1,
 	.num_mix_buffers = 2,
 };
 
 Error AudioDriverSwitch::init_device() {
-	
+
 	int latency = GLOBAL_GET("audio/output_latency");
 	mix_rate = GLOBAL_GET("audio/mix_rate");
 	channels = 2;
@@ -62,11 +61,11 @@ Error AudioDriverSwitch::init_device() {
 	printf("audrenInitialize: %x\n", res);
 
 	audren_buffer_size = (sizeof(int16_t) * buffer_size * channels);
-	audren_pool_size = ((audren_buffer_size * 2) + 0xFFF) &~ 0xFFF;
+	audren_pool_size = ((audren_buffer_size * 2) + 0xFFF) & ~0xFFF;
 	audren_pool_ptr = memalign(0x1000, audren_pool_size);
-	
+
 	for (int i = 0; i < 2; i++) {
-		audren_buffers[i] = {0};
+		audren_buffers[i] = { 0 };
 		audren_buffers[i].data_raw = audren_pool_ptr;
 		audren_buffers[i].size = audren_buffer_size * 2;
 		audren_buffers[i].start_sample_offset = i * buffer_size;
@@ -101,7 +100,7 @@ Error AudioDriverSwitch::init_device() {
 }
 
 Error AudioDriverSwitch::init() {
-	
+
 	active = false;
 	thread_exited = false;
 	exit_thread = false;
@@ -116,7 +115,7 @@ Error AudioDriverSwitch::init() {
 }
 
 void AudioDriverSwitch::thread_func(void *p_udata) {
-	
+
 	AudioDriverSwitch *ad = (AudioDriverSwitch *)p_udata;
 
 	svcSetThreadPriority(CUR_THREAD_HANDLE, 0x2B);
@@ -136,18 +135,17 @@ void AudioDriverSwitch::thread_func(void *p_udata) {
 				ad->samples_out.write[i] = ad->samples_in[i] >> 16;
 			}
 		}
-		
+
 		int free_buffer = -1;
 		for (int i = 0; i < 2; i++) {
-			if (ad->audren_buffers[i].state == AudioDriverWaveBufState_Free
-					|| ad->audren_buffers[i].state == AudioDriverWaveBufState_Done) {
+			if (ad->audren_buffers[i].state == AudioDriverWaveBufState_Free || ad->audren_buffers[i].state == AudioDriverWaveBufState_Done) {
 				free_buffer = i;
 				break;
 			}
 		}
 
 		if (free_buffer >= 0) {
-			uint8_t *ptr = (uint8_t *) ad->audren_pool_ptr + (free_buffer * ad->audren_buffer_size);
+			uint8_t *ptr = (uint8_t *)ad->audren_pool_ptr + (free_buffer * ad->audren_buffer_size);
 			memcpy(ptr, ad->samples_out.ptr(), ad->audren_buffer_size);
 			armDCacheFlush(ptr, ad->audren_buffer_size);
 			audrvVoiceAddWaveBuf(&ad->audren_driver, 0, &ad->audren_buffers[free_buffer]);
@@ -243,10 +241,10 @@ void AudioDriverSwitch::finish() {
 }
 
 AudioDriverSwitch::AudioDriverSwitch() :
-	thread(NULL),
-	mutex(NULL),
-	device_name("Default"),
-	new_device("Default") {
+		thread(NULL),
+		mutex(NULL),
+		device_name("Default"),
+		new_device("Default") {
 }
 
 AudioDriverSwitch::~AudioDriverSwitch() {

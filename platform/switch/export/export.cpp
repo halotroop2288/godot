@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -28,14 +28,18 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+// XXX: fix your windows build with this one weird trick
+// (Microsoft doesn't like strncpy..)
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "export.h"
 
+#include "core/io/packet_peer_udp.h"
 #include "core/os/file_access.h"
 #include "editor/editor_export.h"
 #include "editor/editor_node.h"
 #include "platform/switch/logo.gen.h"
 #include "scene/resources/texture.h"
-#include "core/io/packet_peer_udp.h"
 
 #define TEMPLATE_RELEASE "switch_release.nro"
 #define TEMPLATE_APPLET_SPLASH "switch_applet_splash.rgba.gz"
@@ -43,10 +47,10 @@
 class ExportPluginSwitch : public EditorExportPlugin {
 public:
 	Vector<uint8_t> editor_id_vec;
+
 protected:
 	virtual void _export_begin(const Set<String> &p_features, bool p_debug, const String &p_path, int p_flags) {
-		if(editor_id_vec.size() != 0)
-		{
+		if (editor_id_vec.size() != 0) {
 			add_file("custom_editor_id", editor_id_vec, false);
 		}
 	}
@@ -70,53 +74,45 @@ class EditorExportPlatformSwitch : public EditorExportPlatform {
 		EditorExportPlatformSwitch *ea = (EditorExportPlatformSwitch *)ud;
 
 		PacketPeerUDP peer;
-		if(peer.listen(28771) != OK)
-		{
+		if (peer.listen(28771) != OK) {
 			// ???
 		}
-		
+
 		peer.set_broadcast_enabled(true);
 		peer.set_dest_address(IP_Address("255.255.255.255"), 28280);
 
 		const uint8_t *packet_buff;
 		int packet_len;
 
-		while(!ea->quit_request) {
+		while (!ea->quit_request) {
 			bool different = false;
 
-			peer.put_packet((unsigned char*)"nxboot", strlen("nxboot"));
+			peer.put_packet((unsigned char *)"nxboot", strlen("nxboot"));
 			OS::get_singleton()->delay_usec(500000); // delay 500ms to allow for actual replies
-			
-			Vector<String> ndevices;	
 
-			while(peer.get_packet(&packet_buff, packet_len) != ERR_UNAVAILABLE)
-			{
+			Vector<String> ndevices;
+
+			while (peer.get_packet(&packet_buff, packet_len) != ERR_UNAVAILABLE) {
 				IP_Address a = peer.get_packet_address();
 				ndevices.push_back(String(a));
 			}
-			
+
 			ndevices.sort();
 
 			ea->device_lock->lock();
 
-			if(ndevices.size() != ea->devices.size()) 
-			{
+			if (ndevices.size() != ea->devices.size()) {
 				different = true;
-			}
-			else
-			{
-				for (int i = 0; i < ea->devices.size(); i++)
-				{
-					if (ea->devices[i] != ndevices[i])
-					{
+			} else {
+				for (int i = 0; i < ea->devices.size(); i++) {
+					if (ea->devices[i] != ndevices[i]) {
 						different = true;
 						break;
 					}
 				}
 			}
 
-			if(different)
-			{
+			if (different) {
 				ea->devices = ndevices;
 				ea->devices_changed = true;
 			}
@@ -135,7 +131,6 @@ class EditorExportPlatformSwitch : public EditorExportPlatform {
 	}
 
 public:
-
 	virtual void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) {
 		String driver = ProjectSettings::get_singleton()->get("rendering/quality/driver/driver_name");
 		if (driver == "GLES2") {
@@ -161,7 +156,7 @@ public:
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/version", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Version"), "1.0"));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/icon_256x256", PROPERTY_HINT_GLOBAL_FILE, "*.jpg"), ""));
 	}
-	
+
 	virtual String get_name() const {
 		return "Switch";
 	}
@@ -246,7 +241,7 @@ public:
 
 		String nxlink = EditorSettings::get_singleton()->get("export/switch/nxlink");
 		// If we can't find it, look for a bundled copy.
-		if(nxlink == "") {
+		if (nxlink == "") {
 			String exe_ext;
 			if (OS::get_singleton()->get_name() == "Windows") {
 				exe_ext = "*.exe";
@@ -273,8 +268,7 @@ public:
 			args.push_back(String(" ").join(inner_args));
 
 			OS::get_singleton()->execute(nxlink, args, true, NULL, NULL, &ec);
-		}
-		else {
+		} else {
 			EditorNode::get_singleton()->show_warning(TTR("nxlink binary not found! Set its path in Editor Settings."));
 		}
 
@@ -285,8 +279,8 @@ public:
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
 		String err;
 		r_missing_templates =
-			find_export_template(TEMPLATE_RELEASE) == String() || 
-			find_export_template(TEMPLATE_APPLET_SPLASH) == String();
+				find_export_template(TEMPLATE_RELEASE) == String() ||
+				find_export_template(TEMPLATE_APPLET_SPLASH) == String();
 
 		bool valid = !r_missing_templates;
 		String etc_error = test_etc2();
@@ -316,10 +310,10 @@ public:
 		String custom_editor_id = p_preset->get("application/custom_editor_id");
 		export_plugin->editor_id_vec.clear();
 
-		if(custom_editor_id != "") {
+		if (custom_editor_id != "") {
 			// XXX what the hell is this
 			const char *chars = custom_editor_id.utf8().ptr();
-			for(size_t i = 0; i < strlen(chars); i++) {
+			for (size_t i = 0; i < strlen(chars); i++) {
 				export_plugin->editor_id_vec.push_back(chars[i]);
 			}
 		}
@@ -334,10 +328,10 @@ public:
 		String custom_editor_id = p_preset->get("application/custom_editor_id");
 		export_plugin->editor_id_vec.clear();
 
-		if(custom_editor_id != "") {
+		if (custom_editor_id != "") {
 			// XXX what the hell is this
 			const char *chars = custom_editor_id.utf8().ptr();
-			for(size_t i = 0; i < strlen(chars); i++) {
+			for (size_t i = 0; i < strlen(chars); i++) {
 				export_plugin->editor_id_vec.push_back(chars[i]);
 			}
 		}
@@ -347,7 +341,7 @@ public:
 		if (!DirAccess::exists(p_path.get_base_dir())) {
 			return ERR_FILE_BAD_PATH;
 		}
-		
+
 		String nro_path = find_export_template(TEMPLATE_RELEASE);
 		if (nro_path != String() && !FileAccess::exists(nro_path)) {
 			EditorNode::get_singleton()->show_warning(TTR("Template file not found:") + "\n" + nro_path);
@@ -367,12 +361,11 @@ public:
 		memset(nacp, 0, sizeof(NacpStruct));
 		create_nacp(nacp, title, author, version);
 
-		if(p_preset->get("application/fused_build"))
-		{
+		if (p_preset->get("application/fused_build")) {
 			String build_romfs = EditorSettings::get_singleton()->get("export/switch/build_romfs");
 
 			// If we can't find it, look for a bundled copy.
-			if(build_romfs == "") {
+			if (build_romfs == "") {
 				String exe_ext;
 				if (OS::get_singleton()->get_name() == "Windows") {
 					exe_ext = "*.exe";
@@ -387,7 +380,7 @@ public:
 
 				da->make_dir(romfs_dir);
 				err = save_pack(p_preset, romfs_dir.plus_file("game.pck"));
-				if(err == OK) {
+				if (err == OK) {
 					String applet_splash = find_export_template(TEMPLATE_APPLET_SPLASH);
 					if (FileAccess::exists(applet_splash)) {
 						da->copy(applet_splash, romfs_dir.plus_file("applet_splash.rgba.gz"));
@@ -397,40 +390,33 @@ public:
 						args.push_back(romfs_dir);
 						args.push_back(romfs_bin_path);
 						OS::get_singleton()->execute(build_romfs, args, true, NULL, NULL, &ec);
-						if(ec == 0) {
+						if (ec == 0) {
 							err = create_nro(nro_path, p_path, nacp, icon, romfs_bin_path);
 							DirAccess::remove_file_or_error(romfs_bin_path);
-						}
-						else {
+						} else {
 							EditorNode::get_singleton()->show_warning(TTR("build_romfs failed!"));
 							err = ERR_BUG;
 						}
-					}
-					else {
+					} else {
 						EditorNode::get_singleton()->show_warning(TTR("Template file not found:") + "\n" + applet_splash);
 						err = ERR_FILE_NOT_FOUND;
 					}
-				}
-				else {
+				} else {
 					EditorNode::get_singleton()->show_warning(TTR("Pack export failed!"));
 				}
 
 				DirAccess::remove_file_or_error(romfs_dir);
-			}
-			else {
+			} else {
 				EditorNode::get_singleton()->show_warning(TTR("build_romfs binary not found! Set its path in Editor Settings."));
 				err = ERR_FILE_NOT_FOUND;
 			}
-		}
-		else
-		{
+		} else {
 			String empty_string = "";
 
 			err = save_pack(p_preset, p_path.get_basename() + ".pck");
-			if(err == OK) {
+			if (err == OK) {
 				err = create_nro(nro_path, p_path, nacp, icon, empty_string);
-			}
-			else {
+			} else {
 				EditorNode::get_singleton()->show_warning(TTR("Pack export failed!"));
 			}
 		}
@@ -441,9 +427,8 @@ public:
 	}
 
 	void copy_chunked(FileAccess *src, FileAccess *dst, size_t len, size_t chunk_size = 0x100000) {
-		uint8_t *buffer = (uint8_t*)malloc(chunk_size);
-		while(len > chunk_size)
-		{
+		uint8_t *buffer = (uint8_t *)malloc(chunk_size);
+		while (len > chunk_size) {
 			size_t amt = src->get_buffer(buffer, chunk_size);
 			dst->store_buffer(buffer, amt);
 			len -= amt;
@@ -455,20 +440,19 @@ public:
 		free(buffer);
 	}
 
-	Error create_nro(const String &template_path, const String &output_path, NacpStruct *nacp, String &icon_path, String &romfs_path)
-	{
+	Error create_nro(const String &template_path, const String &output_path, NacpStruct *nacp, String &icon_path, String &romfs_path) {
 		NroHeader nro_header;
 		AssetHeader asset_header;
 
 		FileAccess *template_f = FileAccess::open(template_path, FileAccess::READ);
 		FileAccess *nro = FileAccess::open(output_path, FileAccess::WRITE);
 
-		if(!template_f || !nro) return ERR_FILE_NOT_FOUND;
+		if (!template_f || !nro) return ERR_FILE_NOT_FOUND;
 
 		template_f->seek(sizeof(NroStart));
-		template_f->get_buffer((uint8_t*) &nro_header, sizeof(NroHeader));
+		template_f->get_buffer((uint8_t *)&nro_header, sizeof(NroHeader));
 
-		if(memcmp(nro_header.magic, "NRO0", 4) != 0) {
+		if (memcmp(nro_header.magic, "NRO0", 4) != 0) {
 			template_f->close();
 			memdelete(template_f);
 			nro->close();
@@ -481,8 +465,8 @@ public:
 		copy_chunked(template_f, nro, nro_header.size);
 
 		template_f->seek(nro_header.size);
-		template_f->get_buffer((uint8_t*) &asset_header, sizeof(AssetHeader));
-		if(memcmp(asset_header.magic, "ASET", 4) != 0) {
+		template_f->get_buffer((uint8_t *)&asset_header, sizeof(AssetHeader));
+		if (memcmp(asset_header.magic, "ASET", 4) != 0) {
 			template_f->close();
 			memdelete(template_f);
 			nro->close();
@@ -494,13 +478,13 @@ public:
 		memset(&new_asset_header, 0, sizeof(AssetHeader));
 
 		// write dummy asset header here
-		nro->store_buffer((uint8_t*)&new_asset_header, sizeof(AssetHeader));
+		nro->store_buffer((uint8_t *)&new_asset_header, sizeof(AssetHeader));
 
 		memcpy(new_asset_header.magic, "ASET", 4);
 		new_asset_header.version = 0;
 		new_asset_header.icon.offset = nro->get_position() - nro_header.size;
 
-		if(icon_path != String() && FileAccess::exists(icon_path)) {
+		if (icon_path != String() && FileAccess::exists(icon_path)) {
 			// replace icon
 			FileAccess *icon = FileAccess::open(icon_path, FileAccess::READ);
 			size_t icon_len = icon->get_len();
@@ -509,8 +493,7 @@ public:
 			new_asset_header.icon.size = icon_len;
 			icon->close();
 			memdelete(icon);
-		}
-		else {
+		} else {
 			// copy icon
 			template_f->seek(nro_header.size + asset_header.icon.offset);
 			copy_chunked(template_f, nro, asset_header.icon.size);
@@ -520,11 +503,11 @@ public:
 		// write new nacp
 		new_asset_header.nacp.offset = nro->get_position() - nro_header.size;
 		new_asset_header.nacp.size = sizeof(NacpStruct);
-		nro->store_buffer((uint8_t*)nacp, sizeof(NacpStruct));
+		nro->store_buffer((uint8_t *)nacp, sizeof(NacpStruct));
 
 		new_asset_header.romfs.offset = nro->get_position() - nro_header.size;
 
-		if(romfs_path != String() && FileAccess::exists(romfs_path)) {
+		if (romfs_path != String() && FileAccess::exists(romfs_path)) {
 			FileAccess *romfs = FileAccess::open(romfs_path, FileAccess::READ);
 			size_t romfs_len = romfs->get_len();
 			copy_chunked(romfs, nro, romfs_len);
@@ -541,7 +524,7 @@ public:
 
 		// Go back and actually write the asset header
 		nro->seek(nro_header.size);
-		nro->store_buffer((uint8_t*)&new_asset_header, sizeof(AssetHeader));
+		nro->store_buffer((uint8_t *)&new_asset_header, sizeof(AssetHeader));
 
 		template_f->close();
 		memdelete(template_f);
@@ -551,7 +534,7 @@ public:
 		return OK;
 	}
 
-	void create_nacp(NacpStruct *nacp, String& title, String& author, String& version) {
+	void create_nacp(NacpStruct *nacp, String &title, String &author, String &version) {
 		const char *title_cstr = title.utf8().ptr();
 		const char *author_cstr = author.utf8().ptr();
 		const char *version_cstr = version.utf8().ptr();
@@ -576,13 +559,12 @@ public:
 		export_plugin = memnew(ExportPluginSwitch);
 		EditorExport::get_singleton()->add_export_plugin(export_plugin);
 	}
-	
+
 	~EditorExportPlatformSwitch() {
 		// DO NOT free it
 		//memdelete(export_plugin);
 	}
 };
-
 
 void register_switch_exporter() {
 	String exe_ext;

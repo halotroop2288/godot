@@ -1,12 +1,12 @@
 /*************************************************************************/
-/*  audio_driver_switch.h                                                  */
+/*  audio_driver_switch.h                                                */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -28,13 +28,13 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "switch_wrapper.h"
 #include "servers/audio_server.h"
+#include "switch_wrapper.h"
 
 #include "core/os/mutex.h"
 #include "core/os/thread.h"
 
-class AudioDriverSwitch: public AudioDriver {
+class AudioDriverSwitch : public AudioDriver {
 
 	Thread *thread;
 	Mutex *mutex;
@@ -42,12 +42,12 @@ class AudioDriverSwitch: public AudioDriver {
 	LibnxAudioDriver audren_driver;
 	AudioDriverWaveBuf audren_buffers[2];
 	size_t audren_pool_size;
-	void* audren_pool_ptr;
+	void *audren_pool_ptr;
 	unsigned int audren_buffer_size;
 	unsigned int buffer_size;
 	Vector<int32_t> samples_in;
 	Vector<int16_t> samples_out;
-	
+
 	String device_name;
 	String new_device;
 

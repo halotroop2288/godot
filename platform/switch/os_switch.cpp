@@ -1,39 +1,68 @@
-#include "switch_wrapper.h"
+/*************************************************************************/
+/*  os_switch.cpp                                                        */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
+/*************************************************************************/
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
+
 #include "os_switch.h"
 #include "context_gl_switch_egl.h"
+#include "switch_wrapper.h"
 
-#include "drivers/unix/file_access_unix.h"
 #include "drivers/unix/dir_access_unix.h"
+#include "drivers/unix/file_access_unix.h"
 #include "drivers/unix/ip_unix.h"
-#include "drivers/unix/net_socket_posix.h"
-#include "drivers/unix/thread_posix.h"
 #include "drivers/unix/mutex_posix.h"
+#include "drivers/unix/net_socket_posix.h"
 #include "drivers/unix/rw_lock_posix.h"
 #include "drivers/unix/semaphore_posix.h"
+#include "drivers/unix/thread_posix.h"
 
+#include "drivers/gles2/rasterizer_gles2.h"
+#include "drivers/gles3/rasterizer_gles3.h"
+#include "main/main.h"
 #include "servers/audio_server.h"
 #include "servers/visual/visual_server_wrap_mt.h"
-#include "drivers/gles3/rasterizer_gles3.h"
-#include "drivers/gles2/rasterizer_gles2.h"
-#include "main/main.h"
 
 #include "core/os/keyboard.h"
 
-#include <stdio.h>
-#include <netinet/in.h>
 #include <inttypes.h>
+#include <netinet/in.h>
+#include <stdio.h>
 
 #define ENABLE_NXLINK
 
 #ifndef ENABLE_NXLINK
-#define TRACE(fmt,...) ((void)0)
+#define TRACE(fmt, ...) ((void)0)
 #else
 #include <unistd.h>
-#define TRACE(fmt,...) printf("%s: " fmt "\n", __PRETTY_FUNCTION__, ## __VA_ARGS__)
+#define TRACE(fmt, ...) printf("%s: " fmt "\n", __PRETTY_FUNCTION__, ##__VA_ARGS__)
 #endif
 
-void OS_Switch::initialize_core()
-{
+void OS_Switch::initialize_core() {
 	ThreadPosix::make_default();
 	SemaphorePosix::make_default();
 	MutexPosix::make_default();
@@ -53,15 +82,13 @@ void OS_Switch::initialize_core()
 #endif
 }
 
-void OS_Switch::swap_buffers()
-{
+void OS_Switch::swap_buffers() {
 #if defined(OPENGL_ENABLED)
 	gl_context->swap_buffers();
 #endif
 }
 
-Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver)
-{
+Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
 #if defined(OPENGL_ENABLED)
 	bool gles3_context = true;
 	if (p_video_driver == VIDEO_DRIVER_GLES2) {
@@ -125,7 +152,7 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	if (gl_initialization_error) {
 		OS::get_singleton()->alert("Your video card driver does not support any of the supported OpenGL versions.\n"
 								   "Please update your drivers or if you have a very old or integrated GPU upgrade it.",
-								   "Unable to initialize Video driver");
+				"Unable to initialize Video driver");
 		return ERR_UNAVAILABLE;
 	}
 
@@ -135,8 +162,7 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 #endif
 
 	visual_server = memnew(VisualServerRaster);
-	if (get_render_thread_mode() != RENDER_THREAD_UNSAFE)
-	{
+	if (get_render_thread_mode() != RENDER_THREAD_UNSAFE) {
 		visual_server = memnew(VisualServerWrapMT(visual_server, get_render_thread_mode() == RENDER_SEPARATE_THREAD));
 	}
 
@@ -145,7 +171,7 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	input = memnew(InputDefault);
 	input->set_emulate_mouse_from_touch(true);
 	// TODO: handle joypads/joycons status
-	for(int i=0; i<8; i++) {
+	for (int i = 0; i < 8; i++) {
 		input->joy_connection_changed(i, true, "pad" + (char)i, "");
 	}
 	joypad = memnew(JoypadSwitch(input));
@@ -159,21 +185,18 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	return OK;
 }
 
-void OS_Switch::set_main_loop(MainLoop *p_main_loop)
-{
+void OS_Switch::set_main_loop(MainLoop *p_main_loop) {
 	input->set_main_loop(p_main_loop);
 	main_loop = p_main_loop;
 }
 
-void OS_Switch::delete_main_loop()
-{
+void OS_Switch::delete_main_loop() {
 	if (main_loop)
 		memdelete(main_loop);
 	main_loop = NULL;
 }
 
-void OS_Switch::finalize()
-{
+void OS_Switch::finalize() {
 	memdelete(input);
 	memdelete(joypad);
 	visual_server->finish();
@@ -182,8 +205,7 @@ void OS_Switch::finalize()
 	memdelete(gl_context);
 }
 
-void OS_Switch::finalize_core()
-{
+void OS_Switch::finalize_core() {
 }
 
 bool OS_Switch::_check_internal_feature_support(const String &p_feature) {
@@ -194,38 +216,38 @@ bool OS_Switch::_check_internal_feature_support(const String &p_feature) {
 	return false;
 }
 
-void OS_Switch::alert(const String &p_alert, const String &p_title)
-{
+void OS_Switch::alert(const String &p_alert, const String &p_title) {
 	printf("got alert %ls", p_alert.c_str());
 }
-String OS_Switch::get_stdin_string(bool p_block) { return ""; }
-Point2 OS_Switch::get_mouse_position() const
-{
+String OS_Switch::get_stdin_string(bool p_block) {
+	return "";
+}
+Point2 OS_Switch::get_mouse_position() const {
 	return Point2(0, 0);
 }
 
-int OS_Switch::get_mouse_button_state() const
-{
+int OS_Switch::get_mouse_button_state() const {
 	return 0;
 }
 
 void OS_Switch::set_window_title(const String &p_title) {}
 
 void OS_Switch::set_video_mode(const OS::VideoMode &p_video_mode, int p_screen) {}
-OS::VideoMode OS_Switch::get_video_mode(int p_screen) const
-{
+OS::VideoMode OS_Switch::get_video_mode(int p_screen) const {
 	return VideoMode(1280, 720);
 }
 
 void OS_Switch::get_fullscreen_mode_list(List<OS::VideoMode> *p_list, int p_screen) const {}
 
-int OS_Switch::get_current_video_driver() const { return video_driver_index; }
-Size2 OS_Switch::get_window_size() const { return Size2(1280, 720); }
+int OS_Switch::get_current_video_driver() const {
+	return video_driver_index;
+}
+Size2 OS_Switch::get_window_size() const {
+	return Size2(1280, 720);
+}
 
-Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex)
-{
-	if(p_blocking == true)
-	{
+Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex) {
+	if (p_blocking) {
 		return FAILED; // we don't support this
 	}
 
@@ -233,85 +255,69 @@ Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, 
 	rebuilt_arguments.push_back(p_path); // !!!! v important
 	// This is a super dumb implementation to make the editor vaguely work.
 	// It won't work if you don't exit afterwards.
-	for(const List<String>::Element *E = p_arguments.front(); E; E = E->next()) {
-		if((*E)->find(" ") >= 0)
-		{
+	for (const List<String>::Element *E = p_arguments.front(); E; E = E->next()) {
+		if ((*E)->find(" ") >= 0) {
 			rebuilt_arguments.push_back(String("\"") + E->get() + String("\""));
-		}
-		else
-		{
+		} else {
 			rebuilt_arguments.push_back(E->get());
 		}
 	}
 
-	if(__nxlink_host.s_addr != 0)
-	{
+	if (__nxlink_host.s_addr != 0) {
 		char nxlinked[17];
-		sprintf(nxlinked,"%08" PRIx32 "_NXLINK_",__nxlink_host.s_addr);
+		sprintf(nxlinked, "%08" PRIx32 "_NXLINK_", __nxlink_host.s_addr);
 		rebuilt_arguments.push_back(nxlinked);
 	}
 	envSetNextLoad(p_path.utf8().ptr(), String(" ").join(rebuilt_arguments).utf8().ptr());
 	return OK;
 }
 
-Error OS_Switch::kill(const ProcessID &p_pid)
-{
+Error OS_Switch::kill(const ProcessID &p_pid) {
 	return FAILED;
 }
 
-bool OS_Switch::has_environment(const String &p_var) const
-{
+bool OS_Switch::has_environment(const String &p_var) const {
 	return false;
 }
 
-String OS_Switch::get_environment(const String &p_var) const
-{
+String OS_Switch::get_environment(const String &p_var) const {
 	return "";
 }
 
-bool OS_Switch::set_environment(const String &p_var, const String &p_value) const
-{
+bool OS_Switch::set_environment(const String &p_var, const String &p_value) const {
 	return false;
 }
 
-String OS_Switch::get_name() const
-{
+String OS_Switch::get_name() const {
 	return "Switch";
 }
 
-MainLoop * OS_Switch::get_main_loop() const
-{
+MainLoop *OS_Switch::get_main_loop() const {
 	return main_loop;
 }
 
-OS::Date OS_Switch::get_date(bool local) const
-{
+OS::Date OS_Switch::get_date(bool local) const {
 	return OS::Date();
 }
 
-OS::Time OS_Switch::get_time(bool local) const
-{
+OS::Time OS_Switch::get_time(bool local) const {
 	return OS::Time();
 }
 
-OS::TimeZoneInfo OS_Switch::get_time_zone_info() const
-{
+OS::TimeZoneInfo OS_Switch::get_time_zone_info() const {
 	return OS::TimeZoneInfo();
 }
 
-void OS_Switch::delay_usec(uint32_t p_usec) const
-{
+void OS_Switch::delay_usec(uint32_t p_usec) const {
 	svcSleepThread((int64_t)p_usec * 1000ll);
 }
 
-uint64_t OS_Switch::get_ticks_usec() const
-{
+uint64_t OS_Switch::get_ticks_usec() const {
 	static u64 tick_freq = armGetSystemTickFreq();
 	return armGetSystemTick() / (tick_freq / 1000000);
 }
 
-bool OS_Switch::can_draw() const
-{
+bool OS_Switch::can_draw() const {
 	return true;
 }
 
@@ -323,49 +329,38 @@ int g_eat_string_events = 0;
 u32 last_len = 0;
 s32 last_cursor = 0;
 
-void keyboard_string_changed_callback(const char *str, SwkbdChangedStringArg *arg)
-{
+void keyboard_string_changed_callback(const char *str, SwkbdChangedStringArg *arg) {
 	// We get a string changed event on appear, and another one on setting text.
-	if(g_eat_string_events)
-	{
+	if (g_eat_string_events) {
 		last_len = arg->stringLen;
 		g_eat_string_events--;
 		return;
 	}
 
-	if(arg->stringLen < last_len)
-	{
+	if (arg->stringLen < last_len) {
 		OS_Switch::get_singleton()->key(KEY_BACKSPACE, true);
-	}
-	else if(arg->stringLen != 0)
-	{
-		OS_Switch::get_singleton()->key(str[arg->stringLen-1], true);
+	} else if (arg->stringLen != 0) {
+		OS_Switch::get_singleton()->key(str[arg->stringLen - 1], true);
 	}
 	last_len = arg->stringLen;
 }
 
-void keyboard_moved_cursor_callback(const char *str, SwkbdMovedCursorArg *arg)
-{
-	if(arg->cursorPos < last_cursor)
-	{
+void keyboard_moved_cursor_callback(const char *str, SwkbdMovedCursorArg *arg) {
+	if (arg->cursorPos < last_cursor) {
 		OS_Switch::get_singleton()->key(KEY_LEFT, true);
-	}
-	else
-	{
+	} else {
 		OS_Switch::get_singleton()->key(KEY_RIGHT, true);
 	}
 
 	last_cursor = arg->cursorPos;
 }
 
-void keyboard_decided_enter_callback(const char *str, SwkbdDecidedEnterArg *arg)
-{
+void keyboard_decided_enter_callback(const char *str, SwkbdDecidedEnterArg *arg) {
 	OS_Switch::get_singleton()->key(KEY_ENTER, true);
 	g_swkbd_open = false;
 }
 
-void keyboard_decided_cancel_callback()
-{
+void keyboard_decided_cancel_callback() {
 	g_swkbd_open = false;
 }
 
@@ -379,10 +374,8 @@ void OS_Switch::key(uint32_t p_key, bool p_pressed) {
 	input->parse_input_event(ev);
 };
 
-void OS_Switch::run()
-{
-	if (!main_loop)
-	{
+void OS_Switch::run() {
+	if (!main_loop) {
 		TRACE("no main loop???\n");
 		return;
 	}
@@ -400,13 +393,10 @@ void OS_Switch::run()
 	Vector2 last_touch_pos[16];
 	touchPosition touch;
 
-	while(appletMainLoop())
-	{
+	while (appletMainLoop()) {
 		hidScanInput();
-		if(g_swkbd_open)
-		{
-			for(int i = 0; i < last_touch_count; i++) 
-			{
+		if (g_swkbd_open) {
+			for (int i = 0; i < last_touch_count; i++) {
 				Ref<InputEventScreenTouch> st;
 				st.instance();
 				st->set_index(i);
@@ -414,18 +404,13 @@ void OS_Switch::run()
 				st->set_pressed(false);
 				input->parse_input_event(st);
 			}
-		}
-		else
-		{
+		} else {
 			int touch_count = hidTouchCount();
-			if(touch_count != last_touch_count)
-			{
+			if (touch_count != last_touch_count) {
 				// gained new touches, add them
-				if(touch_count > last_touch_count)
-				{
+				if (touch_count > last_touch_count) {
 					printf("%i -> %i\n", last_touch_count, touch_count);
-					for(int i = last_touch_count; i < touch_count; i++)
-					{
+					for (int i = last_touch_count; i < touch_count; i++) {
 						hidTouchRead(&touch, i);
 						Vector2 pos(touch.px, touch.py);
 
@@ -436,12 +421,10 @@ void OS_Switch::run()
 						st->set_pressed(true);
 						input->parse_input_event(st);
 					}
-				}
-				else // lost touches
+				} else // lost touches
 				{
 					printf("%i -> %i\n", last_touch_count, touch_count);
-					for(int i = touch_count; i < last_touch_count; i++)
-					{
+					for (int i = touch_count; i < last_touch_count; i++) {
 						Ref<InputEventScreenTouch> st;
 						st.instance();
 						st->set_index(i);
@@ -450,11 +433,8 @@ void OS_Switch::run()
 						input->parse_input_event(st);
 					}
 				}
-			}
-			else
-			{
-				for(int i = 0; i < touch_count; i++)
-				{
+			} else {
+				for (int i = 0; i < touch_count; i++) {
 					hidTouchRead(&touch, i);
 					Vector2 pos(touch.px, touch.py);
 
@@ -475,7 +455,7 @@ void OS_Switch::run()
 
 		swkbdInlineUpdate(&inline_keyboard, NULL);
 
-		if (Main::iteration() == true)
+		if (Main::iteration())
 			break;
 	}
 
@@ -493,22 +473,20 @@ bool OS_Switch::has_virtual_keyboard() const {
 
 int OS_Switch::get_virtual_keyboard_height() const {
 	// todo: actually figure this out
-	if(!g_swkbd_open)
-	{
+	if (!g_swkbd_open) {
 		return 0;
 	}
 	return 300;
 }
 
 void OS_Switch::show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect, int p_max_input_length) {
-	if(!g_swkbd_open)
-	{
+	if (!g_swkbd_open) {
 		g_swkbd_open = true;
 
 		SwkbdAppearArg appear_arg;
 		swkbdInlineMakeAppearArg(&appear_arg, SwkbdType_Normal);
 		swkbdInlineSetInputText(&inline_keyboard, p_existing_text.utf8().get_data());
-		swkbdInlineSetCursorPos(&inline_keyboard, p_existing_text.size()-1);
+		swkbdInlineSetCursorPos(&inline_keyboard, p_existing_text.size() - 1);
 
 		g_eat_string_events = 2;
 
@@ -542,15 +520,12 @@ void OS_Switch::set_executable_path(const char *p_execpath) {
 	switch_execpath = p_execpath;
 }
 
-
-
 OS_Switch *OS_Switch::get_singleton() {
 
 	return (OS_Switch *)OS::get_singleton();
 };
 
-OS_Switch::OS_Switch()
-{
+OS_Switch::OS_Switch() {
 	video_driver_index = 0;
 	main_loop = nullptr;
 	visual_server = nullptr;
@@ -561,4 +536,3 @@ OS_Switch::OS_Switch()
 
 	swkbdInlineCreate(&inline_keyboard);
 }
-
