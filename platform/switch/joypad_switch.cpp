@@ -1,12 +1,12 @@
 /*************************************************************************/
-/*  joypad_linux.cpp                                                     */
+/*  joypad_switch.cpp                                                    */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -62,17 +62,17 @@ void JoypadSwitch::process() {
 	u64 changed;
 	static JoypadState pad_old[JOYPADS_MAX];
 
-	for(int index = 0; index < JOYPADS_MAX; index++) {
+	for (int index = 0; index < JOYPADS_MAX; index++) {
 
 		hidJoystickRead(&pads[index].l_pos, pads[index].id, JOYSTICK_LEFT);
 		hidJoystickRead(&pads[index].r_pos, pads[index].id, JOYSTICK_RIGHT);
 		pads[index].buttons = hidKeysHeld(pads[index].id);
 
 		// Axes
-		input->joy_axis(index, 0, {100, (float) (pads[index].l_pos.dx / 32767.0f)});
-		input->joy_axis(index, 1, {100, (float) (-pads[index].l_pos.dy / 32767.0f)});
-		input->joy_axis(index, 2, {100, (float) (pads[index].r_pos.dx / 32767.0f)});
-		input->joy_axis(index, 3, {100, (float) (-pads[index].r_pos.dy / 32767.0f)});
+		input->joy_axis(index, 0, { 100, (float)(pads[index].l_pos.dx / 32767.0f) });
+		input->joy_axis(index, 1, { 100, (float)(-pads[index].l_pos.dy / 32767.0f) });
+		input->joy_axis(index, 2, { 100, (float)(pads[index].r_pos.dx / 32767.0f) });
+		input->joy_axis(index, 3, { 100, (float)(-pads[index].r_pos.dy / 32767.0f) });
 
 		// Buttons
 		changed = pad_old[index].buttons ^ pads[index].buttons;
@@ -80,7 +80,7 @@ void JoypadSwitch::process() {
 		if (changed) {
 			for (int i = 0; i < button_count; i++) {
 				if (changed & pad_mapping[i]) {
-					input->joy_button(index, i, (bool) (pads[index].buttons & pad_mapping[i]));
+					input->joy_button(index, i, (bool)(pads[index].buttons & pad_mapping[i]));
 				}
 			}
 		}

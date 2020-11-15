@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include <string>
 #include <cstring>
+#include <string>
 
 typedef uint64_t u64;
 typedef uint32_t u32;
@@ -78,9 +78,9 @@ typedef struct {
 
 typedef struct {
 	NacpLanguageEntry lang[12];
-	NacpLanguageEntry lang_unk[4];//?
+	NacpLanguageEntry lang_unk[4]; //?
 
-	u8 x3000_unk[0x24];////Normally all-zero?
+	u8 x3000_unk[0x24]; ////Normally all-zero?
 	u32 x3024_unk;
 	u32 x3028_unk;
 	u32 x302C_unk;
@@ -97,18 +97,18 @@ typedef struct {
 	u32 x3080_unk;
 	u32 x3084_unk;
 	u32 x3088_unk;
-	u8 x308C_unk[0x24];//zeros?
+	u8 x308C_unk[0x24]; //zeros?
 
 	u64 titleid2;
-	u64 titleids[7];//"Array of application titleIDs, normally the same as the above app-titleIDs. Only set for game-updates?"
+	u64 titleids[7]; //"Array of application titleIDs, normally the same as the above app-titleIDs. Only set for game-updates?"
 
 	u32 x30F0_unk;
 	u32 x30F4_unk;
 
-	u64 titleid3;//"Application titleID. Only set for game-updates?"
+	u64 titleid3; //"Application titleID. Only set for game-updates?"
 
 	char bcat_passphrase[0x40];
-	u8 x3140_unk[0xEC0];//Normally all-zero?
+	u8 x3140_unk[0xEC0]; //Normally all-zero?
 } NacpStruct;
 
 unsigned char *read_file(const char *fn, size_t *len_out);
