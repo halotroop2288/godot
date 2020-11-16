@@ -244,7 +244,7 @@ public:
 		if (nxlink == "") {
 			String exe_ext;
 			if (OS::get_singleton()->get_name() == "Windows") {
-				exe_ext = "*.exe";
+				exe_ext = ".exe";
 			}
 			nxlink = OS::get_singleton()->get_executable_path().get_base_dir() + "/nxlink" + exe_ext;
 		}
@@ -368,7 +368,7 @@ public:
 			if (build_romfs == "") {
 				String exe_ext;
 				if (OS::get_singleton()->get_name() == "Windows") {
-					exe_ext = "*.exe";
+					exe_ext = ".exe";
 				}
 				build_romfs = OS::get_singleton()->get_executable_path().get_base_dir() + "/build_romfs" + exe_ext;
 			}
