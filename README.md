@@ -3,7 +3,7 @@ It's a port of the Godot open source game engine to the Switch, via homebrew lib
 See the original README-original.md for info about Godot.
 
 # Releases
-See [https://9net.org/godot/editors/](https://9net.org/godot/editors/) for pre-built editors for Windows, macOS and Linux.
+See [the GitHub releases page](https://github.com/Stary2001/godot/releases) for pre-built editors for Windows, macOS and Linux.
 
 # How do I export my game?
 The editor builds above add a `Switch` exporter to the list - it will generate a .nro and a .pck file that can be transferred to your Switch.
