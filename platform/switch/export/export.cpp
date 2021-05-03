@@ -560,6 +560,9 @@ public:
 	}
 
 	~EditorExportPlatformSwitch() {
+		quit_request = true;
+		device_thread.wait_to_finish();
+
 		// DO NOT free it
 		//memdelete(export_plugin);
 	}
