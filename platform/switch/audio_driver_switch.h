@@ -36,8 +36,8 @@
 
 class AudioDriverSwitch : public AudioDriver {
 
-	Thread *thread;
-	Mutex *mutex;
+	Thread thread;
+	Mutex mutex;
 
 	LibnxAudioDriver audren_driver;
 	AudioDriverWaveBuf audren_buffers[2];

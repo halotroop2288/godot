@@ -100,22 +100,19 @@ Error AudioDriverSwitch::init_device() {
 }
 
 Error AudioDriverSwitch::init() {
-
 	active = false;
 	thread_exited = false;
 	exit_thread = false;
 
 	Error err = init_device();
 	if (err == OK) {
-		mutex = Mutex::create();
-		thread = Thread::create(AudioDriverSwitch::thread_func, this);
+		thread.start(AudioDriverSwitch::thread_func, this);
 	}
 
 	return err;
 }
 
 void AudioDriverSwitch::thread_func(void *p_udata) {
-
 	AudioDriverSwitch *ad = (AudioDriverSwitch *)p_udata;
 
 	svcSetThreadPriority(CUR_THREAD_HANDLE, 0x2B);
@@ -174,12 +171,10 @@ void AudioDriverSwitch::thread_func(void *p_udata) {
 }
 
 void AudioDriverSwitch::start() {
-
 	active = true;
 }
 
 int AudioDriverSwitch::get_mix_rate() const {
-
 	return mix_rate;
 }
 
@@ -189,60 +184,38 @@ AudioDriver::SpeakerMode AudioDriverSwitch::get_speaker_mode() const {
 }
 
 Array AudioDriverSwitch::get_device_list() {
-
 	Array list;
 	list.push_back("Default");
 	return list;
 }
 
 String AudioDriverSwitch::get_device() {
-
 	return device_name;
 }
 
 void AudioDriverSwitch::set_device(String device) {
-
 	lock();
 	new_device = device;
 	unlock();
 }
 
 void AudioDriverSwitch::lock() {
-
-	if (!thread || !mutex)
-		return;
-	mutex->lock();
+	mutex.lock();
 }
 
 void AudioDriverSwitch::unlock() {
-
-	if (!thread || !mutex)
-		return;
-	mutex->unlock();
+	mutex.unlock();
 }
 
 void AudioDriverSwitch::finish() {
-
-	if (thread) {
-		exit_thread = true;
-		Thread::wait_to_finish(thread);
-
-		memdelete(thread);
-		thread = NULL;
-
-		if (mutex) {
-			memdelete(mutex);
-			mutex = NULL;
-		}
-	}
+	exit_thread = true;
+	thread.wait_to_finish();
 
 	audrvClose(&audren_driver);
 	audrenExit();
 }
 
 AudioDriverSwitch::AudioDriverSwitch() :
-		thread(NULL),
-		mutex(NULL),
 		device_name("Default"),
 		new_device("Default") {
 }
