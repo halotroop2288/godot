@@ -32,17 +32,13 @@
 #include "context_gl_switch_egl.h"
 #include "switch_wrapper.h"
 
+#include "drivers/gles2/rasterizer_gles2.h"
+#include "drivers/gles3/rasterizer_gles3.h"
 #include "drivers/unix/dir_access_unix.h"
 #include "drivers/unix/file_access_unix.h"
 #include "drivers/unix/ip_unix.h"
-#include "drivers/unix/mutex_posix.h"
 #include "drivers/unix/net_socket_posix.h"
-#include "drivers/unix/rw_lock_posix.h"
-#include "drivers/unix/semaphore_posix.h"
 #include "drivers/unix/thread_posix.h"
-
-#include "drivers/gles2/rasterizer_gles2.h"
-#include "drivers/gles3/rasterizer_gles3.h"
 #include "main/main.h"
 #include "servers/audio_server.h"
 #include "servers/visual/visual_server_wrap_mt.h"
@@ -63,15 +59,13 @@
 #endif
 
 void OS_Switch::initialize_core() {
-	ThreadPosix::make_default();
-	SemaphorePosix::make_default();
-	MutexPosix::make_default();
-	RWLockPosix::make_default();
+#if !defined(NO_THREADS)
+	init_thread_posix();
+#endif
 
 	FileAccess::make_default<FileAccessUnix>(FileAccess::ACCESS_RESOURCES);
 	FileAccess::make_default<FileAccessUnix>(FileAccess::ACCESS_USERDATA);
 	FileAccess::make_default<FileAccessUnix>(FileAccess::ACCESS_FILESYSTEM);
-	//FileAccessBufferedFA<FileAccessUnix>::make_default();
 	DirAccess::make_default<DirAccessUnix>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccessUnix>(DirAccess::ACCESS_USERDATA);
 	DirAccess::make_default<DirAccessUnix>(DirAccess::ACCESS_FILESYSTEM);

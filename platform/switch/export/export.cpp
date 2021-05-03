@@ -64,8 +64,8 @@ class EditorExportPlatformSwitch : public EditorExportPlatform {
 
 	Vector<String> devices;
 	volatile bool devices_changed;
-	Mutex *device_lock;
-	Thread *device_thread;
+	Mutex device_lock;
+	Thread device_thread;
 	volatile bool quit_request;
 
 	ExportPluginSwitch *export_plugin;
@@ -99,7 +99,7 @@ class EditorExportPlatformSwitch : public EditorExportPlatform {
 
 			ndevices.sort();
 
-			ea->device_lock->lock();
+			ea->device_lock.lock();
 
 			if (ndevices.size() != ea->devices.size()) {
 				different = true;
@@ -117,7 +117,7 @@ class EditorExportPlatformSwitch : public EditorExportPlatform {
 				ea->devices_changed = true;
 			}
 
-			ea->device_lock->unlock();
+			ea->device_lock.unlock();
 
 			uint64_t sleep = OS::get_singleton()->get_power_state() == OS::POWERSTATE_ON_BATTERY ? 1000 : 100;
 			uint64_t wait = 3000000;
@@ -183,9 +183,9 @@ public:
 	}
 
 	virtual int get_options_count() const {
-		device_lock->lock();
+		device_lock.lock();
 		int dc = devices.size();
-		device_lock->unlock();
+		device_lock.unlock();
 
 		return dc;
 	}
@@ -196,17 +196,17 @@ public:
 
 	virtual String get_option_label(int p_index) const {
 		ERR_FAIL_INDEX_V(p_index, devices.size(), "");
-		device_lock->lock();
+		device_lock.lock();
 		String s = devices[p_index];
-		device_lock->unlock();
+		device_lock.unlock();
 		return s;
 	}
 
 	virtual String get_option_tooltip(int p_index) const {
 		ERR_FAIL_INDEX_V(p_index, devices.size(), "");
-		device_lock->lock();
+		device_lock.lock();
 		String s = devices[p_index];
-		device_lock->unlock();
+		device_lock.unlock();
 		return s;
 	}
 	virtual Error run(const Ref<EditorExportPreset> &p_preset, int p_device, int p_debug_flags) {
@@ -551,10 +551,9 @@ public:
 		logo.instance();
 		logo->create_from_image(img);
 
-		device_lock = Mutex::create();
 		devices_changed = true;
 		quit_request = false;
-		device_thread = Thread::create(_device_poll_thread, this);
+		device_thread.start(_device_poll_thread, this);
 
 		export_plugin = memnew(ExportPluginSwitch);
 		EditorExport::get_singleton()->add_export_plugin(export_plugin);
