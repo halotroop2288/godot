@@ -77,7 +77,7 @@ def configure(env):
 
     dkp = os.environ.get("DEVKITPRO")
     env["ENV"]["DEVKITPRO"] = dkp
-    updated_path = os.environ["PATH"] + ":{}/portlibs/switch/bin:{}/devkitA64/bin".format(dkp, dkp)
+    updated_path = "{}/portlibs/switch/bin:{}/devkitA64/bin:".format(dkp, dkp) + os.environ["PATH"]
     env["ENV"]["PATH"] = updated_path
     os.environ["PATH"] = updated_path  # os environment has to be updated for subprocess calls
 
