@@ -538,7 +538,7 @@ String OS_Switch::get_user_data_dir() const {
 		} else {
 			return get_data_path().plus_file(get_godot_dir_name()).plus_file("app_userdata").plus_file(appname);
 		}
-	}	
+	}
 	return get_data_path().plus_file(get_godot_dir_name()).plus_file("app_userdata").plus_file("__unknown");
 }
 
