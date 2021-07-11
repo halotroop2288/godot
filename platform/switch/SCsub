@@ -20,7 +20,7 @@ env.Command(
     prog,
     "/opt/devkitpro/tools/bin/elf2nro $SOURCE $TARGET --icon=platform/switch/icon.jpg --nacp=platform/switch/nacp_default.nacp --romfsdir=platform/switch/romfs",
 )
-env.Depends(target="#bin/switch_" + env["target"] + ".nro", dependency="platform/switch/nacp_default.nacp")
+env.Depends(target="#bin/switch_" + env["target"] + ".nro", dependency="nacp_default.nacp")
 
 version_str = "{}.{}.{}-{}".format(version.major, version.minor, version.patch, version.status)
 
