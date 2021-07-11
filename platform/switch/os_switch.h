@@ -83,6 +83,8 @@ public:
 
 	virtual String get_executable_path() const;
 	virtual void set_executable_path(const char *p_execpath);
+	virtual String get_user_data_dir() const;
+	virtual String get_data_path() const;
 
 	virtual bool has_environment(const String &p_var) const;
 	virtual String get_environment(const String &p_var) const;
