@@ -385,10 +385,11 @@ void OS_Switch::run() {
 	int last_touch_count = 0;
 	// maximum of 16 touches
 	Vector2 last_touch_pos[16];
-	touchPosition touch;
+	HidTouchScreenState touch_state = { 0 };
+
+	hidInitializeTouchScreen();
 
 	while (appletMainLoop()) {
-		hidScanInput();
 		if (g_swkbd_open) {
 			for (int i = 0; i < last_touch_count; i++) {
 				Ref<InputEventScreenTouch> st;
@@ -398,51 +399,50 @@ void OS_Switch::run() {
 				st->set_pressed(false);
 				input->parse_input_event(st);
 			}
+
+			last_touch_count = 0;
 		} else {
-			int touch_count = hidTouchCount();
-			if (touch_count != last_touch_count) {
-				// gained new touches, add them
-				if (touch_count > last_touch_count) {
-					printf("%i -> %i\n", last_touch_count, touch_count);
-					for (int i = last_touch_count; i < touch_count; i++) {
-						hidTouchRead(&touch, i);
-						Vector2 pos(touch.px, touch.py);
+			if (hidGetTouchScreenStates(&touch_state, 1)) {
+				if (touch_state.count != last_touch_count) {
+					// gained new touches, add them
+					if (touch_state.count > last_touch_count) {
+						for (int i = last_touch_count; i < touch_state.count; i++) {
+							Vector2 pos(touch_state.touches[i].x, touch_state.touches[i].y);
 
-						Ref<InputEventScreenTouch> st;
-						st.instance();
-						st->set_index(i);
-						st->set_position(pos);
-						st->set_pressed(true);
-						input->parse_input_event(st);
+							Ref<InputEventScreenTouch> st;
+							st.instance();
+							st->set_index(i);
+							st->set_position(pos);
+							st->set_pressed(true);
+							input->parse_input_event(st);
+						}
+					} else // lost touches
+					{
+						for (int i = touch_state.count; i < last_touch_count; i++) {
+							Ref<InputEventScreenTouch> st;
+							st.instance();
+							st->set_index(i);
+							st->set_position(last_touch_pos[i]);
+							st->set_pressed(false);
+							input->parse_input_event(st);
+						}
 					}
-				} else // lost touches
-				{
-					printf("%i -> %i\n", last_touch_count, touch_count);
-					for (int i = touch_count; i < last_touch_count; i++) {
-						Ref<InputEventScreenTouch> st;
-						st.instance();
-						st->set_index(i);
-						st->set_position(last_touch_pos[i]);
-						st->set_pressed(false);
-						input->parse_input_event(st);
+				} else {
+					for (int i = 0; i < touch_state.count; i++) {
+						Vector2 pos(touch_state.touches[i].x, touch_state.touches[i].y);
+
+						Ref<InputEventScreenDrag> sd;
+						sd.instance();
+						sd->set_index(i);
+						sd->set_position(pos);
+						sd->set_relative(pos - last_touch_pos[i]);
+						last_touch_pos[i] = pos;
+						input->parse_input_event(sd);
 					}
 				}
-			} else {
-				for (int i = 0; i < touch_count; i++) {
-					hidTouchRead(&touch, i);
-					Vector2 pos(touch.px, touch.py);
 
-					Ref<InputEventScreenDrag> sd;
-					sd.instance();
-					sd->set_index(i);
-					sd->set_position(pos);
-					sd->set_relative(pos - last_touch_pos[i]);
-					last_touch_pos[i] = pos;
-					input->parse_input_event(sd);
-				}
+				last_touch_count = touch_state.count;
 			}
-
-			last_touch_count = touch_count;
 		}
 
 		joypad->process();

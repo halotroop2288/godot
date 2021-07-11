@@ -95,14 +95,13 @@ int main(int argc, char *argv[]) {
 
 		framebufferEnd(&fb);
 
+		// set up input
+		PadState pad;
+		padConfigureInput(1, HidNpadStyleSet_NpadStandard);
+		padInitializeDefault(&pad);
 		while (appletMainLoop()) {
-			hidScanInput();
-			if (hidKeysDown(CONTROLLER_P1_AUTO) &
-					~(LIBNX_KEY_TOUCH |
-							LIBNX_KEY_LSTICK_LEFT | LIBNX_KEY_LSTICK_RIGHT |
-							LIBNX_KEY_LSTICK_UP | LIBNX_KEY_LSTICK_DOWN |
-							LIBNX_KEY_RSTICK_LEFT | LIBNX_KEY_RSTICK_RIGHT |
-							LIBNX_KEY_RSTICK_UP | LIBNX_KEY_RSTICK_DOWN)) {
+			padUpdate(&pad);
+			if (padGetButtonsDown(&pad) != 0) {
 				break;
 			}
 		}

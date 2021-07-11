@@ -44,15 +44,8 @@ public:
 	void process();
 
 private:
-	typedef struct JoypadState {
-		HidControllerID id;
-		JoystickPosition l_pos;
-		JoystickPosition r_pos;
-		u64 buttons;
-	} JoypadState;
-
 	InputDefault *input;
-	JoypadState pads[JOYPADS_MAX];
+	PadState pads[JOYPADS_MAX];
 	int button_count = 0;
 };
 
