@@ -233,6 +233,13 @@ OS::VideoMode OS_Switch::get_video_mode(int p_screen) const {
 
 void OS_Switch::get_fullscreen_mode_list(List<OS::VideoMode> *p_list, int p_screen) const {}
 
+OS::RenderThreadMode OS_Switch::get_render_thread_mode() const {
+	if (OS::get_render_thread_mode() == OS::RenderThreadMode::RENDER_SEPARATE_THREAD) {
+		return OS::RENDER_THREAD_SAFE;
+	}
+	return OS::get_render_thread_mode();
+}
+
 int OS_Switch::get_current_video_driver() const {
 	return video_driver_index;
 }
