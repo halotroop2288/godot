@@ -521,6 +521,27 @@ void OS_Switch::set_executable_path(const char *p_execpath) {
 	switch_execpath = p_execpath;
 }
 
+String OS_Switch::get_data_path() const {
+	return "sdmc:/switch";
+}
+
+String OS_Switch::get_user_data_dir() const {
+	String appname = get_safe_dir_name(ProjectSettings::get_singleton()->get("application/config/name"));
+	if (appname != "") {
+		bool use_custom_dir = ProjectSettings::get_singleton()->get("application/config/use_custom_user_dir");
+		if (use_custom_dir) {
+			String custom_dir = get_safe_dir_name(ProjectSettings::get_singleton()->get("application/config/custom_user_dir_name"), true);
+			if (custom_dir == "") {
+				custom_dir = appname;
+			}
+			return get_data_path().plus_file(custom_dir);
+		} else {
+			return get_data_path().plus_file(get_godot_dir_name()).plus_file("app_userdata").plus_file(appname);
+		}
+	}	
+	return get_data_path().plus_file(get_godot_dir_name()).plus_file("app_userdata").plus_file("__unknown");
+}
+
 OS_Switch *OS_Switch::get_singleton() {
 
 	return (OS_Switch *)OS::get_singleton();
