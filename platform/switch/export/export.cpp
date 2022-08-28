@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2022 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2022 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -57,7 +57,6 @@ protected:
 };
 
 class EditorExportPlatformSwitch : public EditorExportPlatform {
-
 	GDCLASS(EditorExportPlatformSwitch, EditorExportPlatform)
 
 	Ref<ImageTexture> logo;
@@ -447,7 +446,8 @@ public:
 		FileAccess *template_f = FileAccess::open(template_path, FileAccess::READ);
 		FileAccess *nro = FileAccess::open(output_path, FileAccess::WRITE);
 
-		if (!template_f || !nro) return ERR_FILE_NOT_FOUND;
+		if (!template_f || !nro)
+			return ERR_FILE_NOT_FOUND;
 
 		template_f->seek(sizeof(NroStart));
 		template_f->get_buffer((uint8_t *)&nro_header, sizeof(NroHeader));
