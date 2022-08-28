@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2022 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2022 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -46,7 +46,6 @@ static const AudioRendererConfig arConfig = {
 };
 
 Error AudioDriverSwitch::init_device() {
-
 	int latency = GLOBAL_GET("audio/output_latency");
 	mix_rate = GLOBAL_GET("audio/mix_rate");
 	channels = 2;
@@ -118,7 +117,6 @@ void AudioDriverSwitch::thread_func(void *p_udata) {
 	svcSetThreadPriority(CUR_THREAD_HANDLE, 0x2B);
 
 	while (!ad->exit_thread) {
-
 		ad->lock();
 		ad->start_counting_ticks();
 
@@ -179,7 +177,6 @@ int AudioDriverSwitch::get_mix_rate() const {
 }
 
 AudioDriver::SpeakerMode AudioDriverSwitch::get_speaker_mode() const {
-
 	return speaker_mode;
 }
 
