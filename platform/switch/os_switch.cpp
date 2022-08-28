@@ -247,7 +247,7 @@ Size2 OS_Switch::get_window_size() const {
 	return Size2(1280, 720);
 }
 
-Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex) {
+Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex, bool p_open_console) {
 	if (p_blocking) {
 		return FAILED; // we don't support this
 	}
@@ -275,6 +275,10 @@ Error OS_Switch::execute(const String &p_path, const List<String> &p_arguments, 
 
 Error OS_Switch::kill(const ProcessID &p_pid) {
 	return FAILED;
+}
+
+bool OS_Switch::is_process_running(const ProcessID &p_pid) const {
+	return false;
 }
 
 bool OS_Switch::has_environment(const String &p_var) const {
