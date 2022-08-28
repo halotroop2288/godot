@@ -73,10 +73,10 @@ void JoypadSwitch::process() {
 		HidAnalogStickState r_stick = padGetStickPos(&pads[index], 1);
 
 		// Axes
-		input->joy_axis(index, 0, { 100, (float)(l_stick.x / 32767.0f) });
-		input->joy_axis(index, 1, { 100, (float)(-l_stick.y / 32767.0f) });
-		input->joy_axis(index, 2, { 100, (float)(r_stick.x / 32767.0f) });
-		input->joy_axis(index, 3, { 100, (float)(-r_stick.y / 32767.0f) });
+		input->joy_axis(index, 0, (float)(l_stick.x / 32767.0f));
+		input->joy_axis(index, 1, (float)(-l_stick.y / 32767.0f));
+		input->joy_axis(index, 2, (float)(r_stick.x / 32767.0f));
+		input->joy_axis(index, 3, (float)(-r_stick.y / 32767.0f));
 
 		// Buttons
 		u64 buttons_up = padGetButtonsUp(&pads[index]);

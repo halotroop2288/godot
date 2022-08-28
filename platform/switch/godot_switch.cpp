@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 			memset(compressed_splash, 0, splash_size);
 			fseek(splash, 0, SEEK_SET);
 
-			size_t amt_read = fread(compressed_splash, 1, splash_size, splash);
+			fread(compressed_splash, 1, splash_size, splash);
 			fclose(splash);
 
 			memset(framebuf, 0, stride * FB_HEIGHT);

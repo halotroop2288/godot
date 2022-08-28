@@ -78,8 +78,9 @@ public:
 	virtual int get_current_video_driver() const;
 	virtual Size2 get_window_size() const;
 
-	virtual Error execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id = NULL, String *r_pipe = NULL, int *r_exitcode = NULL, bool read_stderr = false, Mutex *p_pipe_mutex = NULL);
+	virtual Error execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id = NULL, String *r_pipe = NULL, int *r_exitcode = NULL, bool read_stderr = false, Mutex *p_pipe_mutex = NULL, bool p_open_console = false);
 	virtual Error kill(const ProcessID &p_pid);
+	virtual bool is_process_running(const ProcessID &p_pid) const;
 
 	virtual String get_executable_path() const;
 	virtual void set_executable_path(const char *p_execpath);
