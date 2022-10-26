@@ -535,9 +535,13 @@ public:
 	}
 
 	void create_nacp(NacpStruct *nacp, String &title, String &author, String &version) {
-		const char *title_cstr = title.utf8().ptr();
-		const char *author_cstr = author.utf8().ptr();
-		const char *version_cstr = version.utf8().ptr();
+		CharString title_utf8 = title.utf8();
+		CharString author_utf8 = author.utf8();
+		CharString version_utf8 = version.utf8();
+
+		const char *title_cstr = title_utf8.ptr();
+		const char *author_cstr = author_utf8.ptr();
+		const char *version_cstr = version_utf8.ptr();
 
 		for (int i = 0; i < 12; i++) {
 			strncpy(nacp->lang[i].name, title_cstr, sizeof(nacp->lang[i].name) - 1);
