@@ -227,9 +227,7 @@ def configure(env):
         env.ParseConfig("aarch64-none-elf-pkg-config libwslay --cflags --libs")
 
     if not env["builtin_miniupnpc"]:
-        # No pkgconfig file so far, hardcode default paths.
-        env.Append(CPPPATH=["/usr/include/miniupnpc"])
-        env.Append(LIBS=["miniupnpc"])
+        env.ParseConfig("aarch64-none-elf-pkg-config miniupnpc --cflags --libs")
 
     # On Linux wchar_t should be 32-bits
     # 16-bit library shouldn't be required due to compiler optimisations
