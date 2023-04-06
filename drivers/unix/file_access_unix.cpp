@@ -280,7 +280,8 @@ bool FileAccessUnix::file_exists(const String &p_path) {
 		return false;
 	}
 
-#if !defined(VITA_ENABLED) && (defined(UNIX_ENABLED) || defined(HORIZON_ENABLED))
+#ifndef VITA_ENABLED
+#if defined(UNIX_ENABLED) || defined(HORIZON_ENABLED)
 	// See if we have access to the file
 	if (access(filename.utf8().get_data(), F_OK)) {
 		return false;
@@ -289,6 +290,7 @@ bool FileAccessUnix::file_exists(const String &p_path) {
 	if (_access(filename.utf8().get_data(), 4) == -1)
 		return false;
 #endif
+#endif // !VITA_ENABLED
 
 	// See if this is a regular file
 	switch (st.st_mode & S_IFMT) {

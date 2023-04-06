@@ -442,6 +442,7 @@ String DirAccessUnix::read_link(String p_file) {
 	}
 	return link;
 #endif
+#endif
 }
 
 Error DirAccessUnix::create_link(String p_source, String p_target) {
