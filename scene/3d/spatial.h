@@ -120,11 +120,15 @@ class Spatial : public Node {
 	void _propagate_visibility_changed();
 
 protected:
-	_FORCE_INLINE_ void set_ignore_transform_notification(bool p_ignore) { data.ignore_notification = p_ignore; }
+	_FORCE_INLINE_ void set_ignore_transform_notification(bool p_ignore) {
+		data.ignore_notification = p_ignore;
+	}
 	_FORCE_INLINE_ void _update_local_transform() const;
 
 	void _set_vi_visible(bool p_visible);
-	bool _is_vi_visible() const { return data.vi_visible; }
+	bool _is_vi_visible() const {
+		return data.vi_visible;
+	}
 	Transform _get_global_transform_interpolated(real_t p_interpolation_fraction);
 	void _disable_client_physics_interpolation();
 
@@ -189,7 +193,9 @@ public:
 	void set_gizmo(const Ref<SpatialGizmo> &p_gizmo);
 	Ref<SpatialGizmo> get_gizmo() const;
 
-	_FORCE_INLINE_ bool is_inside_world() const { return data.inside_world; }
+	_FORCE_INLINE_ bool is_inside_world() const {
+		return data.inside_world;
+	}
 
 	Transform get_relative_transform(const Node *p_parent) const;
 

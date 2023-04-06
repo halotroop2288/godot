@@ -101,53 +101,99 @@ public:
 	changes[1] += 1;
 #endif
 
-#define BIND0R(m_r, m_name) \
-	m_r m_name() { return BINDBASE->m_name(); }
-#define BIND1R(m_r, m_name, m_type1) \
-	m_r m_name(m_type1 arg1) { return BINDBASE->m_name(arg1); }
-#define BIND1RC(m_r, m_name, m_type1) \
-	m_r m_name(m_type1 arg1) const { return BINDBASE->m_name(arg1); }
+#define BIND0R(m_r, m_name)        \
+	m_r m_name() {                 \
+		return BINDBASE->m_name(); \
+	}
+#define BIND1R(m_r, m_name, m_type1)   \
+	m_r m_name(m_type1 arg1) {         \
+		return BINDBASE->m_name(arg1); \
+	}
+#define BIND1RC(m_r, m_name, m_type1)  \
+	m_r m_name(m_type1 arg1) const {   \
+		return BINDBASE->m_name(arg1); \
+	}
 #define BIND2R(m_r, m_name, m_type1, m_type2) \
-	m_r m_name(m_type1 arg1, m_type2 arg2) { return BINDBASE->m_name(arg1, arg2); }
-#define BIND2RC(m_r, m_name, m_type1, m_type2) \
-	m_r m_name(m_type1 arg1, m_type2 arg2) const { return BINDBASE->m_name(arg1, arg2); }
-#define BIND3RC(m_r, m_name, m_type1, m_type2, m_type3) \
-	m_r m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3) const { return BINDBASE->m_name(arg1, arg2, arg3); }
-#define BIND4RC(m_r, m_name, m_type1, m_type2, m_type3, m_type4) \
-	m_r m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4) const { return BINDBASE->m_name(arg1, arg2, arg3, arg4); }
+	m_r m_name(m_type1 arg1, m_type2 arg2) {  \
+		return BINDBASE->m_name(arg1, arg2);  \
+	}
+#define BIND2RC(m_r, m_name, m_type1, m_type2)     \
+	m_r m_name(m_type1 arg1, m_type2 arg2) const { \
+		return BINDBASE->m_name(arg1, arg2);       \
+	}
+#define BIND3RC(m_r, m_name, m_type1, m_type2, m_type3)          \
+	m_r m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3) const { \
+		return BINDBASE->m_name(arg1, arg2, arg3);               \
+	}
+#define BIND4RC(m_r, m_name, m_type1, m_type2, m_type3, m_type4)               \
+	m_r m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4) const { \
+		return BINDBASE->m_name(arg1, arg2, arg3, arg4);                       \
+	}
 
-#define BIND0N(m_name) \
-	void m_name() { BINDBASE->m_name(); }
-#define BIND1(m_name, m_type1) \
-	void m_name(m_type1 arg1) { DISPLAY_CHANGED BINDBASE->m_name(arg1); }
+#define BIND0N(m_name)      \
+	void m_name() {         \
+		BINDBASE->m_name(); \
+	}
+#define BIND1(m_name, m_type1)                  \
+	void m_name(m_type1 arg1) {                 \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1); \
+	}
 #define BIND1N(m_name, m_type1) \
-	void m_name(m_type1 arg1) { BINDBASE->m_name(arg1); }
-#define BIND2(m_name, m_type1, m_type2) \
-	void m_name(m_type1 arg1, m_type2 arg2) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2); }
-#define BIND2C(m_name, m_type1, m_type2) \
-	void m_name(m_type1 arg1, m_type2 arg2) const { BINDBASE->m_name(arg1, arg2); }
-#define BIND3(m_name, m_type1, m_type2, m_type3) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3); }
-#define BIND4(m_name, m_type1, m_type2, m_type3, m_type4) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4); }
-#define BIND5(m_name, m_type1, m_type2, m_type3, m_type4, m_type5) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5); }
-#define BIND6(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6); }
-#define BIND7(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7); }
-#define BIND8(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8); }
-#define BIND9(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8, m_type9) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8, m_type9 arg9) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9); }
-#define BIND10(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8, m_type9, m_type10) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8, m_type9 arg9, m_type10 arg10) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10); }
-#define BIND11(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8, m_type9, m_type10, m_type11) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8, m_type9 arg9, m_type10 arg10, m_type11 arg11) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11); }
-#define BIND12(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8, m_type9, m_type10, m_type11, m_type12) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8, m_type9 arg9, m_type10 arg10, m_type11 arg11, m_type12 arg12) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12); }
-#define BIND13(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8, m_type9, m_type10, m_type11, m_type12, m_type13) \
-	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8, m_type9 arg9, m_type10 arg10, m_type11 arg11, m_type12 arg12, m_type13 arg13) { DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13); }
+	void m_name(m_type1 arg1) { \
+		BINDBASE->m_name(arg1); \
+	}
+#define BIND2(m_name, m_type1, m_type2)               \
+	void m_name(m_type1 arg1, m_type2 arg2) {         \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2); \
+	}
+#define BIND2C(m_name, m_type1, m_type2)            \
+	void m_name(m_type1 arg1, m_type2 arg2) const { \
+		BINDBASE->m_name(arg1, arg2);               \
+	}
+#define BIND3(m_name, m_type1, m_type2, m_type3)            \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3); \
+	}
+#define BIND4(m_name, m_type1, m_type2, m_type3, m_type4)                 \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4);         \
+	}
+#define BIND5(m_name, m_type1, m_type2, m_type3, m_type4, m_type5)                      \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5);                 \
+	}
+#define BIND6(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6)                           \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6);                         \
+	}
+#define BIND7(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7)                                \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7);                                 \
+	}
+#define BIND8(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8)                                     \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);                                         \
+	}
+#define BIND9(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8, m_type9)                                          \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8, m_type9 arg9) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);                                                 \
+	}
+#define BIND10(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8, m_type9, m_type10)                                               \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8, m_type9 arg9, m_type10 arg10) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);                                                          \
+	}
+#define BIND11(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8, m_type9, m_type10, m_type11)                                                     \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8, m_type9 arg9, m_type10 arg10, m_type11 arg11) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);                                                                   \
+	}
+#define BIND12(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8, m_type9, m_type10, m_type11, m_type12)                                                           \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8, m_type9 arg9, m_type10 arg10, m_type11 arg11, m_type12 arg12) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);                                                                            \
+	}
+#define BIND13(m_name, m_type1, m_type2, m_type3, m_type4, m_type5, m_type6, m_type7, m_type8, m_type9, m_type10, m_type11, m_type12, m_type13)                                                                 \
+	void m_name(m_type1 arg1, m_type2 arg2, m_type3 arg3, m_type4 arg4, m_type5 arg5, m_type6 arg6, m_type7 arg7, m_type8 arg8, m_type9 arg9, m_type10 arg10, m_type11 arg11, m_type12 arg12, m_type13 arg13) { \
+		DISPLAY_CHANGED BINDBASE->m_name(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);                                                                                     \
+	}
 
 //from now on, calls forwarded to this singleton
 #define BINDBASE VSG::storage

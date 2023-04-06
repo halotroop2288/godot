@@ -54,8 +54,12 @@ protected:
 	static void _bind_methods();
 
 public:
-	_FORCE_INLINE_ bool is_completed() { return completed; }
-	_FORCE_INLINE_ void set_completed(bool p_completed) { completed = p_completed; }
+	_FORCE_INLINE_ bool is_completed() {
+		return completed;
+	}
+	_FORCE_INLINE_ void set_completed(bool p_completed) {
+		completed = p_completed;
+	}
 
 #ifdef DEBUG_ENABLED
 	_FORCE_INLINE_ void set_connection_target(Object *p_target) {

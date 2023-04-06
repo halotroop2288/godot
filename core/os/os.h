@@ -314,10 +314,14 @@ public:
 	// each time a frame is redrawn as a result of moving the mouse, clicking etc.
 	// This enables us to keep e.g. particle systems processing, but ONLY when other
 	// events have caused a redraw.
-	virtual bool is_update_pending(bool p_include_redraws = false) const { return !_update_vital_only || (_update_pending && p_include_redraws); }
+	virtual bool is_update_pending(bool p_include_redraws = false) const {
+		return !_update_vital_only || (_update_pending && p_include_redraws);
+	}
 #else
 	// Always update when outside the editor, UPDATE_VITAL_ONLY has no effect outside the editor.
-	virtual bool is_update_pending(bool p_include_redraws = false) const { return true; }
+	virtual bool is_update_pending(bool p_include_redraws = false) const {
+		return true;
+	}
 #endif
 
 	virtual String get_executable_path() const;
@@ -335,7 +339,9 @@ public:
 	virtual bool set_environment(const String &p_var, const String &p_value) const = 0;
 
 	virtual String get_name() const = 0;
-	virtual List<String> get_cmdline_args() const { return _cmdline; }
+	virtual List<String> get_cmdline_args() const {
+		return _cmdline;
+	}
 	virtual String get_model_name() const;
 
 	void ensure_user_data_dir();
@@ -408,13 +414,17 @@ public:
 
 	virtual bool can_draw() const = 0;
 
-	virtual bool is_userfs_persistent() const { return true; }
+	virtual bool is_userfs_persistent() const {
+		return true;
+	}
 
 	bool is_stdout_verbose() const;
 	bool is_stdout_debug_enabled() const;
 
 	virtual void disable_crash_handler() {}
-	virtual bool is_disable_crash_handler() const { return false; }
+	virtual bool is_disable_crash_handler() const {
+		return false;
+	}
 	virtual void initialize_debugging() {}
 
 	enum CursorShape {
@@ -450,7 +460,9 @@ public:
 	virtual CursorShape get_cursor_shape() const;
 	virtual void set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot);
 
-	virtual bool get_swap_ok_cancel() { return false; }
+	virtual bool get_swap_ok_cancel() {
+		return false;
+	}
 	virtual void dump_memory_to_file(const char *p_file);
 	virtual void dump_resources_to_file(const char *p_file);
 	virtual void print_resources_in_use(bool p_short = false);
@@ -461,7 +473,9 @@ public:
 	virtual uint64_t get_dynamic_memory_usage() const;
 	virtual uint64_t get_free_static_memory() const;
 
-	RenderThreadMode get_render_thread_mode() const { return _render_thread_mode; }
+	RenderThreadMode get_render_thread_mode() const {
+		return _render_thread_mode;
+	}
 
 	virtual String get_locale() const;
 	String get_locale_language() const;
@@ -493,7 +507,9 @@ public:
 
 	virtual String get_system_dir(SystemDir p_dir, bool p_shared_storage = true) const;
 
-	virtual Error move_to_trash(const String &p_path) { return FAILED; }
+	virtual Error move_to_trash(const String &p_path) {
+		return FAILED;
+	}
 
 	virtual void set_no_window_mode(bool p_enable);
 	virtual bool is_no_window_mode_enabled() const;
@@ -533,7 +549,9 @@ public:
 
 	virtual int get_processor_count() const;
 	virtual String get_processor_name() const;
-	virtual int get_default_thread_pool_size() const { return get_processor_count(); }
+	virtual int get_default_thread_pool_size() const {
+		return get_processor_count();
+	}
 
 	virtual String get_unique_id() const;
 
@@ -603,16 +621,26 @@ public:
 
 	void set_has_server_feature_callback(HasServerFeatureCallback p_callback);
 
-	bool is_layered_allowed() const { return _allow_layered; }
-	bool is_hidpi_allowed() const { return _allow_hidpi; }
+	bool is_layered_allowed() const {
+		return _allow_layered;
+	}
+	bool is_hidpi_allowed() const {
+		return _allow_hidpi;
+	}
 
 	void set_restart_on_exit(bool p_restart, const List<String> &p_restart_arguments);
 	bool is_restart_on_exit_set() const;
 	List<String> get_restart_on_exit_arguments() const;
 
-	virtual bool request_permission(const String &p_name) { return true; }
-	virtual bool request_permissions() { return true; }
-	virtual Vector<String> get_granted_permissions() const { return Vector<String>(); }
+	virtual bool request_permission(const String &p_name) {
+		return true;
+	}
+	virtual bool request_permissions() {
+		return true;
+	}
+	virtual Vector<String> get_granted_permissions() const {
+		return Vector<String>();
+	}
 
 	virtual void process_and_drop_events() {}
 	OS();

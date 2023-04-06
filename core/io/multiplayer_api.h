@@ -146,9 +146,13 @@ public:
 	void _connection_failed();
 	void _server_disconnected();
 
-	bool has_network_peer() const { return network_peer.is_valid(); }
+	bool has_network_peer() const {
+		return network_peer.is_valid();
+	}
 	Vector<int> get_network_connected_peers() const;
-	int get_rpc_sender_id() const { return rpc_sender_id; }
+	int get_rpc_sender_id() const {
+		return rpc_sender_id;
+	}
 	int get_network_unique_id() const;
 	bool is_network_server() const;
 	void set_refuse_new_network_connections(bool p_refuse);

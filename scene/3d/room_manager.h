@@ -186,7 +186,9 @@ private:
 	// merging
 	void _merge_meshes_in_room(Room *p_room);
 	void _list_mergeable_mesh_instances(Spatial *p_node, LocalVector<MeshInstance *, int32_t> &r_list);
-	void _merge_log(String p_string) { debug_print_line(p_string); }
+	void _merge_log(String p_string) {
+		debug_print_line(p_string);
+	}
 	bool _remove_redundant_dangling_nodes(Spatial *p_node);
 
 	// helper funcs
@@ -203,7 +205,9 @@ private:
 	Error _build_convex_hull(const Vector<Vector3> &p_points, Geometry::MeshData &r_mesh, real_t p_epsilon = 3.0 * UNIT_EPSILON);
 
 	// output strings during conversion process
-	void convert_log(String p_string, int p_priority = 0) { debug_print_line(p_string, 1); }
+	void convert_log(String p_string, int p_priority = 0) {
+		debug_print_line(p_string, 1);
+	}
 
 	// only prints when user has set 'debug' in the room manager inspector
 	// also does not show in non editor builds

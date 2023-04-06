@@ -102,7 +102,9 @@ public:
 	bool m_solveSwingLimit;
 
 public:
-	virtual PhysicsServer::JointType get_type() const { return PhysicsServer::JOINT_CONE_TWIST; }
+	virtual PhysicsServer::JointType get_type() const {
+		return PhysicsServer::JOINT_CONE_TWIST;
+	}
 
 	virtual bool setup(real_t p_timestep);
 	virtual void solve(real_t p_timestep);

@@ -218,9 +218,15 @@ public:
 		Vector<int> arguments_usage;
 #endif // DEBUG_ENABLED
 
-		virtual DataType get_datatype() const { return return_type; }
-		virtual void set_datatype(const DataType &p_datatype) { return_type = p_datatype; }
-		int get_required_argument_count() { return arguments.size() - default_values.size(); }
+		virtual DataType get_datatype() const {
+			return return_type;
+		}
+		virtual void set_datatype(const DataType &p_datatype) {
+			return_type = p_datatype;
+		}
+		int get_required_argument_count() {
+			return arguments.size() - default_values.size();
+		}
 
 		FunctionNode() {
 			type = TYPE_FUNCTION;
@@ -659,7 +665,9 @@ public:
 	int get_error_line() const;
 	int get_error_column() const;
 #ifdef DEBUG_ENABLED
-	const List<GDScriptWarning> &get_warnings() const { return warnings; }
+	const List<GDScriptWarning> &get_warnings() const {
+		return warnings;
+	}
 #endif // DEBUG_ENABLED
 	Error parse(const String &p_code, const String &p_base_path = "", bool p_just_validate = false, const String &p_self_path = "", bool p_for_completion = false, Set<int> *r_safe_lines = nullptr, bool p_dependencies_only = false);
 	Error parse_bytecode(const Vector<uint8_t> &p_bytecode, const String &p_base_path = "", const String &p_self_path = "");
@@ -680,7 +688,9 @@ public:
 	int get_completion_argument_index();
 	int get_completion_identifier_is_function();
 
-	const List<String> &get_dependencies() const { return dependencies; }
+	const List<String> &get_dependencies() const {
+		return dependencies;
+	}
 
 	void clear();
 	GDScriptParser();

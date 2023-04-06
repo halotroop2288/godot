@@ -634,8 +634,12 @@ public:
 		return e;
 	}
 
-	inline bool empty() const { return _data.size_cache == 0; }
-	inline int size() const { return _data.size_cache; }
+	inline bool empty() const {
+		return _data.size_cache == 0;
+	}
+	inline int size() const {
+		return _data.size_cache;
+	}
 
 	int calculate_depth() const {
 		// used for debug mostly

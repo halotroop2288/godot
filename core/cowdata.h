@@ -111,7 +111,9 @@ private:
 	uint32_t _copy_on_write();
 
 public:
-	void operator=(const CowData<T> &p_from) { _ref(p_from); }
+	void operator=(const CowData<T> &p_from) {
+		_ref(p_from);
+	}
 
 	_FORCE_INLINE_ T *ptrw() {
 		_copy_on_write();
@@ -131,8 +133,12 @@ public:
 		}
 	}
 
-	_FORCE_INLINE_ void clear() { resize(0); }
-	_FORCE_INLINE_ bool empty() const { return _ptr == nullptr; }
+	_FORCE_INLINE_ void clear() {
+		resize(0);
+	}
+	_FORCE_INLINE_ bool empty() const {
+		return _ptr == nullptr;
+	}
 
 	_FORCE_INLINE_ void set(int p_index, const T &p_elem) {
 		CRASH_BAD_INDEX(p_index, size());
@@ -180,7 +186,9 @@ public:
 
 	_FORCE_INLINE_ CowData();
 	_FORCE_INLINE_ ~CowData();
-	_FORCE_INLINE_ CowData(CowData<T> &p_from) { _ref(p_from); };
+	_FORCE_INLINE_ CowData(CowData<T> &p_from) {
+		_ref(p_from);
+	};
 };
 
 template <class T>

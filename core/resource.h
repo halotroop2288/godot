@@ -38,11 +38,15 @@
 #include "core/safe_refcount.h"
 #include "core/self_list.h"
 
-#define RES_BASE_EXTENSION(m_ext)                                                                                   \
-public:                                                                                                             \
-	static void register_custom_data_to_otdb() { ClassDB::add_resource_base_extension(m_ext, get_class_static()); } \
-	virtual String get_base_extension() const { return m_ext; }                                                     \
-                                                                                                                    \
+#define RES_BASE_EXTENSION(m_ext)                                        \
+public:                                                                  \
+	static void register_custom_data_to_otdb() {                         \
+		ClassDB::add_resource_base_extension(m_ext, get_class_static()); \
+	}                                                                    \
+	virtual String get_base_extension() const {                          \
+		return m_ext;                                                    \
+	}                                                                    \
+                                                                         \
 private:
 
 class Resource : public Reference {
@@ -114,14 +118,26 @@ public:
 
 	uint32_t hash_edited_version() const;
 
-	virtual void set_last_modified_time(uint64_t p_time) { last_modified_time = p_time; }
-	uint64_t get_last_modified_time() const { return last_modified_time; }
+	virtual void set_last_modified_time(uint64_t p_time) {
+		last_modified_time = p_time;
+	}
+	uint64_t get_last_modified_time() const {
+		return last_modified_time;
+	}
 
-	virtual void set_import_last_modified_time(uint64_t p_time) { import_last_modified_time = p_time; }
-	uint64_t get_import_last_modified_time() const { return import_last_modified_time; }
+	virtual void set_import_last_modified_time(uint64_t p_time) {
+		import_last_modified_time = p_time;
+	}
+	uint64_t get_import_last_modified_time() const {
+		return import_last_modified_time;
+	}
 
-	void set_import_path(const String &p_path) { import_path = p_path; }
-	String get_import_path() const { return import_path; }
+	void set_import_path(const String &p_path) {
+		import_path = p_path;
+	}
+	String get_import_path() const {
+		return import_path;
+	}
 
 #endif
 

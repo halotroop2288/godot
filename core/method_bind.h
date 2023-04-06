@@ -219,11 +219,17 @@ protected:
 	virtual PropertyInfo _gen_argument_type_info(int p_arg) const = 0;
 	void _generate_argument_types(int p_count);
 
-	void set_argument_count(int p_count) { argument_count = p_count; }
+	void set_argument_count(int p_count) {
+		argument_count = p_count;
+	}
 
 public:
-	Vector<Variant> get_default_arguments() const { return default_arguments; }
-	_FORCE_INLINE_ int get_default_argument_count() const { return default_argument_count; }
+	Vector<Variant> get_default_arguments() const {
+		return default_arguments;
+	}
+	_FORCE_INLINE_ int get_default_argument_count() const {
+		return default_argument_count;
+	}
 
 	_FORCE_INLINE_ Variant has_default_argument(int p_arg) const {
 		int idx = argument_count - p_arg - 1;
@@ -260,11 +266,17 @@ public:
 	virtual GodotTypeInfo::Metadata get_argument_meta(int p_arg) const = 0;
 
 #endif
-	void set_hint_flags(uint32_t p_hint) { hint_flags = p_hint; }
-	uint32_t get_hint_flags() const { return hint_flags | (is_const() ? METHOD_FLAG_CONST : 0) | (is_vararg() ? METHOD_FLAG_VARARG : 0); }
+	void set_hint_flags(uint32_t p_hint) {
+		hint_flags = p_hint;
+	}
+	uint32_t get_hint_flags() const {
+		return hint_flags | (is_const() ? METHOD_FLAG_CONST : 0) | (is_vararg() ? METHOD_FLAG_VARARG : 0);
+	}
 	virtual String get_instance_class() const = 0;
 
-	_FORCE_INLINE_ int get_argument_count() const { return argument_count; };
+	_FORCE_INLINE_ int get_argument_count() const {
+		return argument_count;
+	};
 
 	virtual Variant call(Object *p_object, const Variant **p_args, int p_arg_count, Variant::CallError &r_error) = 0;
 
@@ -274,10 +286,18 @@ public:
 
 	StringName get_name() const;
 	void set_name(const StringName &p_name);
-	_FORCE_INLINE_ int get_method_id() const { return method_id; }
-	_FORCE_INLINE_ bool is_const() const { return _const; }
-	_FORCE_INLINE_ bool has_return() const { return _returns; }
-	virtual bool is_vararg() const { return false; }
+	_FORCE_INLINE_ int get_method_id() const {
+		return method_id;
+	}
+	_FORCE_INLINE_ bool is_const() const {
+		return _const;
+	}
+	_FORCE_INLINE_ bool has_return() const {
+		return _returns;
+	}
+	virtual bool is_vararg() const {
+		return false;
+	}
 
 	void set_default_arguments(const Vector<Variant> &p_defargs);
 
@@ -353,11 +373,19 @@ public:
 	} //todo
 #endif
 
-	void set_method(NativeCall p_method) { call_method = p_method; }
-	virtual bool is_const() const { return false; }
-	virtual String get_instance_class() const { return T::get_class_static(); }
+	void set_method(NativeCall p_method) {
+		call_method = p_method;
+	}
+	virtual bool is_const() const {
+		return false;
+	}
+	virtual String get_instance_class() const {
+		return T::get_class_static();
+	}
 
-	virtual bool is_vararg() const { return true; }
+	virtual bool is_vararg() const {
+		return true;
+	}
 
 	MethodBindVarArg() {
 		call_method = nullptr;

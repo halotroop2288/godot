@@ -709,8 +709,12 @@ public:
 
 	FUNC1(set_debug_generate_wireframes, bool)
 
-	virtual bool has_feature(Features p_feature) const { return visual_server->has_feature(p_feature); }
-	virtual bool has_os_feature(const String &p_feature) const { return visual_server->has_os_feature(p_feature); }
+	virtual bool has_feature(Features p_feature) const {
+		return visual_server->has_feature(p_feature);
+	}
+	virtual bool has_os_feature(const String &p_feature) const {
+		return visual_server->has_os_feature(p_feature);
+	}
 
 	FUNC1(call_set_use_vsync, bool)
 

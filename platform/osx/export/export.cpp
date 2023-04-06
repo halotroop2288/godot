@@ -72,9 +72,13 @@ class EditorExportPlatformOSX : public EditorExportPlatform {
 
 	bool use_codesign() const { return true; }
 #ifdef OSX_ENABLED
-	bool use_dmg() const { return true; }
+	bool use_dmg() const {
+		return true;
+	}
 #else
-	bool use_dmg() const { return false; }
+	bool use_dmg() const {
+		return false;
+	}
 #endif
 	bool is_package_name_valid(const String &p_package, String *r_error = nullptr) const {
 		String pname = p_package;
@@ -105,9 +109,15 @@ protected:
 	virtual bool get_option_visibility(const String &p_option, const Map<StringName, Variant> &p_options) const;
 
 public:
-	virtual String get_name() const { return "Mac OSX"; }
-	virtual String get_os_name() const { return "OSX"; }
-	virtual Ref<Texture> get_logo() const { return logo; }
+	virtual String get_name() const {
+		return "Mac OSX";
+	}
+	virtual String get_os_name() const {
+		return "OSX";
+	}
+	virtual Ref<Texture> get_logo() const {
+		return logo;
+	}
 
 	virtual List<String> get_binary_extensions(const Ref<EditorExportPreset> &p_preset) const {
 		List<String> list;

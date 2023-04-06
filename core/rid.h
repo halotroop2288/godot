@@ -51,7 +51,9 @@ class RID_Data {
 	uint32_t _id;
 
 public:
-	_FORCE_INLINE_ uint32_t get_id() const { return _id; }
+	_FORCE_INLINE_ uint32_t get_id() const {
+		return _id;
+	}
 
 	virtual ~RID_Data();
 };

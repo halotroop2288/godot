@@ -222,19 +222,19 @@ void light_compute(
 		vec3 light_color,
 		vec3 attenuation,
 		float roughness) {
-//this makes lights behave closer to linear, but then addition of lights looks bad
-//better left disabled
+	//this makes lights behave closer to linear, but then addition of lights looks bad
+	//better left disabled
 
-//#define SRGB_APPROX(m_var) m_var = pow(m_var,0.4545454545);
-/*
-#define SRGB_APPROX(m_var) {\
-	float S1 = sqrt(m_var);\
-	float S2 = sqrt(S1);\
-	float S3 = sqrt(S2);\
-	m_var = 0.662002687 * S1 + 0.684122060 * S2 - 0.323583601 * S3 - 0.0225411470 * m_var;\
-	}
-*/
-#define SRGB_APPROX(m_var)
+	//#define SRGB_APPROX(m_var) m_var = pow(m_var,0.4545454545);
+	/*
+	#define SRGB_APPROX(m_var) {\
+		float S1 = sqrt(m_var);\
+		float S2 = sqrt(S1);\
+		float S3 = sqrt(S2);\
+		m_var = 0.662002687 * S1 + 0.684122060 * S2 - 0.323583601 * S3 - 0.0225411470 * m_var;\
+		}
+	*/
+	//#define SRGB_APPROX(m_var)
 
 	float NdotL = dot(N, L);
 	float cNdotL = max(NdotL, 0.0); // clamped NdotL
@@ -271,7 +271,7 @@ void light_compute(
 	diffuse_brdf_NL = cNdotL * (1.0 / M_PI);
 #endif
 
-	SRGB_APPROX(diffuse_brdf_NL)
+	//SRGB_APPROX(diffuse_brdf_NL)
 
 	diffuse_interp += light_color * diffuse_brdf_NL * attenuation;
 
@@ -289,7 +289,7 @@ void light_compute(
 		specular_brdf_NL = blinn;
 #endif
 
-		SRGB_APPROX(specular_brdf_NL)
+		//SRGB_APPROX(specular_brdf_NL)
 		specular_interp += specular_brdf_NL * light_color * attenuation;
 	}
 }
@@ -729,20 +729,20 @@ VERTEX_SHADER_CODE
 // Do not copy these defines in the vertex section.
 #ifndef USE_GLES_OVER_GL
 #ifdef GL_EXT_shader_texture_lod
-#extension GL_EXT_shader_texture_lod : enable
-#define texture2DLod(img, coord, lod) texture2DLodEXT(img, coord, lod)
-#define textureCubeLod(img, coord, lod) textureCubeLodEXT(img, coord, lod)
+//#extension GL_EXT_shader_texture_lod : enable
+//#define texture2DLod(img, coord, lod) texture2DLodEXT(img, coord, lod)
+//#define textureCubeLod(img, coord, lod) textureCubeLodEXT(img, coord, lod)
 #endif
 #endif // !USE_GLES_OVER_GL
 
 #ifdef GL_ARB_shader_texture_lod
-#extension GL_ARB_shader_texture_lod : enable
+//#extension GL_ARB_shader_texture_lod : enable
 #endif
 
-#if !defined(GL_EXT_shader_texture_lod) && !defined(GL_ARB_shader_texture_lod)
+//#if !defined(GL_EXT_shader_texture_lod) && !defined(GL_ARB_shader_texture_lod)
 #define texture2DLod(img, coord, lod) texture2D(img, coord, lod)
 #define textureCubeLod(img, coord, lod) textureCube(img, coord, lod)
-#endif
+//#endif
 
 #ifdef USE_GLES_OVER_GL
 #define lowp
@@ -1272,19 +1272,19 @@ void light_compute(
 		inout vec3 diffuse_light,
 		inout vec3 specular_light,
 		inout float alpha) {
-//this makes lights behave closer to linear, but then addition of lights looks bad
-//better left disabled
+	//this makes lights behave closer to linear, but then addition of lights looks bad
+	//better left disabled
 
-//#define SRGB_APPROX(m_var) m_var = pow(m_var,0.4545454545);
-/*
-#define SRGB_APPROX(m_var) {\
-	float S1 = sqrt(m_var);\
-	float S2 = sqrt(S1);\
-	float S3 = sqrt(S2);\
-	m_var = 0.662002687 * S1 + 0.684122060 * S2 - 0.323583601 * S3 - 0.0225411470 * m_var;\
-	}
-*/
-#define SRGB_APPROX(m_var)
+	//#define SRGB_APPROX(m_var) m_var = pow(m_var,0.4545454545);
+	/*
+	#define SRGB_APPROX(m_var) {\
+		float S1 = sqrt(m_var);\
+		float S2 = sqrt(S1);\
+		float S3 = sqrt(S2);\
+		m_var = 0.662002687 * S1 + 0.684122060 * S2 - 0.323583601 * S3 - 0.0225411470 * m_var;\
+		}
+	*/
+	//#define SRGB_APPROX(m_var)
 
 #if defined(USE_LIGHT_SHADER_CODE)
 	// light is written by the light shader
@@ -1377,7 +1377,7 @@ LIGHT_SHADER_CODE
 		diffuse_brdf_NL = cNdotL * (1.0 / M_PI);
 #endif
 
-		SRGB_APPROX(diffuse_brdf_NL)
+		//SRGB_APPROX(diffuse_brdf_NL)
 
 		diffuse_light += light_color * diffuse_color * diffuse_brdf_NL * attenuation;
 
@@ -1457,7 +1457,7 @@ LIGHT_SHADER_CODE
 
 #endif
 
-		SRGB_APPROX(specular_brdf_NL)
+		//SRGB_APPROX(specular_brdf_NL)
 		specular_light += specular_brdf_NL * light_color * specular_blob_intensity * attenuation;
 
 #if defined(LIGHT_USE_CLEARCOAT)

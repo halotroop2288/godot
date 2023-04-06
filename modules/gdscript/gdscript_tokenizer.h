@@ -245,9 +245,15 @@ public:
 	virtual String get_token_error(int p_offset = 0) const;
 	virtual void advance(int p_amount = 1);
 #ifdef DEBUG_ENABLED
-	virtual const Vector<Pair<int, String>> &get_warning_skips() const { return warning_skips; }
-	virtual const Set<String> &get_warning_global_skips() const { return warning_global_skips; }
-	virtual bool is_ignoring_warnings() const { return ignore_warnings; }
+	virtual const Vector<Pair<int, String>> &get_warning_skips() const {
+		return warning_skips;
+	}
+	virtual const Set<String> &get_warning_global_skips() const {
+		return warning_global_skips;
+	}
+	virtual bool is_ignoring_warnings() const {
+		return ignore_warnings;
+	}
 #endif // DEBUG_ENABLED
 };
 
@@ -291,7 +297,9 @@ public:
 		static Set<String> s;
 		return s;
 	}
-	virtual bool is_ignoring_warnings() const { return true; }
+	virtual bool is_ignoring_warnings() const {
+		return true;
+	}
 #endif // DEBUG_ENABLED
 	GDScriptTokenizerBuffer();
 };

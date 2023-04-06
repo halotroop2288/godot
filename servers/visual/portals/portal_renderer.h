@@ -161,21 +161,31 @@ public:
 	void rooms_and_portals_clear();
 	void rooms_finalize(bool p_generate_pvs, bool p_cull_using_pvs, bool p_use_secondary_pvs, bool p_use_signals, String p_pvs_filename, bool p_use_simple_pvs, bool p_log_pvs_generation);
 	void rooms_override_camera(bool p_override, const Vector3 &p_point, const Vector<Plane> *p_convex);
-	void rooms_set_active(bool p_active) { _active = p_active; }
+	void rooms_set_active(bool p_active) {
+		_active = p_active;
+	}
 	void rooms_set_params(int p_portal_depth_limit, real_t p_roaming_expansion_margin) {
 		_tracer.set_depth_limit(p_portal_depth_limit);
 		_roaming_expansion_margin = p_roaming_expansion_margin;
 	}
-	void rooms_set_cull_using_pvs(bool p_enable) { _cull_using_pvs = p_enable; }
+	void rooms_set_cull_using_pvs(bool p_enable) {
+		_cull_using_pvs = p_enable;
+	}
 	void rooms_update_gameplay_monitor(const Vector<Vector3> &p_camera_positions);
 
 	// for use in the editor only, to allow a cheap way of turning off portals
 	// if there has been a change, e.g. moving a room etc.
-	void rooms_unload(String p_reason) { _ensure_unloaded(p_reason); }
-	bool rooms_is_loaded() const { return _loaded; }
+	void rooms_unload(String p_reason) {
+		_ensure_unloaded(p_reason);
+	}
+	bool rooms_is_loaded() const {
+		return _loaded;
+	}
 
 	// debugging
-	void set_debug_sprawl(bool p_active) { _debug_sprawl = p_active; }
+	void set_debug_sprawl(bool p_active) {
+		_debug_sprawl = p_active;
+	}
 
 	// this section handles moving objects - roaming (change rooms) and globals (not in any room)
 	OcclusionHandle instance_moving_create(VSInstance *p_instance, RID p_instance_rid, bool p_global, AABB p_aabb);
@@ -195,7 +205,9 @@ public:
 	void occluder_instance_destroy(OccluderInstanceHandle p_handle, bool p_free = true);
 
 	// editor only .. slow
-	Geometry::MeshData occlusion_debug_get_current_polys() const { return _tracer.get_occlusion_culler().debug_get_current_polys(); }
+	Geometry::MeshData occlusion_debug_get_current_polys() const {
+		return _tracer.get_occlusion_culler().debug_get_current_polys();
+	}
 
 	// note that this relies on a 'frustum' type cull, from a point, and that the planes are specified as in
 	// CameraMatrix, i.e.
@@ -216,7 +228,9 @@ public:
 
 	int cull_convex_implementation(const Vector3 &p_point, const Vector3 &p_cam_dir, const CameraMatrix &p_cam_matrix, const Vector<Plane> &p_convex, VSInstance **p_result_array, int p_result_max, uint32_t p_mask, int32_t &r_previous_room_id_hint);
 
-	bool occlusion_is_active() const { return _occluder_instance_pool.active_size() && use_occlusion_culling; }
+	bool occlusion_is_active() const {
+		return _occluder_instance_pool.active_size() && use_occlusion_culling;
+	}
 
 	// special function for occlusion culling only that does not use portals / rooms,
 	// but allows using occluders with the main scene
@@ -235,45 +249,99 @@ public:
 		return _tracer.occlusion_cull(*this, point, cam_dir, cm, p_convex, p_result_array, p_num_results);
 	}
 
-	bool is_active() const { return _active && _loaded; }
+	bool is_active() const {
+		return _active && _loaded;
+	}
 
-	VSStatic &get_static(int p_id) { return _statics[p_id]; }
-	const VSStatic &get_static(int p_id) const { return _statics[p_id]; }
+	VSStatic &get_static(int p_id) {
+		return _statics[p_id];
+	}
+	const VSStatic &get_static(int p_id) const {
+		return _statics[p_id];
+	}
 
-	int32_t get_num_rooms() const { return _room_pool_ids.size(); }
-	VSRoom &get_room(int p_id) { return _room_pool[_room_pool_ids[p_id]]; }
-	const VSRoom &get_room(int p_id) const { return _room_pool[_room_pool_ids[p_id]]; }
+	int32_t get_num_rooms() const {
+		return _room_pool_ids.size();
+	}
+	VSRoom &get_room(int p_id) {
+		return _room_pool[_room_pool_ids[p_id]];
+	}
+	const VSRoom &get_room(int p_id) const {
+		return _room_pool[_room_pool_ids[p_id]];
+	}
 
-	int32_t get_num_portals() const { return _portal_pool_ids.size(); }
-	VSPortal &get_portal(int p_id) { return _portal_pool[_portal_pool_ids[p_id]]; }
-	const VSPortal &get_portal(int p_id) const { return _portal_pool[_portal_pool_ids[p_id]]; }
+	int32_t get_num_portals() const {
+		return _portal_pool_ids.size();
+	}
+	VSPortal &get_portal(int p_id) {
+		return _portal_pool[_portal_pool_ids[p_id]];
+	}
+	const VSPortal &get_portal(int p_id) const {
+		return _portal_pool[_portal_pool_ids[p_id]];
+	}
 
-	int32_t get_num_moving_globals() const { return _moving_list_global.size(); }
-	const Moving &get_moving_global(uint32_t p_id) const { return _moving_pool[_moving_list_global[p_id]]; }
+	int32_t get_num_moving_globals() const {
+		return _moving_list_global.size();
+	}
+	const Moving &get_moving_global(uint32_t p_id) const {
+		return _moving_pool[_moving_list_global[p_id]];
+	}
 
-	Moving &get_pool_moving(uint32_t p_pool_id) { return _moving_pool[p_pool_id]; }
-	const Moving &get_pool_moving(uint32_t p_pool_id) const { return _moving_pool[p_pool_id]; }
+	Moving &get_pool_moving(uint32_t p_pool_id) {
+		return _moving_pool[p_pool_id];
+	}
+	const Moving &get_pool_moving(uint32_t p_pool_id) const {
+		return _moving_pool[p_pool_id];
+	}
 
-	RGhost &get_pool_rghost(uint32_t p_pool_id) { return _rghost_pool[p_pool_id]; }
-	const RGhost &get_pool_rghost(uint32_t p_pool_id) const { return _rghost_pool[p_pool_id]; }
+	RGhost &get_pool_rghost(uint32_t p_pool_id) {
+		return _rghost_pool[p_pool_id];
+	}
+	const RGhost &get_pool_rghost(uint32_t p_pool_id) const {
+		return _rghost_pool[p_pool_id];
+	}
 
-	VSStaticGhost &get_static_ghost(uint32_t p_id) { return _static_ghosts[p_id]; }
+	VSStaticGhost &get_static_ghost(uint32_t p_id) {
+		return _static_ghosts[p_id];
+	}
 
-	VSRoomGroup &get_roomgroup(uint32_t p_pool_id) { return _roomgroup_pool[p_pool_id]; }
+	VSRoomGroup &get_roomgroup(uint32_t p_pool_id) {
+		return _roomgroup_pool[p_pool_id];
+	}
 
-	PVS &get_pvs() { return _pvs; }
-	const PVS &get_pvs() const { return _pvs; }
+	PVS &get_pvs() {
+		return _pvs;
+	}
+	const PVS &get_pvs() const {
+		return _pvs;
+	}
 
-	bool get_cull_using_pvs() const { return _cull_using_pvs; }
+	bool get_cull_using_pvs() const {
+		return _cull_using_pvs;
+	}
 
 	// occluders
-	const LocalVector<uint32_t, uint32_t> &get_occluders_active_list() const { return _occluder_instance_pool.get_active_list(); }
-	const VSOccluder_Instance &get_pool_occluder_instance(uint32_t p_pool_id) const { return _occluder_instance_pool[p_pool_id]; }
-	VSOccluder_Instance &get_pool_occluder_instance(uint32_t p_pool_id) { return _occluder_instance_pool[p_pool_id]; }
-	const VSOccluder_Sphere &get_pool_occluder_world_sphere(uint32_t p_pool_id) const { return _occluder_world_sphere_pool[p_pool_id]; }
-	const VSOccluder_Poly &get_pool_occluder_world_poly(uint32_t p_pool_id) const { return _occluder_world_poly_pool[p_pool_id]; }
-	const VSOccluder_Hole &get_pool_occluder_world_hole(uint32_t p_pool_id) const { return _occluder_world_hole_pool[p_pool_id]; }
-	VSOccluder_Hole &get_pool_occluder_world_hole(uint32_t p_pool_id) { return _occluder_world_hole_pool[p_pool_id]; }
+	const LocalVector<uint32_t, uint32_t> &get_occluders_active_list() const {
+		return _occluder_instance_pool.get_active_list();
+	}
+	const VSOccluder_Instance &get_pool_occluder_instance(uint32_t p_pool_id) const {
+		return _occluder_instance_pool[p_pool_id];
+	}
+	VSOccluder_Instance &get_pool_occluder_instance(uint32_t p_pool_id) {
+		return _occluder_instance_pool[p_pool_id];
+	}
+	const VSOccluder_Sphere &get_pool_occluder_world_sphere(uint32_t p_pool_id) const {
+		return _occluder_world_sphere_pool[p_pool_id];
+	}
+	const VSOccluder_Poly &get_pool_occluder_world_poly(uint32_t p_pool_id) const {
+		return _occluder_world_poly_pool[p_pool_id];
+	}
+	const VSOccluder_Hole &get_pool_occluder_world_hole(uint32_t p_pool_id) const {
+		return _occluder_world_hole_pool[p_pool_id];
+	}
+	VSOccluder_Hole &get_pool_occluder_world_hole(uint32_t p_pool_id) {
+		return _occluder_world_hole_pool[p_pool_id];
+	}
 
 private:
 	int find_room_within(const Vector3 &p_pos, int p_previous_room_id = -1) {

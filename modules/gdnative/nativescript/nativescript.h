@@ -294,7 +294,9 @@ public:
 		return singleton;
 	}
 
-	_FORCE_INLINE_ void set_language_index(int p_idx) { lang_idx = p_idx; }
+	_FORCE_INLINE_ void set_language_index(int p_idx) {
+		lang_idx = p_idx;
+	}
 
 #ifndef NO_THREADS
 	virtual void thread_enter();

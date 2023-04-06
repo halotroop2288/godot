@@ -430,7 +430,9 @@ public:
 	void set(int p_index, const T &p_val);
 	void fill(const T &p_val);
 	void push_back(const T &p_val);
-	void append(const T &p_val) { push_back(p_val); }
+	void append(const T &p_val) {
+		push_back(p_val);
+	}
 	void append_array(const PoolVector<T> &p_arr) {
 		int ds = p_arr.size();
 		if (ds == 0) {
@@ -494,7 +496,9 @@ public:
 		return rs;
 	}
 
-	bool is_locked() const { return alloc && alloc->lock.get() > 0; }
+	bool is_locked() const {
+		return alloc && alloc->lock.get() > 0;
+	}
 
 	inline T operator[](int p_index) const;
 
@@ -503,13 +507,19 @@ public:
 	void invert();
 	void sort();
 
-	void operator=(const PoolVector &p_pool_vector) { _reference(p_pool_vector); }
-	PoolVector() { alloc = nullptr; }
+	void operator=(const PoolVector &p_pool_vector) {
+		_reference(p_pool_vector);
+	}
+	PoolVector() {
+		alloc = nullptr;
+	}
 	PoolVector(const PoolVector &p_pool_vector) {
 		alloc = nullptr;
 		_reference(p_pool_vector);
 	}
-	~PoolVector() { _unreference(); }
+	~PoolVector() {
+		_unreference();
+	}
 };
 
 template <class T>

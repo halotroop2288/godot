@@ -608,7 +608,9 @@ public:
 	const JointData *get_joint_data() const;
 	Skeleton *find_skeleton_parent();
 
-	int get_bone_id() const { return bone_id; }
+	int get_bone_id() const {
+		return bone_id;
+	}
 
 	void set_joint_type(JointType p_joint_type);
 	JointType get_joint_type() const;

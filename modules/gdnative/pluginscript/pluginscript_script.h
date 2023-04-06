@@ -103,8 +103,12 @@ public:
 	bool has_property(const StringName &p_method) const;
 	PropertyInfo get_property_info(const StringName &p_property) const;
 
-	bool is_tool() const { return _tool; }
-	bool is_valid() const { return true; }
+	bool is_tool() const {
+		return _tool;
+	}
+	bool is_valid() const {
+		return true;
+	}
 
 	virtual ScriptLanguage *get_language() const;
 

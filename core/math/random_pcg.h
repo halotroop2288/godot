@@ -132,7 +132,9 @@ public:
 
 	double random(double p_from, double p_to);
 	float random(float p_from, float p_to);
-	real_t random(int p_from, int p_to) { return (real_t)random((real_t)p_from, (real_t)p_to); }
+	real_t random(int p_from, int p_to) {
+		return (real_t)random((real_t)p_from, (real_t)p_to);
+	}
 };
 
 #endif // RANDOM_PCG_H

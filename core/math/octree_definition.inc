@@ -456,9 +456,15 @@ public:
 	void set_pair_callback(PairCallback p_callback, void *p_userdata);
 	void set_unpair_callback(UnpairCallback p_callback, void *p_userdata);
 
-	int get_octant_count() const { return octant_count; }
-	int get_pair_count() const { return pair_count; }
-	void set_octant_elements_limit(int p_limit) { octant_elements_limit = p_limit; }
+	int get_octant_count() const {
+		return octant_count;
+	}
+	int get_pair_count() const {
+		return pair_count;
+	}
+	void set_octant_elements_limit(int p_limit) {
+		octant_elements_limit = p_limit;
+	}
 
 	// just convenience for project settings, as users don't need to know exact numbers
 	void set_balance(float p_bal) // 0.0 is optimized for multiple tests, 1.0 is for multiple edits (moves etc)
@@ -476,7 +482,9 @@ public:
 #endif
 
 	OCTREE_CLASS_NAME(real_t p_unit_size = 1.0);
-	~OCTREE_CLASS_NAME() { _remove_tree(root); }
+	~OCTREE_CLASS_NAME() {
+		_remove_tree(root);
+	}
 };
 
 /* PRIVATE FUNCTIONS */

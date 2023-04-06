@@ -59,7 +59,9 @@ class OccluderShapePolygon : public OccluderShape {
 	// mem funcs
 	void _sanitize_points();
 	void _sanitize_points_internal(const PoolVector<Vector2> &p_from, Vector<Vector2> &r_to);
-	static Vector3 _vec2to3(const Vector2 &p_pt) { return Vector3(p_pt.x, p_pt.y, 0.0); }
+	static Vector3 _vec2to3(const Vector2 &p_pt) {
+		return Vector3(p_pt.x, p_pt.y, 0.0);
+	}
 
 protected:
 	static void _bind_methods();
@@ -77,7 +79,9 @@ public:
 	void set_hole_point(int p_idx, const Vector2 &p_point);
 
 	void set_two_way(bool p_two_way);
-	bool is_two_way() const { return _settings_two_way; }
+	bool is_two_way() const {
+		return _settings_two_way;
+	}
 
 	void clear();
 

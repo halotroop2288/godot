@@ -182,8 +182,12 @@ public:
 
 	virtual void get_members(Set<StringName> *p_members);
 
-	virtual bool is_tool() const { return tool; }
-	virtual bool is_valid() const { return valid; }
+	virtual bool is_tool() const {
+		return tool;
+	}
+	virtual bool is_valid() const {
+		return valid;
+	}
 
 	bool inherits_script(const Ref<Script> &p_script) const;
 
@@ -197,7 +201,9 @@ public:
 	virtual int get_member_line(const StringName &p_member) const;
 
 #ifdef TOOLS_ENABLED
-	virtual bool is_placeholder_fallback_enabled() const { return placeholder_fallback_enabled; }
+	virtual bool is_placeholder_fallback_enabled() const {
+		return placeholder_fallback_enabled;
+	}
 #endif
 
 	Error load_source_code(const String &p_path);
@@ -358,17 +364,27 @@ class CSharpLanguage : public ScriptLanguage {
 public:
 	StringNameCache string_names;
 
-	Mutex &get_language_bind_mutex() { return language_bind_mutex; }
+	Mutex &get_language_bind_mutex() {
+		return language_bind_mutex;
+	}
 
-	_FORCE_INLINE_ int get_language_index() { return lang_idx; }
+	_FORCE_INLINE_ int get_language_index() {
+		return lang_idx;
+	}
 	void set_language_index(int p_idx);
 
-	_FORCE_INLINE_ const StringNameCache &get_string_names() { return string_names; }
+	_FORCE_INLINE_ const StringNameCache &get_string_names() {
+		return string_names;
+	}
 
-	_FORCE_INLINE_ static CSharpLanguage *get_singleton() { return singleton; }
+	_FORCE_INLINE_ static CSharpLanguage *get_singleton() {
+		return singleton;
+	}
 
 #ifdef TOOLS_ENABLED
-	_FORCE_INLINE_ EditorPlugin *get_godotsharp_editor() const { return godotsharp_editor; }
+	_FORCE_INLINE_ EditorPlugin *get_godotsharp_editor() const {
+		return godotsharp_editor;
+	}
 #endif
 
 	static void release_script_gchandle(Ref<MonoGCHandle> &p_gchandle);
@@ -409,12 +425,16 @@ public:
 	virtual Ref<Script> get_template(const String &p_class_name, const String &p_base_class_name) const;
 	virtual bool is_using_templates();
 	virtual void make_template(const String &p_class_name, const String &p_base_class_name, Ref<Script> &p_script);
-	/* TODO */ virtual bool validate(const String &p_script, int &r_line_error, int &r_col_error, String &r_test_error, const String &p_path, List<String> *r_functions, List<ScriptLanguage::Warning> *r_warnings = NULL, Set<int> *r_safe_lines = NULL) const { return true; }
+	/* TODO */ virtual bool validate(const String &p_script, int &r_line_error, int &r_col_error, String &r_test_error, const String &p_path, List<String> *r_functions, List<ScriptLanguage::Warning> *r_warnings = NULL, Set<int> *r_safe_lines = NULL) const {
+		return true;
+	}
 	virtual String validate_path(const String &p_path) const;
 	virtual Script *create_script() const;
 	virtual bool has_named_classes() const;
 	virtual bool supports_builtin_mode() const;
-	/* TODO? */ virtual int find_function(const String &p_function, const String &p_code) const { return -1; }
+	/* TODO? */ virtual int find_function(const String &p_function, const String &p_code) const {
+		return -1;
+	}
 	virtual String make_function(const String &p_class, const String &p_name, const PoolStringArray &p_args) const;
 	virtual String _get_indentation() const;
 	/* TODO? */ virtual void auto_indent_code(String &p_code, int p_from_line, int p_to_line) const {}
@@ -429,14 +449,20 @@ public:
 	/* TODO */ virtual void debug_get_stack_level_locals(int p_level, List<String> *p_locals, List<Variant> *p_values, int p_max_subitems, int p_max_depth) {}
 	/* TODO */ virtual void debug_get_stack_level_members(int p_level, List<String> *p_members, List<Variant> *p_values, int p_max_subitems, int p_max_depth) {}
 	/* TODO */ virtual void debug_get_globals(List<String> *p_locals, List<Variant> *p_values, int p_max_subitems, int p_max_depth) {}
-	/* TODO */ virtual String debug_parse_stack_level_expression(int p_level, const String &p_expression, int p_max_subitems, int p_max_depth) { return ""; }
+	/* TODO */ virtual String debug_parse_stack_level_expression(int p_level, const String &p_expression, int p_max_subitems, int p_max_depth) {
+		return "";
+	}
 	virtual Vector<StackInfo> debug_get_current_stack_info();
 
 	/* PROFILING FUNCTIONS */
 	/* TODO */ virtual void profiling_start() {}
 	/* TODO */ virtual void profiling_stop() {}
-	/* TODO */ virtual int profiling_get_accumulated_data(ProfilingInfo *p_info_arr, int p_info_max) { return 0; }
-	/* TODO */ virtual int profiling_get_frame_data(ProfilingInfo *p_info_arr, int p_info_max) { return 0; }
+	/* TODO */ virtual int profiling_get_accumulated_data(ProfilingInfo *p_info_arr, int p_info_max) {
+		return 0;
+	}
+	/* TODO */ virtual int profiling_get_frame_data(ProfilingInfo *p_info_arr, int p_info_max) {
+		return 0;
+	}
 
 	virtual void frame();
 

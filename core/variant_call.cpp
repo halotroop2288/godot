@@ -211,32 +211,58 @@ struct _VariantCall {
 		type_funcs[p_type].functions[p_name] = funcdata;
 	}
 
-#define VCALL_LOCALMEM0(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._mem)->m_method(); }
-#define VCALL_LOCALMEM0R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(); }
-#define VCALL_LOCALMEM0RI(m_type, m_method, m_internal_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_internal_method(); }
-#define VCALL_LOCALMEM1(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0]); }
-#define VCALL_LOCALMEM1R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0]); }
-#define VCALL_LOCALMEM2(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1]); }
-#define VCALL_LOCALMEM2R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1]); }
-#define VCALL_LOCALMEM3(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2]); }
-#define VCALL_LOCALMEM3R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2]); }
-#define VCALL_LOCALMEM4(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3]); }
-#define VCALL_LOCALMEM4R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3]); }
-#define VCALL_LOCALMEM5(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3], *p_args[4]); }
-#define VCALL_LOCALMEM5R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3], *p_args[4]); }
+#define VCALL_LOCALMEM0(m_type, m_method)                                                              \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		reinterpret_cast<m_type *>(p_self._data._mem)->m_method();                                     \
+	}
+#define VCALL_LOCALMEM0R(m_type, m_method)                                                             \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method();                             \
+	}
+#define VCALL_LOCALMEM0RI(m_type, m_method, m_internal_method)                                         \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_internal_method();                    \
+	}
+#define VCALL_LOCALMEM1(m_type, m_method)                                                              \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0]);                           \
+	}
+#define VCALL_LOCALMEM1R(m_type, m_method)                                                             \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0]);                   \
+	}
+#define VCALL_LOCALMEM2(m_type, m_method)                                                              \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1]);               \
+	}
+#define VCALL_LOCALMEM2R(m_type, m_method)                                                             \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1]);       \
+	}
+#define VCALL_LOCALMEM3(m_type, m_method)                                                              \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2]);   \
+	}
+#define VCALL_LOCALMEM3R(m_type, m_method)                                                                   \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) {       \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2]); \
+	}
+#define VCALL_LOCALMEM4(m_type, m_method)                                                                        \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) {           \
+		reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3]); \
+	}
+#define VCALL_LOCALMEM4R(m_type, m_method)                                                                               \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) {                   \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3]); \
+	}
+#define VCALL_LOCALMEM5(m_type, m_method)                                                                                    \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) {                       \
+		reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3], *p_args[4]); \
+	}
+#define VCALL_LOCALMEM5R(m_type, m_method)                                                                                           \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) {                               \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._mem)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3], *p_args[4]); \
+	}
 
 	// built-in functions of localmem based types
 
@@ -817,30 +843,54 @@ struct _VariantCall {
 	VCALL_LOCALMEM1R(PoolColorArray, has);
 	VCALL_LOCALMEM0(PoolColorArray, sort);
 
-#define VCALL_PTR0(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(); }
-#define VCALL_PTR0R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(); }
-#define VCALL_PTR1(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0]); }
-#define VCALL_PTR1R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0]); }
-#define VCALL_PTR2(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1]); }
-#define VCALL_PTR2R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1]); }
-#define VCALL_PTR3(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2]); }
-#define VCALL_PTR3R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2]); }
-#define VCALL_PTR4(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3]); }
-#define VCALL_PTR4R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3]); }
-#define VCALL_PTR5(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3], *p_args[4]); }
-#define VCALL_PTR5R(m_type, m_method) \
-	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3], *p_args[4]); }
+#define VCALL_PTR0(m_type, m_method)                                                                   \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		reinterpret_cast<m_type *>(p_self._data._ptr)->m_method();                                     \
+	}
+#define VCALL_PTR0R(m_type, m_method)                                                                  \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method();                             \
+	}
+#define VCALL_PTR1(m_type, m_method)                                                                   \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0]);                           \
+	}
+#define VCALL_PTR1R(m_type, m_method)                                                                  \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0]);                   \
+	}
+#define VCALL_PTR2(m_type, m_method)                                                                   \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1]);               \
+	}
+#define VCALL_PTR2R(m_type, m_method)                                                                  \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1]);       \
+	}
+#define VCALL_PTR3(m_type, m_method)                                                                   \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) { \
+		reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2]);   \
+	}
+#define VCALL_PTR3R(m_type, m_method)                                                                        \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) {       \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2]); \
+	}
+#define VCALL_PTR4(m_type, m_method)                                                                             \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) {           \
+		reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3]); \
+	}
+#define VCALL_PTR4R(m_type, m_method)                                                                                    \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) {                   \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3]); \
+	}
+#define VCALL_PTR5(m_type, m_method)                                                                                         \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) {                       \
+		reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3], *p_args[4]); \
+	}
+#define VCALL_PTR5R(m_type, m_method)                                                                                                \
+	static void _call_##m_type##_##m_method(Variant &r_ret, Variant &p_self, const Variant **p_args) {                               \
+		r_ret = reinterpret_cast<m_type *>(p_self._data._ptr)->m_method(*p_args[0], *p_args[1], *p_args[2], *p_args[3], *p_args[4]); \
+	}
 
 	VCALL_PTR0R(AABB, abs);
 	VCALL_PTR0R(AABB, get_area);

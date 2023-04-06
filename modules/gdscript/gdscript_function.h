@@ -311,7 +311,9 @@ public:
 		Variant result;
 	};
 
-	_FORCE_INLINE_ bool is_static() const { return _static; }
+	_FORCE_INLINE_ bool is_static() const {
+		return _static;
+	}
 
 	const int *get_code() const; //used for debug
 	int get_code_size() const;
@@ -323,14 +325,22 @@ public:
 	int get_default_argument_addr(int p_idx) const;
 	GDScriptDataType get_return_type() const;
 	GDScriptDataType get_argument_type(int p_idx) const;
-	GDScript *get_script() const { return _script; }
-	StringName get_source() const { return source; }
+	GDScript *get_script() const {
+		return _script;
+	}
+	StringName get_source() const {
+		return source;
+	}
 
 	void debug_get_stack_member_state(int p_line, List<Pair<StringName, int>> *r_stackvars) const;
 
-	_FORCE_INLINE_ bool is_empty() const { return _code_size == 0; }
+	_FORCE_INLINE_ bool is_empty() const {
+		return _code_size == 0;
+	}
 
-	int get_argument_count() const { return _argument_count; }
+	int get_argument_count() const {
+		return _argument_count;
+	}
 	StringName get_argument_name(int p_idx) const {
 #ifdef TOOLS_ENABLED
 		ERR_FAIL_INDEX_V(p_idx, arg_names.size(), StringName());
@@ -346,7 +356,9 @@ public:
 
 	Variant call(GDScriptInstance *p_instance, const Variant **p_args, int p_argcount, Variant::CallError &r_err, CallState *p_state = nullptr);
 
-	_FORCE_INLINE_ MultiplayerAPI::RPCMode get_rpc_mode() const { return rpc_mode; }
+	_FORCE_INLINE_ MultiplayerAPI::RPCMode get_rpc_mode() const {
+		return rpc_mode;
+	}
 	GDScriptFunction();
 	~GDScriptFunction();
 };

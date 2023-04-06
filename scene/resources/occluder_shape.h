@@ -56,7 +56,9 @@ public:
 #ifdef TOOLS_ENABLED
 	// for editor gizmo
 	virtual AABB get_fallback_gizmo_aabb() const;
-	virtual bool requires_uniform_scale() const { return false; }
+	virtual bool requires_uniform_scale() const {
+		return false;
+	}
 #endif
 };
 
@@ -77,7 +79,9 @@ protected:
 
 public:
 	void set_spheres(const Vector<Plane> &p_spheres);
-	Vector<Plane> get_spheres() const { return _spheres; }
+	Vector<Plane> get_spheres() const {
+		return _spheres;
+	}
 
 	void set_sphere_position(int p_idx, const Vector3 &p_position);
 	void set_sphere_radius(int p_idx, real_t p_radius);
@@ -87,7 +91,9 @@ public:
 
 #ifdef TOOLS_ENABLED
 	virtual AABB get_fallback_gizmo_aabb() const;
-	virtual bool requires_uniform_scale() const { return false; }
+	virtual bool requires_uniform_scale() const {
+		return false;
+	}
 #endif
 
 	OccluderShapeSphere();

@@ -282,8 +282,12 @@ public:
 	void set_selected(Node *p_node, bool p_emit_selected = false);
 	void fill_path_renames(Node *p_node, Node *p_new_parent, Map<Node *, NodePath> *p_renames);
 	void perform_node_renames(Node *p_base, Map<Node *, NodePath> *p_renames, Map<Ref<Animation>, Set<int>> *r_rem_anims = nullptr);
-	SceneTreeEditor *get_tree_editor() { return scene_tree; }
-	EditorData *get_editor_data() { return editor_data; }
+	SceneTreeEditor *get_tree_editor() {
+		return scene_tree;
+	}
+	EditorData *get_editor_data() {
+		return editor_data;
+	}
 
 	void add_remote_tree_editor(Control *p_remote);
 	void show_remote_tree();
@@ -299,7 +303,9 @@ public:
 	void open_add_child_dialog();
 	void open_instance_child_dialog();
 
-	ScriptCreateDialog *get_script_create_dialog() { return script_create_dialog; }
+	ScriptCreateDialog *get_script_create_dialog() {
+		return script_create_dialog;
+	}
 
 	SceneTreeDock(EditorNode *p_editor, Node *p_scene_root, EditorSelection *p_editor_selection, EditorData &p_editor_data);
 	~SceneTreeDock();

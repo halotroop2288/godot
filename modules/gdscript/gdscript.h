@@ -146,28 +146,46 @@ protected:
 	static void _bind_methods();
 
 public:
-	virtual bool is_valid() const { return valid; }
+	virtual bool is_valid() const {
+		return valid;
+	}
 
 	bool inherits_script(const Ref<Script> &p_script) const;
 
-	const Map<StringName, Ref<GDScript>> &get_subclasses() const { return subclasses; }
-	const Map<StringName, Variant> &get_constants() const { return constants; }
-	const Set<StringName> &get_members() const { return members; }
+	const Map<StringName, Ref<GDScript>> &get_subclasses() const {
+		return subclasses;
+	}
+	const Map<StringName, Variant> &get_constants() const {
+		return constants;
+	}
+	const Set<StringName> &get_members() const {
+		return members;
+	}
 	const GDScriptDataType &get_member_type(const StringName &p_member) const {
 		CRASH_COND(!member_indices.has(p_member));
 		return member_indices[p_member].data_type;
 	}
-	const Map<StringName, GDScriptFunction *> &get_member_functions() const { return member_functions; }
-	const Ref<GDScriptNativeClass> &get_native() const { return native; }
-	const String &get_script_class_name() const { return name; }
+	const Map<StringName, GDScriptFunction *> &get_member_functions() const {
+		return member_functions;
+	}
+	const Ref<GDScriptNativeClass> &get_native() const {
+		return native;
+	}
+	const String &get_script_class_name() const {
+		return name;
+	}
 
 	virtual bool has_script_signal(const StringName &p_signal) const;
 	virtual void get_script_signal_list(List<MethodInfo> *r_signals) const;
 
-	bool is_tool() const { return tool; }
+	bool is_tool() const {
+		return tool;
+	}
 	Ref<GDScript> get_base() const;
 
-	const Map<StringName, MemberInfo> &debug_get_member_indices() const { return member_indices; }
+	const Map<StringName, MemberInfo> &debug_get_member_indices() const {
+		return member_indices;
+	}
 	const Map<StringName, GDScriptFunction *> &debug_get_member_functions() const; //this is debug only
 	StringName debug_get_member_by_index(int p_idx) const;
 
@@ -188,7 +206,9 @@ public:
 
 	virtual Error reload(bool p_keep_state = false);
 
-	void set_script_path(const String &p_path) { path = p_path; } //because subclasses need a path too...
+	void set_script_path(const String &p_path) {
+		path = p_path;
+	} //because subclasses need a path too...
 	Error load_source_code(const String &p_path);
 	Error load_byte_code(const String &p_path);
 
@@ -217,7 +237,9 @@ public:
 	virtual void get_members(Set<StringName> *p_members);
 
 #ifdef TOOLS_ENABLED
-	virtual bool is_placeholder_fallback_enabled() const { return placeholder_fallback_enabled; }
+	virtual bool is_placeholder_fallback_enabled() const {
+		return placeholder_fallback_enabled;
+	}
 #endif
 
 	GDScript();
@@ -243,7 +265,9 @@ class GDScriptInstance : public ScriptInstance {
 	void _ml_call_reversed(GDScript *sptr, const StringName &p_method, const Variant **p_args, int p_argcount);
 
 public:
-	virtual Object *get_owner() { return owner; }
+	virtual Object *get_owner() {
+		return owner;
+	}
 
 	virtual bool set(const StringName &p_name, const Variant &p_value);
 	virtual bool get(const StringName &p_name, Variant &r_ret) const;
@@ -256,7 +280,9 @@ public:
 	virtual void call_multilevel(const StringName &p_method, const Variant **p_args, int p_argcount);
 	virtual void call_multilevel_reversed(const StringName &p_method, const Variant **p_args, int p_argcount);
 
-	Variant debug_get_member_by_index(int p_idx) const { return members[p_idx]; }
+	Variant debug_get_member_by_index(int p_idx) const {
+		return members[p_idx];
+	}
 
 	virtual void notification(int p_notification);
 	String to_string(bool *r_valid);
