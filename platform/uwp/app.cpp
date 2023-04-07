@@ -108,9 +108,6 @@ void App::SetWindow(CoreWindow ^ p_window) {
 	window->VisibilityChanged +=
 			ref new TypedEventHandler<CoreWindow ^, VisibilityChangedEventArgs ^>(this, &App::OnVisibilityChanged);
 
-	window->Activated +=
-			ref new TypedEventHandler<CoreWindow ^, WindowActivatedEventArgs ^>(this, &App::OnWindowActivated);
-
 	window->Closed +=
 			ref new TypedEventHandler<CoreWindow ^, CoreWindowEventArgs ^>(this, &App::OnWindowClosed);
 
@@ -446,10 +443,6 @@ void App::OnActivated(CoreApplicationView ^ applicationView, IActivatedEventArgs
 // Window event handlers.
 void App::OnVisibilityChanged(CoreWindow ^ sender, VisibilityChangedEventArgs ^ args) {
 	mWindowVisible = args->Visible;
-}
-
-void App::OnWindowActivated(CoreWindow ^ sender, WindowActivatedEventArgs ^ args) {
-	os->update_clipboard();
 }
 
 void App::OnWindowClosed(CoreWindow ^ sender, CoreWindowEventArgs ^ args) {
