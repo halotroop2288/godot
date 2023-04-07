@@ -3,18 +3,18 @@ on: [push, pull_request]
 
 # Global Cache Settings
 env:
-  GODOT_BASE_BRANCH: 3.2
+  GODOT_BASE_BRANCH: 3.5
   SCONS_CACHE_LIMIT: 4096
 
 jobs:
   switch-template:
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
     container: devkitpro/devkita64
 
     name: Template (target=release, tools=no)
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Upload cache on completion and check it out now
       - name: Load .scons_cache directory
