@@ -375,8 +375,3 @@ $RECYCLE.BIN/
 templates/
 /*.zip
 /*.tpz
-
-# Switch
-*.nro
-switch/
-config/nx-hbmenu/

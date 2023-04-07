@@ -544,15 +544,15 @@ public:
 		const char *version_cstr = version_utf8.ptr();
 
 		for (int i = 0; i < 12; i++) {
-			if(title.length() != 0) {
+			if (title.length() != 0) {
 				strncpy(nacp->lang[i].name, title_cstr, sizeof(nacp->lang[i].name) - 1);
 			}
-			if(author.length() != 0) {
+			if (author.length() != 0) {
 				strncpy(nacp->lang[i].author, author_cstr, sizeof(nacp->lang[i].author) - 1);
 			}
 		}
 
-		if(version.length() != 0) {
+		if (version.length() != 0) {
 			strncpy(nacp->version, version_cstr, sizeof(nacp->version) - 1);
 		}
 	}
