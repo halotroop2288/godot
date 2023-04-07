@@ -14,18 +14,11 @@ concurrency:
 
 jobs:
   vita-template:
-    runs-on: "ubuntu-20.04"
+    runs-on: ubuntu-20.04
     name: Template (target=release, tools=no)
 
     steps:
-      - uses: actions/checkout@v2
-
-      # Azure repositories are not reliable, we need to prevent azure giving us packages.
-      - name: Make apt sources.list use the default Ubuntu repositories
-        run: |
-          sudo rm -f /etc/apt/sources.list.d/*
-          sudo cp -f misc/ci/sources.list /etc/apt/sources.list
-          sudo apt-get update
+      - uses: actions/checkout@v3
 
       - name: Setup Godot build cache
         uses: ./.github/actions/godot-cache
@@ -34,9 +27,16 @@ jobs:
       - name: Setup python and scons
         uses: ./.github/actions/godot-deps
 
+      - name: Linux dependencies
+        run: |
+          # Azure repositories are not reliable, we need to prevent azure giving us packages.
+          sudo rm -f /etc/apt/sources.list.d/*
+          sudo cp -f misc/ci/sources.list /etc/apt/sources.list
+          sudo apt-get update
+          sudo apt-get install cmake libarchive-tools fakeroot zip -y
+
       - name: Setup VitaSDK
         run: |
-          sudo apt-get install cmake libarchive-tools fakeroot zip -y
           git clone https://github.com/vitasdk/vdpm
           git clone https://github.com/isage/vita-packages-extra
           cd vdpm

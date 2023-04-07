@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   ios-template:
-    runs-on: "macos-latest"
+    runs-on: macos-latest
     name: Template (target=release, tools=no)
 
     steps:

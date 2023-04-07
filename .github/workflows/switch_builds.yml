@@ -8,13 +8,13 @@ env:
 
 jobs:
   switch-template:
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-20.04
     container: devkitpro/devkita64
 
     name: Template (target=release, tools=no)
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Upload cache on completion and check it out now
       - name: Load .scons_cache directory

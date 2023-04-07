@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   build-server:
-    runs-on: "ubuntu-20.04"
+    runs-on: ubuntu-20.04
     name: ${{ matrix.name }}
     strategy:
       fail-fast: false
