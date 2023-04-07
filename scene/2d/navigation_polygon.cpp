@@ -582,8 +582,11 @@ void NavigationPolygonInstance::_map_changed(RID p_map) {
 }
 
 String NavigationPolygonInstance::get_configuration_warning() const {
-	String warning = Node2D::get_configuration_warning();
+	if (!is_visible_in_tree() || !is_inside_tree()) {
+		return String();
+	}
 
+	String warning = Node2D::get_configuration_warning();
 	if (!navpoly.is_valid()) {
 		if (warning != String()) {
 			warning += "\n\n";

@@ -83,14 +83,7 @@ Vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vect
 }
 
 String Navigation2D::get_configuration_warning() const {
-	String warning = Node2D::get_configuration_warning();
-
-	if (warning != String()) {
-		warning += "\n\n";
-	}
-	warning += TTR("'Navigation2D' node and 'Navigation2D.get_simple_path()' are deprecated and will be removed in a future version. Use 'Navigation2DServer.map_get_path()' instead.");
-
-	return warning;
+	return TTR("'Navigation2D' node and 'Navigation2D.get_simple_path()' are deprecated and will be removed in a future version. Use 'Navigation2DServer.map_get_path()' instead.");
 }
 
 Vector2 Navigation2D::get_closest_point(const Vector2 &p_point) const {
