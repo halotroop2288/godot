@@ -33,7 +33,6 @@ def can_build():
 
 
 def get_opts():
-
     from SCons.Variables import BoolVariable, EnumVariable
 
     return [

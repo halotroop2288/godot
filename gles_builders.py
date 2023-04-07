@@ -36,7 +36,6 @@ def include_file_in_legacygl_header(filename, header_data, depth):
     line = fs.readline()
 
     while line:
-
         if line.find("[vertex]") != -1:
             header_data.reading = "vertex"
             line = fs.readline()
@@ -97,7 +96,6 @@ def include_file_in_legacygl_header(filename, header_data, depth):
             uline = uline.replace(";", "")
             lines = uline.split(",")
             for x in lines:
-
                 x = x.strip()
                 x = x[x.rfind(" ") + 1 :]
                 if x.find("[") != -1:
@@ -119,7 +117,6 @@ def include_file_in_legacygl_header(filename, header_data, depth):
             uline = uline.replace("{", "").strip()
             lines = uline.split(",")
             for x in lines:
-
                 x = x.strip()
                 x = x[x.rfind(" ") + 1 :]
                 if x.find("[") != -1:
@@ -135,7 +132,6 @@ def include_file_in_legacygl_header(filename, header_data, depth):
             uline = uline.replace(";", "")
             lines = uline.split(",")
             for x in lines:
-
                 x = x.strip()
                 x = x[x.rfind(" ") + 1 :]
                 if x.find("[") != -1:
@@ -379,7 +375,6 @@ def build_legacygl_header(filename, include, class_suffix, output_attribs, gles2
     enum_value_count = 0
 
     if header_data.enums:
-
         fd.write("\t\t//Written using math, given nonstandarity of 64 bits integer constants..\n")
         fd.write("\t\tstatic const Enum _enums[]={\n")
 
@@ -423,7 +418,6 @@ def build_legacygl_header(filename, include, class_suffix, output_attribs, gles2
 
     conditionals_found = []
     if header_data.conditionals:
-
         fd.write("\t\tstatic const char* _conditional_strings[]={\n")
         if header_data.conditionals:
             for x in header_data.conditionals:
@@ -434,7 +428,6 @@ def build_legacygl_header(filename, include, class_suffix, output_attribs, gles2
         fd.write("\t\tstatic const char **_conditional_strings=NULL;\n")
 
     if header_data.uniforms:
-
         fd.write("\t\tstatic const char* _uniform_strings[]={\n")
         if header_data.uniforms:
             for x in header_data.uniforms:
@@ -445,7 +438,6 @@ def build_legacygl_header(filename, include, class_suffix, output_attribs, gles2
 
     if output_attribs:
         if header_data.attributes:
-
             fd.write("\t\tstatic AttributePair _attribute_pairs[]={\n")
             for x in header_data.attributes:
                 fd.write('\t\t\t{"' + x[0] + '",' + x[1] + "},\n")
@@ -456,7 +448,6 @@ def build_legacygl_header(filename, include, class_suffix, output_attribs, gles2
     feedback_count = 0
 
     if not gles2 and len(header_data.feedbacks):
-
         fd.write("\t\tstatic const Feedback _feedbacks[]={\n")
         for x in header_data.feedbacks:
             name = x[0]
@@ -580,7 +571,6 @@ def build_legacygl_header(filename, include, class_suffix, output_attribs, gles2
     fd.write("\t}\n\n")
 
     if enum_constants:
-
         fd.write("\tenum EnumConditionals {\n")
         for x in enum_constants:
             fd.write("\t\t" + x.upper() + ",\n")

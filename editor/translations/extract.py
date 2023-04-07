@@ -194,7 +194,6 @@ def process_file(f, fname):
         patterns = {**message_patterns, **theme_property_patterns}
 
     while l:
-
         # Detect translator comments.
         if not reading_translator_comment and l.find("TRANSLATORS:") != -1:
             reading_translator_comment = True

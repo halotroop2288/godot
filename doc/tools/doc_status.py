@@ -253,7 +253,6 @@ class ClassStatus:
         status.name = c.attrib["name"]
 
         for tag in list(c):
-
             if tag.tag == "brief_description":
                 status.has_brief_description = len(tag.text.strip()) > 0
 
@@ -401,7 +400,6 @@ table_column_chars = "|"
 total_status = ClassStatus("Total")
 
 for cn in filtered_classes:
-
     c = classes[cn]
     validate_tag(c, "class")
     status = ClassStatus.generate_for_class(c)

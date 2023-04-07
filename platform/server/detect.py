@@ -49,7 +49,6 @@ def get_flags():
 
 
 def configure(env):
-
     ## Build type
 
     if env["target"] == "release":

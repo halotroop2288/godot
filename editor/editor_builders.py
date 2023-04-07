@@ -14,7 +14,6 @@ from compat import encode_utf8, byte_to_str, open_utf8
 
 
 def make_doc_header(target, source, env):
-
     dst = target[0]
     g = open_utf8(dst, "w")
     buf = ""
@@ -49,7 +48,6 @@ def make_doc_header(target, source, env):
 
 
 def make_fonts_header(target, source, env):
-
     dst = target[0]
 
     g = open_utf8(dst, "w")
@@ -79,7 +77,6 @@ def make_fonts_header(target, source, env):
 
 
 def make_translations_header(target, source, env, category):
-
     dst = target[0]
 
     g = open_utf8(dst, "w")
