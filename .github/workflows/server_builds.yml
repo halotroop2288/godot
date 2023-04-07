@@ -1,5 +1,17 @@
 name: ☁ Server Builds
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - ".github/workflows/**"
+      - "platform/**"
+      - "!.github/workflows/server_builds.yml"
+      - "!platform/server/**"
+  pull_request:
+    paths-ignore:
+      - ".github/workflows/**"
+      - "platform/**"
+      - "!.github/workflows/server_builds.yml"
+      - "!platform/server/**"
 
 # Global Settings
 env:
