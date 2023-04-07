@@ -88,6 +88,14 @@ platform/javascript/node_modules/
 
 # Vita
 temp-build/
+*.vpk
+
+# Switch
+*.nacp
+*.nca
+*.nro
+*.nsp
+*.xci
 
 # Misc
 *.debug
