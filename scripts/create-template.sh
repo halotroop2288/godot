@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-sudo apt-get update
-sudo apt-get -y install zip
-
 template_version=`echo $1 | grep -Po '[0-9]+.[0-9]+.[0-9]+(-[^-]*)?' | sed s/-/./`
 
 mkdir templates

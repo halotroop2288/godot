@@ -4,9 +4,6 @@ if [[ $# -eq 0 ]]; then
 	echo "something is wrong.."
 fi
 
-sudo apt-get update
-sudo apt-get -y install zip
-
 version_number=`echo $1 | grep -o '[0-9]\+.[0-9]\+.[0-9]\+'`
 
 mkdir -p switch/godot config/nx-hbmenu/fileassoc
