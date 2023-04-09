@@ -96,6 +96,8 @@ temp-build/
 *.nro
 *.nsp
 *.xci
+switch/
+config/nx-hbmenu/
 
 # Misc
 *.debug
