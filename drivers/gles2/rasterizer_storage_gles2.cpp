@@ -6251,7 +6251,7 @@ void RasterizerStorageGLES2::initialize() {
 	// If the desktop build is using S3TC, and you export / run from the IDE for android, if the device supports
 	// S3TC it will crash trying to load these textures, as they are not exported in the APK. This is a simple way
 	// to prevent Android devices trying to load S3TC, by faking lack of hardware support.
-#if defined(ANDROID_ENABLED) || defined(IPHONE_ENABLED) || defined(VITA_ENABLED)
+#if defined(ANDROID_ENABLED) || defined(IPHONE_ENABLED) || defined(VITA_ENABLED) || (!defined(TOOLS_ENABLED) && defined(HORIZON_ENABLED))
 	config.s3tc_supported = false;
 #endif // ANDROID_ENABLED || IPHONE_ENABLED || VITA_ENABLED
 
@@ -6300,17 +6300,6 @@ void RasterizerStorageGLES2::initialize() {
 	//check if mipmaps can be used for SCREEN_TEXTURE and Glow on Mobile and web platforms
 	config.render_to_mipmap_supported = config.extensions.has("GL_OES_fbo_render_mipmap") && config.extensions.has("GL_EXT_texture_lod");
 #endif // GLES_OVER_GL
-
-	// If the desktop build is using S3TC, and you export / run from the IDE for android, if the device supports
-	// S3TC it will crash trying to load these textures, as they are not exported in the APK. This is a simple way
-	// to prevent Android devices trying to load S3TC, by faking lack of hardware support.
-
-	// Switch: this happens on Horizon too.
-#ifndef TOOLS_ENABLED
-#if defined(ANDROID_ENABLED) || defined(HORIZON_ENABLED)
-	config.s3tc_supported = false;
-#endif // ANDROID_ENABLED || HORIZON_ENABLED
-#endif // TOOLS_ENABLED
 
 #ifdef GLES_OVER_GL
 	config.use_rgba_2d_shadows = false;
@@ -6385,7 +6374,7 @@ void RasterizerStorageGLES2::initialize() {
 #ifdef GLES_OVER_GL
 			config.depth_internalformat = GL_DEPTH_COMPONENT16;
 #else // GLES_OVER_GL
-			// OES_depth_texture extension only specifies GL_DEPTH_COMPONENT.
+	  // OES_depth_texture extension only specifies GL_DEPTH_COMPONENT.
 			config.depth_internalformat = GL_DEPTH_COMPONENT;
 #endif // GLES_OVER_GL
 			config.depth_type = GL_UNSIGNED_SHORT;
