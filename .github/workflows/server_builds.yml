@@ -6,12 +6,14 @@ on:
       - "platform/**"
       - "!.github/workflows/server_builds.yml"
       - "!platform/server/**"
+      - "!platform/*/export/**"
   pull_request:
     paths-ignore:
       - ".github/workflows/**"
       - "platform/**"
       - "!.github/workflows/server_builds.yml"
       - "!platform/server/**"
+      - "!platform/*/export/**"
 
 # Global Settings
 env:

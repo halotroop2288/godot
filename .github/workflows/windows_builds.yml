@@ -10,6 +10,7 @@ on:
       - "!platform/server/**"
       - "!platform/uwp/**"
       - "!platform/windows/**"
+      - "!platform/*/export/**"
   pull_request:
     paths-ignore:
       - ".github/workflows/**"
@@ -20,6 +21,7 @@ on:
       - "!platform/server/**"
       - "!platform/uwp/**"
       - "!platform/windows/**"
+      - "!platform/*/export/**"
 
 # Global Settings
 # SCONS_CACHE for windows must be set in the build environment

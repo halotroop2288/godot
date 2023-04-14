@@ -9,6 +9,7 @@ on:
       - "!platform/SCsub"
       - "!platform/server/**"
       - "!platform/x11"
+      - "!platform/*/export/**"
   pull_request:
     paths-ignore:
       - ".github/workflows/**"
@@ -18,6 +19,7 @@ on:
       - "!platform/SCsub"
       - "!platform/server/**"
       - "!platform/x11"
+      - "!platform/*/export/**"
 
 # Global Settings
 env:
