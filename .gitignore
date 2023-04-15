@@ -86,6 +86,12 @@ platform/android/java/*/libs/
 *.bc
 platform/javascript/node_modules/
 
+# Switch
+*.nacp
+*.nro
+switch/
+config/nx-hbmenu/
+
 # Misc
 *.debug
 
