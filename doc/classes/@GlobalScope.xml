@@ -1045,16 +1045,16 @@
 		<constant name="JOY_XBOX_Y" value="3" enum="JoystickList">
 			Xbox controller Y button.
 		</constant>
-		<constant name="JOY_DS_A" value="1" enum="JoystickList">
+		<constant name="JOY_NINTENDO_A" value="1" enum="JoystickList">
 			Nintendo controller A button.
 		</constant>
-		<constant name="JOY_DS_B" value="0" enum="JoystickList">
+		<constant name="JOY_NINTENDO_B" value="0" enum="JoystickList">
 			Nintendo controller B button.
 		</constant>
-		<constant name="JOY_DS_X" value="3" enum="JoystickList">
+		<constant name="JOY_NINTENDO_X" value="3" enum="JoystickList">
 			Nintendo controller X button.
 		</constant>
-		<constant name="JOY_DS_Y" value="2" enum="JoystickList">
+		<constant name="JOY_NINTENDO_Y" value="2" enum="JoystickList">
 			Nintendo controller Y button.
 		</constant>
 		<constant name="JOY_VR_GRIP" value="2" enum="JoystickList">

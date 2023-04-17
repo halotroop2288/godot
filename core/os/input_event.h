@@ -62,29 +62,29 @@ enum JoystickList {
 
 	JOY_INVALID_OPTION = -1,
 
-	JOY_BUTTON_0 = 0,
-	JOY_BUTTON_1 = 1,
-	JOY_BUTTON_2 = 2,
-	JOY_BUTTON_3 = 3,
-	JOY_BUTTON_4 = 4,
-	JOY_BUTTON_5 = 5,
-	JOY_BUTTON_6 = 6,
-	JOY_BUTTON_7 = 7,
-	JOY_BUTTON_8 = 8,
-	JOY_BUTTON_9 = 9,
-	JOY_BUTTON_10 = 10,
-	JOY_BUTTON_11 = 11,
-	JOY_BUTTON_12 = 12,
-	JOY_BUTTON_13 = 13,
-	JOY_BUTTON_14 = 14,
-	JOY_BUTTON_15 = 15,
-	JOY_BUTTON_16 = 16,
-	JOY_BUTTON_17 = 17,
-	JOY_BUTTON_18 = 18,
-	JOY_BUTTON_19 = 19,
-	JOY_BUTTON_20 = 20,
-	JOY_BUTTON_21 = 21,
-	JOY_BUTTON_22 = 22,
+	JOY_BUTTON_0 = 0, // South Face Button
+	JOY_BUTTON_1 = 1, // East Face Button
+	JOY_BUTTON_2 = 2, // West Face Button
+	JOY_BUTTON_3 = 3, // North Face Button
+	JOY_BUTTON_4 = 4, // L1 Bumper
+	JOY_BUTTON_5 = 5, // R1 Bumper
+	JOY_BUTTON_6 = 6, // L2 Trigger
+	JOY_BUTTON_7 = 7, // R2 Trigger
+	JOY_BUTTON_8 = 8, // L3 Left Stick Button
+	JOY_BUTTON_9 = 9, // R3 Right Stick Button
+	JOY_BUTTON_10 = 10, // Select
+	JOY_BUTTON_11 = 11, // Start
+	JOY_BUTTON_12 = 12, // D-Pad Up
+	JOY_BUTTON_13 = 13, // D-Pad Down
+	JOY_BUTTON_14 = 14, // D-Pad Left
+	JOY_BUTTON_15 = 15, // D-Pad Right
+	JOY_BUTTON_16 = 16, // Home
+	JOY_BUTTON_17 = 17, // Screenshot / Misc
+	JOY_BUTTON_18 = 18, // P1 Top-Right Paddle
+	JOY_BUTTON_19 = 19, // P2 Bottom-Right Paddle
+	JOY_BUTTON_20 = 20, // P3 Top-Left Paddle
+	JOY_BUTTON_21 = 21, // P4 Bottom-Left Paddle
+	JOY_BUTTON_22 = 22, // Touchpad
 	JOY_BUTTON_MAX = 128, // Android supports up to 36 buttons. DirectInput supports up to 128 buttons.
 
 	JOY_L = JOY_BUTTON_4,
@@ -117,16 +117,16 @@ enum JoystickList {
 	JOY_XBOX_X = JOY_BUTTON_2,
 	JOY_XBOX_Y = JOY_BUTTON_3,
 
-	JOY_DS_A = JOY_BUTTON_1,
-	JOY_DS_B = JOY_BUTTON_0,
-	JOY_DS_X = JOY_BUTTON_3,
-	JOY_DS_Y = JOY_BUTTON_2,
+	JOY_NINTENDO_A = JOY_BUTTON_1,
+	JOY_NINTENDO_B = JOY_BUTTON_0,
+	JOY_NINTENDO_X = JOY_BUTTON_3,
+	JOY_NINTENDO_Y = JOY_BUTTON_2,
 
-	JOY_WII_C = JOY_BUTTON_5,
-	JOY_WII_Z = JOY_BUTTON_6,
+	JOY_NINTENDO_C = JOY_BUTTON_4,
+	JOY_NINTENDO_Z = JOY_BUTTON_6,
 
-	JOY_WII_MINUS = JOY_BUTTON_10,
-	JOY_WII_PLUS = JOY_BUTTON_11,
+	JOY_NINTENDO_MINUS = JOY_BUTTON_10,
+	JOY_NINTENDO_PLUS = JOY_BUTTON_11,
 
 	JOY_VR_GRIP = JOY_BUTTON_2,
 	JOY_VR_PAD = JOY_BUTTON_14,

@@ -164,10 +164,6 @@ Error OS_Switch::initialize(const VideoMode &p_desired, int p_video_driver, int 
 
 	input = memnew(InputDefault);
 	input->set_emulate_mouse_from_touch(true);
-	// TODO: handle joypads/joycons status
-	for (int i = 0; i < 8; i++) {
-		input->joy_connection_changed(i, true, "pad" + (char)i, "");
-	}
 	joypad = memnew(JoypadSwitch(input));
 
 	power_manager = memnew(PowerSwitch);
@@ -464,6 +460,8 @@ void OS_Switch::run() {
 		if (Main::iteration())
 			break;
 	}
+
+	joypad->stop();
 
 	swkbdInlineClose(&inline_keyboard);
 	main_loop->finish();
