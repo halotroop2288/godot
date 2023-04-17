@@ -47,9 +47,10 @@
 		<method name="get_accelerometer" qualifiers="const">
 			<return type="Vector3" />
 			<description>
-				Returns the acceleration of the device's accelerometer sensor, if the device has one. Otherwise, the method returns [constant Vector3.ZERO].
-				Note this method returns an empty [Vector3] when running from the editor even when your device has an accelerometer. You must export your project to a supported device to read values from the accelerometer.
-				[b]Note:[/b] This method only works on iOS, Android, and UWP. On other platforms, it always returns [constant Vector3.ZERO]. On Android the unit of measurement for each axis is m/s² while on iOS and UWP it's a multiple of the Earth's gravitational acceleration [code]g[/code] (~9.81 m/s²).
+				Returns the acceleration of the device's accelerometer sensor, if the device has one.
+				Otherwise, the method returns [constant Vector3.ZERO].
+				[b]Note:[/b] This method returns an empty [Vector3] when running from the editor even when your device has an accelerometer.
+				You must export your project to a supported device to read values from the accelerometer.
 			</description>
 		</method>
 		<method name="get_action_raw_strength" qualifiers="const">
@@ -94,27 +95,40 @@
 		<method name="get_gravity" qualifiers="const">
 			<return type="Vector3" />
 			<description>
-				Returns the gravity of the device's accelerometer sensor, if the device has one. Otherwise, the method returns [constant Vector3.ZERO].
-				[b]Note:[/b] This method only works on Android and iOS. On other platforms, it always returns [constant Vector3.ZERO]. On Android the unit of measurement for each axis is m/s² while on iOS it's a multiple of the Earth's gravitational acceleration [code]g[/code] (~9.81 m/s²).
+				Returns the gravity of the device's accelerometer sensor, if the device has one. Otherwise, the method
+				returns [constant Vector3.ZERO].
+				[b]Note:[/b] On Android the unit of measurement for each axis is m/s² while on iOS it's a multiple of
+				the Earth's gravitational acceleration [code]g[/code] (~9.81 m/s²).
 			</description>
 		</method>
 		<method name="get_gyroscope" qualifiers="const">
-			<return type="Vector3" />
+			<return type="Vector3"/>
 			<description>
-				Returns the rotation rate in rad/s around a device's X, Y, and Z axes of the gyroscope sensor, if the device has one. Otherwise, the method returns [constant Vector3.ZERO].
-				[b]Note:[/b] This method only works on Android and iOS. On other platforms, it always returns [constant Vector3.ZERO].
+				Returns the rotation rate in rad/s around a device's X, Y, and Z axes of the gyroscope sensor, if the
+				device has one. Otherwise, the method returns [constant Vector3.ZERO].
+			</description>
+		</method>
+		<method name="get_joy_accelerometer" qualifiers="const">
+			<return type="Vector3"/>
+			<argument index="0" name="device" type="int"/>
+			<description>
+				Returns the acceleration of the controller's accelerometer sensor, if the controller has one.
+				Otherwise, the method returns [constant Vector3.ZERO].
+				[b]Note:[/b] This method returns an empty [Vector3] when running from the editor even when your device
+				has an accelerometer.
+				You must export your project to a supported device to read values from the accelerometer.
 			</description>
 		</method>
 		<method name="get_joy_axis" qualifiers="const">
-			<return type="float" />
-			<argument index="0" name="device" type="int" />
-			<argument index="1" name="axis" type="int" />
+			<return type="float"/>
+			<argument index="0" name="device" type="int"/>
+			<argument index="1" name="axis" type="int"/>
 			<description>
 				Returns the current value of the joypad axis at given index (see [enum JoystickList]).
 			</description>
 		</method>
 		<method name="get_joy_axis_index_from_string">
-			<return type="int" />
+			<return type="int"/>
 			<argument index="0" name="axis" type="String" />
 			<description>
 				Returns the index of the provided axis name.
@@ -129,28 +143,56 @@
 		</method>
 		<method name="get_joy_button_index_from_string">
 			<return type="int" />
-			<argument index="0" name="button" type="String" />
+			<argument index="0" name="button" type="String"/>
 			<description>
 				Returns the index of the provided button name.
 			</description>
 		</method>
 		<method name="get_joy_button_string">
-			<return type="String" />
-			<argument index="0" name="button_index" type="int" />
+			<return type="String"/>
+			<argument index="0" name="button_index" type="int"/>
 			<description>
 				Receives a gamepad button from [enum JoystickList] and returns its equivalent name as a string.
 			</description>
 		</method>
-		<method name="get_joy_guid" qualifiers="const">
-			<return type="String" />
-			<argument index="0" name="device" type="int" />
+		<method name="get_joy_gravity" qualifiers="const">
+			<return type="Vector3"/>
+			<argument index="0" name="device" type="int"/>
 			<description>
-				Returns a SDL2-compatible device GUID on platforms that use gamepad remapping. Returns [code]"Default Gamepad"[/code] otherwise.
+				Returns the rotation rate in rad/s around a controller's X, Y, and Z axes of the gyroscope sensor, if
+				the controller has one.
+				Otherwise, the method returns [constant Vector3.ZERO].
+			</description>
+		</method>
+		<method name="get_joy_guid" qualifiers="const">
+			<return type="String"/>
+			<argument index="0" name="device" type="int"/>
+			<description>
+				Returns a SDL2-compatible device GUID on platforms that use gamepad remapping. Returns [code]"Default
+				Gamepad"[/code] otherwise.
+			</description>
+		</method>
+		<method name="get_joy_gyroscope" qualifiers="const">
+			<return type="Vector3"/>
+			<argument index="0" name="device" type="int"/>
+			<description>
+				Returns the rotation rate in rad/s around a controller's X, Y, and Z axes of the gyroscope sensor, if
+				the controller has one.
+				Otherwise, the method returns [constant Vector3.ZERO].
+			</description>
+		</method>
+		<method name="get_joy_magnetometer" qualifiers="const">
+			<return type="Vector3"/>
+			<argument index="0" name="device" type="int"/>
+			<description>
+				Returns the magnetic field strength in micro-Tesla for all axes of the controller's magnetometer sensor,
+				if the controller has one.
+				Otherwise, the method returns [constant Vector3.ZERO].
 			</description>
 		</method>
 		<method name="get_joy_name">
-			<return type="String" />
-			<argument index="0" name="device" type="int" />
+			<return type="String"/>
+			<argument index="0" name="device" type="int"/>
 			<description>
 				Returns the name of the joypad at the specified device index.
 			</description>
@@ -178,8 +220,10 @@
 		<method name="get_magnetometer" qualifiers="const">
 			<return type="Vector3" />
 			<description>
-				Returns the magnetic field strength in micro-Tesla for all axes of the device's magnetometer sensor, if the device has one. Otherwise, the method returns [constant Vector3.ZERO].
-				[b]Note:[/b] This method only works on Android, iOS and UWP. On other platforms, it always returns [constant Vector3.ZERO].
+				Returns the magnetic field strength in micro-Tesla for all axes of the device's magnetometer sensor, if
+				the device has one. Otherwise, the method returns [constant Vector3.ZERO].
+				[b]Note:[/b] This method only works on Android, iOS and UWP. On other platforms, it always returns
+				[constant Vector3.ZERO].
 			</description>
 		</method>
 		<method name="get_mouse_button_mask" qualifiers="const">
@@ -338,35 +382,79 @@
 			<return type="void" />
 			<argument index="0" name="value" type="Vector3" />
 			<description>
-				Sets the gravity value of the accelerometer sensor. Can be used for debugging on devices without a hardware sensor, for example in an editor on a PC.
+				Sets the gravity value of the device's accelerometer sensor.
+				Can be used for debugging on devices without a hardware sensor, for example in an editor on a PC.
 				[b]Note:[/b] This value can be immediately overwritten by the hardware sensor value on Android and iOS.
 			</description>
 		</method>
 		<method name="set_gyroscope">
-			<return type="void" />
-			<argument index="0" name="value" type="Vector3" />
+			<return type="void"/>
+			<argument index="0" name="value" type="Vector3"/>
 			<description>
-				Sets the value of the rotation rate of the gyroscope sensor. Can be used for debugging on devices without a hardware sensor, for example in an editor on a PC.
+				Sets the value of the rotation rate of the device's gyroscope sensor.
+				Can be used for debugging on devices without a hardware sensor, for example in an editor on a PC.
 				[b]Note:[/b] This value can be immediately overwritten by the hardware sensor value on Android and iOS.
 			</description>
 		</method>
-		<method name="set_magnetometer">
-			<return type="void" />
-			<argument index="0" name="value" type="Vector3" />
+		<method name="set_joy_accelerometer">
+			<return type="void"/>
+			<argument index="0" name="device" type="int"/>
+			<argument index="1" name="value" type="Vector3"/>
 			<description>
-				Sets the value of the magnetic field of the magnetometer sensor. Can be used for debugging on devices without a hardware sensor, for example in an editor on a PC.
+				Sets the acceleration value of the controller's accelerometer sensor.
+				Can be used for debugging on devices without a hardware sensor, for example in an editor on a PC.
+			</description>
+		</method>
+		<method name="set_joy_gravity">
+			<return type="void"/>
+			<argument index="0" name="device" type="int"/>
+			<argument index="1" name="value" type="Vector3"/>
+			<description>
+				Sets the gravity value of the controller's accelerometer sensor.
+				Can be used for debugging on devices without a hardware sensor, for example in an editor on a PC.
+			</description>
+		</method>
+		<method name="set_joy_gyroscope">
+			<return type="void"/>
+			<argument index="0" name="device" type="int"/>
+			<argument index="1" name="value" type="Vector3"/>
+			<description>
+				Sets the value of the rotation rate of the controller's gyroscope sensor.
+				Can be used for debugging on devices without a hardware sensor, for example in an editor on a PC.
+			</description>
+		</method>
+		<method name="set_joy_magnetometer">
+			<return type="void"/>
+			<argument index="0" name="device" type="int"/>
+			<argument index="1" name="value" type="Vector3"/>
+			<description>
+				Sets the value of the magnetic field of the controller's magnetometer sensor.
+				Can be used for debugging on devices without a hardware sensor, for example in an editor on a PC.
+			</description>
+		</method>
+		<method name="set_magnetometer">
+			<return type="void"/>
+			<argument index="0" name="value" type="Vector3"/>
+			<description>
+				Sets the value of the magnetic field of the device's magnetometer sensor.
+				Can be used for debugging on devices without a hardware sensor, for example in an editor on a PC.
 				[b]Note:[/b] This value can be immediately overwritten by the hardware sensor value on Android and iOS.
 			</description>
 		</method>
 		<method name="start_joy_vibration">
-			<return type="void" />
-			<argument index="0" name="device" type="int" />
-			<argument index="1" name="weak_magnitude" type="float" />
-			<argument index="2" name="strong_magnitude" type="float" />
-			<argument index="3" name="duration" type="float" default="0" />
+			<return type="void"/>
+			<argument index="0" name="device" type="int"/>
+			<argument index="1" name="weak_magnitude" type="float"/>
+			<argument index="2" name="strong_magnitude" type="float"/>
+			<argument index="3" name="duration" type="float" default="0"/>
 			<description>
-				Starts to vibrate the joypad. Joypads usually come with two rumble motors, a strong and a weak one. [code]weak_magnitude[/code] is the strength of the weak motor (between 0 and 1) and [code]strong_magnitude[/code] is the strength of the strong motor (between 0 and 1). [code]duration[/code] is the duration of the effect in seconds (a duration of 0 will try to play the vibration indefinitely).
-				[b]Note:[/b] Not every hardware is compatible with long effect durations; it is recommended to restart an effect if it has to be played for more than a few seconds.
+				Starts to vibrate the joypad. Joypads usually come with two rumble motors, a strong and a weak one.
+				[code]weak_magnitude[/code] is the strength of the weak motor (between 0 and 1) and
+				[code]strong_magnitude[/code] is the strength of the strong motor (between 0 and 1).
+				[code]duration[/code] is the duration of the effect in seconds (a duration of 0 will try to play the
+				vibration indefinitely).
+				[b]Note:[/b] Not every hardware is compatible with long effect durations; it is recommended to restart
+				an effect if it has to be played for more than a few seconds.
 			</description>
 		</method>
 		<method name="stop_joy_vibration">
