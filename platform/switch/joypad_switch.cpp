@@ -54,7 +54,7 @@ JoypadSwitch::JoypadSwitch(InputDefault *in) {
 	input = in;
 
 	// TODO: n players?
-	padConfigureInput(1, HidNpadStyleSet_NpadStandard);
+	padConfigureInput(JOYPADS_MAX, HidNpadStyleSet_NpadStandard);
 
 	button_count = sizeof(pad_mapping) / sizeof(*pad_mapping);
 	for (int i = 0; i < JOYPADS_MAX; i++) {
