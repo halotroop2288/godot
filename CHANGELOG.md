@@ -452,6 +452,8 @@ See the [release announcement](https://godotengine.org/article/godot-3-5-cant-st
 - Windows: Implement limited surrogate pairs support (better UTF-8 support, emoji fonts) ([GH-54625](https://github.com/godotengine/godot/pull/54625)).
 - Windows: Add support for handling network share paths ([GH-61985](https://github.com/godotengine/godot/pull/61985)).
 - Add stylus inverted/eraser support to InputEventMouseMotion event (desktop platforms) ([GH-62723](https://github.com/godotengine/godot/pull/62723)).
+- [Vita](https://github.com/SonicMastr/godot-vita/releases/tag/3.5-rc5-vita1): Added engine build support and project
+  exporter
 
 #### Rendering
 
