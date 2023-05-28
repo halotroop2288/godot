@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ip_unix.h                                                             */
+/*  export_plugin.h                                                       */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,27 +28,31 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef IP_UNIX_H
-#define IP_UNIX_H
+#pragma once
+#ifndef SWITCH_EXPORT_PLUGIN_H
+#define SWITCH_EXPORT_PLUGIN_H
 
-#include "core/io/ip.h"
+#include "core/io/file_access.h"
+#include "editor/editor_settings.h"
+#include "scene/resources/texture.h"
+#include "thirdparty/libnx/nacp.h"
+#include "thirdparty/libnx/nro.h"
+#include <cstring>
+#include <string>
 
-#if defined(UNIX_ENABLED) || defined(WINDOWS_ENABLED) || defined(HORIZON_ENABLED)
+class EditorExportPlatformSwitch : public EditorExportPlatform {
+    GDCLASS(EditorExportPlatformSwitch, EditorExportPlatform);
 
-class IPUnix : public IP {
-	GDCLASS(IPUnix, IP);
+    HashMap<String, String> extensions;
 
-	virtual void _resolve_hostname(List<IPAddress> &r_addresses, const String &p_hostname, Type p_type = TYPE_ANY) const override;
+    Ref<ImageTexture> run_icon;
+    Ref<ImageTexture> stop_icon;
 
-	static IP *_create_unix();
+    unsigned char *read_file(const char *fn, size_t *len_out);
 
-public:
-	virtual void get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces) const override;
+    unsigned char *read_bytes(const char *fn, size_t off, size_t len);
 
-	static void make_default();
-	IPUnix();
+    size_t write_bytes(const char *fn, size_t off, size_t len, const unsigned char *data);
 };
 
-#endif // UNIX_ENABLED || WINDOWS_ENABLED || HORIZON_ENABLED
-
-#endif // IP_UNIX_H
+#endif // SWITCH_EXPORT_PLUGIN_H

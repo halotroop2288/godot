@@ -541,7 +541,13 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
 			// Attempt to load PCK from macOS .app bundle resources.
 			found = _load_resource_pack(OS::get_singleton()->get_bundle_resource_dir().path_join(exec_basename + ".pck")) || _load_resource_pack(OS::get_singleton()->get_bundle_resource_dir().path_join(exec_filename + ".pck"));
 		}
-#endif
+#endif // MACOS_ENABLED
+
+#ifdef HORIZON_ENABLED
+		if (!found) {
+            found = _load_resource_pack("romfs:/game.pck")
+		}
+#endif // HORIZON_ENABLED
 
 		if (!found) {
 			// Try to load data pack at the location of the executable.

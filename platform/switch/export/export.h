@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ip_unix.h                                                             */
+/*  export.h                                                              */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,27 +28,11 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef IP_UNIX_H
-#define IP_UNIX_H
+#pragma once
+#ifndef SWITCH_EXPORT_H
+#define SWITCH_EXPORT_H
 
-#include "core/io/ip.h"
+void register_switch_exporter_types();
+void register_switch_exporter();
 
-#if defined(UNIX_ENABLED) || defined(WINDOWS_ENABLED) || defined(HORIZON_ENABLED)
-
-class IPUnix : public IP {
-	GDCLASS(IPUnix, IP);
-
-	virtual void _resolve_hostname(List<IPAddress> &r_addresses, const String &p_hostname, Type p_type = TYPE_ANY) const override;
-
-	static IP *_create_unix();
-
-public:
-	virtual void get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces) const override;
-
-	static void make_default();
-	IPUnix();
-};
-
-#endif // UNIX_ENABLED || WINDOWS_ENABLED || HORIZON_ENABLED
-
-#endif // IP_UNIX_H
+#endif // SWITCH_EXPORT_H

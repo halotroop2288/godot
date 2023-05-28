@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ip_unix.h                                                             */
+/*  export.cpp                                                            */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,27 +28,29 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef IP_UNIX_H
-#define IP_UNIX_H
+#include "export.h"
 
-#include "core/io/ip.h"
+#include "editor/editor_settings.h"
+#include "export_plugin.h"
 
-#if defined(UNIX_ENABLED) || defined(WINDOWS_ENABLED) || defined(HORIZON_ENABLED)
 
-class IPUnix : public IP {
-	GDCLASS(IPUnix, IP);
+void register_switch_exporter_types() {
+    GDREGISTER_VIRTUAL_CLASS(EditorExportPlatformSwitch);
+}
 
-	virtual void _resolve_hostname(List<IPAddress> &r_addresses, const String &p_hostname, Type p_type = TYPE_ANY) const override;
+void register_switch_exporter() {
+    String exe_ext;
+#ifdef WINDOWS_ENABLED
+    exe_ext = "*.exe";
+#endif // WINDOWS_ENABLED
+	EDITOR_DEF("export/switch/nxlink", "");
+	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "export/switch/nxlink", PROPERTY_HINT_GLOBAL_FILE, exe_ext));
 
-	static IP *_create_unix();
+	EDITOR_DEF("export/switch/build_romfs", "");
+	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "export/switch/build_romfs", PROPERTY_HINT_GLOBAL_FILE, exe_ext));
 
-public:
-	virtual void get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces) const override;
+	Ref<EditorExportPlatformSwitch> platform;
+    platform.instantiate();
 
-	static void make_default();
-	IPUnix();
-};
-
-#endif // UNIX_ENABLED || WINDOWS_ENABLED || HORIZON_ENABLED
-
-#endif // IP_UNIX_H
+    EditorExport::get_singleton()->add_export_platform(platform);
+}

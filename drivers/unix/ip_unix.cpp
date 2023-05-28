@@ -30,11 +30,12 @@
 
 #include "ip_unix.h"
 
-#if defined(UNIX_ENABLED) || defined(WINDOWS_ENABLED)
+#if defined(UNIX_ENABLED) || defined(WINDOWS_ENABLED) || defined(HORIZON_ENABLED)
 
 #include <string.h>
 
 #ifdef WINDOWS_ENABLED
+
 #include <stdio.h>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -42,26 +43,28 @@
 #include <ws2tcpip.h>
 #ifndef UWP_ENABLED
 #include <iphlpapi.h>
-#endif
-#else // UNIX
+#endif // !UWP_ENABLED
+#else // WINDOWS_ENABLED
 #include <netdb.h>
 #ifdef ANDROID_ENABLED
 // We could drop this file once we up our API level to 24,
 // where the NDK's ifaddrs.h supports to needed getifaddrs.
 #include "thirdparty/misc/ifaddrs-android.h"
-#else
+#else // ANDROID_ENABLED
 #ifdef __FreeBSD__
 #include <sys/types.h>
-#endif
+#endif // __FreeBSD__
+#ifndef HORIZON_ENABLED
 #include <ifaddrs.h>
-#endif
+#endif // HORIZON_ENABLED
+#endif // ANDROID_ENABLED
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #ifdef __FreeBSD__
 #include <netinet/in.h>
-#endif
+#endif // __FreeBSD__
 #include <net/if.h> // Order is important on OpenBSD, leave as last
-#endif
+#endif // WINDOWS_ENABLED
 
 static IPAddress _sockaddr2ip(struct sockaddr *p_addr) {
 	IPAddress ip;
@@ -124,11 +127,9 @@ void IPUnix::_resolve_hostname(List<IPAddress> &r_addresses, const String &p_hos
 	freeaddrinfo(result);
 }
 
-#if defined(WINDOWS_ENABLED)
-
-#if defined(UWP_ENABLED)
-
 void IPUnix::get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces) const {
+#if defined(WINDOWS_ENABLED)
+#if defined(UWP_ENABLED)
 	using namespace Windows::Networking;
 	using namespace Windows::Networking::Connectivity;
 
@@ -158,11 +159,7 @@ void IPUnix::get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces)
 		IPAddress ip = IPAddress(hostname->CanonicalName->Data());
 		info.ip_addresses.push_front(ip);
 	}
-}
-
-#else
-
-void IPUnix::get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces) const {
+#else // UWP_ENABLED
 	ULONG buf_size = 1024;
 	IP_ADAPTER_ADDRESSES *addrs;
 
@@ -206,15 +203,11 @@ void IPUnix::get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces)
 	}
 
 	memfree(addrs);
-}
-
-#endif
-
-#else // UNIX
-
-void IPUnix::get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces) const {
+#endif // UWP_ENABLED
+#else // WINDOWS_ENABLED
 	struct ifaddrs *ifAddrStruct = nullptr;
 	struct ifaddrs *ifa = nullptr;
+#ifndef HORIZON_ENABLED
 	int family;
 
 	getifaddrs(&ifAddrStruct);
@@ -247,8 +240,9 @@ void IPUnix::get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces)
 	if (ifAddrStruct != nullptr) {
 		freeifaddrs(ifAddrStruct);
 	}
+#endif // !HORIZON_ENABLED
+#endif // WINDOWS_ENABLED
 }
-#endif
 
 void IPUnix::make_default() {
 	_create = _create_unix;
@@ -261,4 +255,4 @@ IP *IPUnix::_create_unix() {
 IPUnix::IPUnix() {
 }
 
-#endif
+#endif // UNIX_ENABLED || WINDOWS_ENABLED || HORIZON_ENABLED

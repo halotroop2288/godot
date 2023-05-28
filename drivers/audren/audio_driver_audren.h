@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ip_unix.h                                                             */
+/*  audio_driver_audren.h                                                 */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,27 +28,68 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef IP_UNIX_H
-#define IP_UNIX_H
+#pragma once
+#ifndef AUDIO_DRIVER_AUDREN_H
+#define AUDIO_DRIVER_AUDREN_H
 
-#include "core/io/ip.h"
+#ifdef AUDREN_ENABLED
 
-#if defined(UNIX_ENABLED) || defined(WINDOWS_ENABLED) || defined(HORIZON_ENABLED)
+#include "servers/audio_server.h"
+#include "switch_wrapper.h"
 
-class IPUnix : public IP {
-	GDCLASS(IPUnix, IP);
+#include "core/os/mutex.h"
+#include "core/os/thread.h"
 
-	virtual void _resolve_hostname(List<IPAddress> &r_addresses, const String &p_hostname, Type p_type = TYPE_ANY) const override;
+class AudioDriverSwitch : public AudioDriver {
+	Thread thread;
+	Mutex mutex;
 
-	static IP *_create_unix();
+	LibnxAudioDriver audren_driver;
+	AudioDriverWaveBuf audren_buffers[2];
+	size_t audren_pool_size;
+	void *audren_pool_ptr;
+
+	String output_device_name = "Default";
+	String new_output_device = "Default";
+
+	Vector<int32_t> samples_in;
+	Vector<int16_t> samples_out;
+
+	unsigned int mix_rate = 0;
+	unsigned int buffer_frames = 0;
+	unsigned int audren_buffer_size = 0;
+	int channels = 0;
+
+	SafeFlag active;
+	SafeFlag exit_thread;
+
+	Error init_output_device();
+	void finish_output_device();
+
+	static void thread_func(void *p_udata);
 
 public:
-	virtual void get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces) const override;
+	const char *get_name() const {
+		return "Audren";
+	};
 
-	static void make_default();
-	IPUnix();
+	virtual Error init() override;
+	virtual void start() override;
+	virtual int get_mix_rate() const override;
+	virtual SpeakerMode get_speaker_mode() const override;
+
+	virtual void lock() override;
+	virtual void unlock() override;
+	virtual void finish() override;
+
+	virtual PackedStringArray get_output_device_list() override;
+	virtual String get_output_device() override;
+	virtual void set_output_device(const String &p_name) override;
+
+	AudioDriverSwitch();
+	~AudioDriverSwitch() {}
 };
 
-#endif // UNIX_ENABLED || WINDOWS_ENABLED || HORIZON_ENABLED
+#endif // AUDREN_ENABLED
 
-#endif // IP_UNIX_H
+#endif // AUDIO_DRIVER_AUDREN_H

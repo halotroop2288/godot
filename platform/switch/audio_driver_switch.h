@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ip_unix.h                                                             */
+/*  audio_driver_switch.h                                                 */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,27 +28,63 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef IP_UNIX_H
-#define IP_UNIX_H
+#pragma once
+#ifndef AUDIO_DRIVER_SWITCH_H
+#define AUDIO_DRIVER_SWITCH_H
 
-#include "core/io/ip.h"
+#include "servers/audio_server.h"
+#include "switch_wrapper.h"
 
-#if defined(UNIX_ENABLED) || defined(WINDOWS_ENABLED) || defined(HORIZON_ENABLED)
+#include "core/os/mutex.h"
+#include "core/os/thread.h"
 
-class IPUnix : public IP {
-	GDCLASS(IPUnix, IP);
+class AudioDriverSwitch : public AudioDriver {
+	Thread thread;
+	Mutex mutex;
 
-	virtual void _resolve_hostname(List<IPAddress> &r_addresses, const String &p_hostname, Type p_type = TYPE_ANY) const override;
+	LibnxAudioDriver audren_driver;
+	AudioDriverWaveBuf audren_buffers[2];
+	size_t audren_pool_size;
+	void *audren_pool_ptr;
+	unsigned int audren_buffer_size;
+	unsigned int buffer_size;
+	Vector<int32_t> samples_in;
+	Vector<int16_t> samples_out;
 
-	static IP *_create_unix();
+	String device_name;
+	String new_device;
+
+	Error init_device();
+	void finish_device();
+
+	static void thread_func(void *p_udata);
+
+	unsigned int mix_rate;
+	SpeakerMode speaker_mode;
+	int channels;
+
+	bool active;
+	bool thread_exited;
+	mutable bool exit_thread;
 
 public:
-	virtual void get_local_interfaces(HashMap<String, Interface_Info> *r_interfaces) const override;
+	const char *get_name() const {
+		return "AUDREN";
+	};
 
-	static void make_default();
-	IPUnix();
+	virtual Error init();
+	virtual void start();
+	virtual int get_mix_rate() const;
+	virtual SpeakerMode get_speaker_mode() const;
+	virtual Array get_device_list();
+	virtual String get_device();
+	virtual void set_device(String device);
+	virtual void lock();
+	virtual void unlock();
+	virtual void finish();
+
+	AudioDriverSwitch();
+	~AudioDriverSwitch();
 };
 
-#endif // UNIX_ENABLED || WINDOWS_ENABLED || HORIZON_ENABLED
-
-#endif // IP_UNIX_H
+#endif // AUDIO_DRIVER_SWITCH_H

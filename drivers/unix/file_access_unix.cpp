@@ -40,9 +40,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#if defined(UNIX_ENABLED)
+#if defined(UNIX_ENABLED) || defined(HORIZON_ENABLED)
 #include <unistd.h>
-#endif
+#endif // UNIX_ENABLED || HORIZON_ENABLED
 
 #ifdef MSVC
 #define S_ISREG(m) ((m)&_S_IFREG)
@@ -134,6 +134,7 @@ Error FileAccessUnix::open_internal(const String &p_path, int p_mode_flags) {
 		return last_error;
 	}
 
+#ifndef HORIZON_ENABLED
 	// Set close on exec to avoid leaking it to subprocesses.
 	int fd = fileno(f);
 
@@ -145,6 +146,7 @@ Error FileAccessUnix::open_internal(const String &p_path, int p_mode_flags) {
 	last_error = OK;
 	flags = p_mode_flags;
 	return OK;
+#endif // !HORIZON_ENABLED
 }
 
 void FileAccessUnix::_close() {
@@ -278,16 +280,14 @@ bool FileAccessUnix::file_exists(const String &p_path) {
 		return false;
 	}
 
-#ifdef UNIX_ENABLED
+#if defined(UNIX_ENABLED) || defined(HORIZON_ENABLED)
 	// See if we have access to the file
 	if (access(filename.utf8().get_data(), F_OK)) {
-		return false;
-	}
-#else
+#else // UNIX_ENABLED || HORIZON_ENABLED
 	if (_access(filename.utf8().get_data(), 4) == -1) {
+#endif // UNIX_ENABLED || HORIZON_ENABLED
 		return false;
 	}
-#endif
 
 	// See if this is a regular file
 	switch (st.st_mode & S_IFMT) {
