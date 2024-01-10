@@ -243,6 +243,7 @@ def configure(env):
     env.Append(CPPPATH=["#platform/switch"])
     env.Append(
         CPPFLAGS=[
+            "-DHOMEBREW_ENABLED",
             "-DHORIZON_ENABLED",
             "-DLIBC_FILEIO_ENABLED",
             "-DOPENGL_ENABLED",
