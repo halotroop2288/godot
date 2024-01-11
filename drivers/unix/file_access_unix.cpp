@@ -279,15 +279,17 @@ bool FileAccessUnix::file_exists(const String &p_path) {
 		return false;
 	}
 
+#ifndef VITA_ENABLED
 #ifdef UNIX_ENABLED
 	// See if we have access to the file
 	if (access(filename.utf8().get_data(), F_OK)) {
 		return false;
 	}
-#else
+#else // UNIX_ENABLED
 	if (_access(filename.utf8().get_data(), 4) == -1)
 		return false;
-#endif
+#endif // !UNIX_ENABLED
+#endif // !VITA_ENABLED
 
 	// See if this is a regular file
 	switch (st.st_mode & S_IFMT) {
