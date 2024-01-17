@@ -226,7 +226,13 @@ def configure(env):
     if (env['builtin_zlib'] == 'no'):
         env.ParseConfig('pkg-config zlib --cflags --libs')
 
-    env.Append(CPPFLAGS=['-DX11_ENABLED', '-DUNIX_ENABLED', '-DGLES2_ENABLED', '-DGLES_OVER_GL'])
+    env.Append(CXXFLAGS=['-std=c++11'])
+    env.Append(CPPFLAGS=[
+        '-DX11_ENABLED',
+        '-DUNIX_ENABLED',
+        '-DGLES2_ENABLED',
+        '-DGLES_OVER_GL'
+    ])
     env.Append(LIBS=['GL', 'pthread'])
 
     if (platform.system() == "Linux"):
