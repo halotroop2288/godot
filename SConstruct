@@ -53,6 +53,30 @@ for x in sorted(glob.glob("platform/*")):
     sys.path.remove(tmppath)
     sys.modules.pop("detect")
 
+for x in sorted(glob.glob("platform/homebrew/*")):
+    if not os.path.isdir(x) or not os.path.exists(x + "/detect.py"):
+        continue
+    tmppath = "./" + x
+
+    sys.path.insert(0, tmppath)
+    import detect
+
+    if os.path.exists(x + "/export/export.cpp"):
+        platform_exporters.append(x[9:])
+    if os.path.exists(x + "/api/api.cpp"):
+        platform_apis.append(x[9:])
+    if detect.is_active():
+        active_platforms.append(detect.get_name())
+        active_platform_ids.append(x)
+    if detect.can_build():
+        x = x.replace("platform/homebrew/", "")  # rest of world
+        x = x.replace("platform\\homebrew\\", "")  # win32
+        platform_list += [x]
+        platform_opts[x] = detect.get_opts()        # These comments force the
+        platform_flags[x] = detect.get_flags()      # patch to not apply in the
+    sys.path.remove(tmppath)                        # middle of the previous block
+    sys.modules.pop("detect")                       # That would amke it hard to rebase
+
 methods.save_active_platforms(active_platforms, active_platform_ids)
 
 custom_tools = ["default"]
@@ -365,7 +389,12 @@ if env_base["rids"] == "tracked_handles":
 
 if selected_platform in platform_list:
     tmppath = "./platform/" + selected_platform
-    sys.path.insert(0, tmppath)
+    if os.path.exists(tmppath):
+        sys.path.insert(0, tmppath)
+    else:
+        tmppath = "./platform/homebrew/" + selected_platform
+        if os.path.exists(tmppath):
+                sys.path.insert(0, tmppath)
     import detect
 
     env = env_base.Clone()
@@ -719,7 +748,11 @@ if selected_platform in platform_list:
     SConscript("modules/SCsub")
     SConscript("main/SCsub")
 
-    SConscript("platform/" + selected_platform + "/SCsub")  # build selected platform
+    # build selected platform
+    if os.path.exists("platform/" + selected_platform + "/SCsub"):
+        SConscript("platform/" + selected_platform + "/SCsub")
+    else:
+        SConscript("platform/homebrew/" + selected_platform + "/SCsub")
 
     # Microsoft Visual Studio Project Generation
     if env["vsproj"]:
