@@ -1,0 +1,22 @@
+# Generated sources
+*.gen.h
+*.gen.cpp
+
+# Git tree
+.git
+
+# Build outputs
+*.o
+*.obj
+bin/
+
+# Wii binaries
+*.dol
+*.elf
+
+# IntelliJ Editors
+.idea/
+
+# Caches
+__pycache__
+.sconf_temp
