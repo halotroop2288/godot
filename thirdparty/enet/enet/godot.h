@@ -42,6 +42,9 @@
 #ifdef UNIX_ENABLED
 #include <arpa/inet.h>
 #endif
+#ifdef WII_ENABLED
+#include <network.h>
+#endif // WII_ENABLED
 
 #ifdef MSG_MAXIOVLEN
 #define ENET_BUFFER_MAXIMUM MSG_MAXIOVLEN
