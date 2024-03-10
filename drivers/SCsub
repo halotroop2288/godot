@@ -5,8 +5,9 @@ Import("env")
 env.drivers_sources = []
 
 # OS drivers
-SConscript("unix/SCsub")
-SConscript("windows/SCsub")
+if env["platform"] != "wii":
+    SConscript("unix/SCsub")
+    SConscript("windows/SCsub")
 
 # Sounds drivers
 SConscript("alsa/SCsub")
@@ -23,13 +24,13 @@ SConscript("coremidi/SCsub")
 SConscript("winmidi/SCsub")
 
 # Graphics drivers
-if env["platform"] != "server":
+if env["platform"] == "server":
+    SConscript("dummy/SCsub")
+elif env["platform"] != "wii":
     SConscript("gles3/SCsub")
     SConscript("gles2/SCsub")
     SConscript("gles_common/SCsub")
     SConscript("gl_context/SCsub")
-else:
-    SConscript("dummy/SCsub")
 
 # Core dependencies
 SConscript("png/SCsub")

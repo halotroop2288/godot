@@ -59,6 +59,20 @@ const char *Image::format_names[Image::FORMAT_MAX] = {
 	"RGBHalf",
 	"RGBAHalf",
 	"RGBE9995",
+
+	// Wii formats
+	"GX I4",
+	"GX I8",
+	"GX IA4",
+	"GX IA8",
+	"GX RGB565",
+	"GX RGB5A3",
+	"GX RGBA8",
+	"GX CI4",
+	"GX CI8",
+	"GX CI14",
+	"GX CMPR",
+
 	"DXT1 RGB8", //s3tc
 	"DXT3 RGBA8",
 	"DXT5 RGBA8",
@@ -173,6 +187,9 @@ int Image::get_format_pixel_size(Format p_format) {
 			return 1;
 		case FORMAT_ETC2_RGB8A1:
 			return 1;
+		case FORMAT_GX_RGBA8:
+			return 4;
+		// TODO: Finish adding GX formats
 		case FORMAT_MAX: {
 		}
 	}
@@ -221,7 +238,8 @@ void Image::get_format_min_pixel_size(Format p_format, int &r_w, int &r_h) {
 			r_h = 4;
 
 		} break;
-
+		case FORMAT_GX_RGBA8:
+		// TODO: Finish adding GX formats
 		default: {
 			r_w = 1;
 			r_h = 1;
@@ -274,6 +292,10 @@ int Image::get_format_block_size(Format p_format) {
 		case FORMAT_ETC2_RGB8A1: {
 			return 4;
 		}
+		case FORMAT_GX_RGBA8: {
+			return 4;
+		}
+		// TODO: Finish adding GX formats
 		default: {
 		}
 	}
@@ -413,10 +435,10 @@ void Image::convert(Format p_new_format) {
 
 	ERR_FAIL_COND_MSG(write_lock.ptr(), "Cannot convert image when it is locked.");
 
-	if (format > FORMAT_RGBE9995 || p_new_format > FORMAT_RGBE9995) {
+	if (format > FORMAT_DXT1 || p_new_format > FORMAT_DXT1) {
 		ERR_FAIL_MSG("Cannot convert to <-> from compressed formats. Use compress() and decompress() instead.");
 
-	} else if (format > FORMAT_RGBA8 || p_new_format > FORMAT_RGBA8) {
+	} else if (format > FORMAT_RGBA4444 || p_new_format > FORMAT_RGBA4444) {
 		//use put/set pixel which is slower but works with non byte formats
 		Image new_img(width, height, false, p_new_format);
 		lock();
@@ -2822,6 +2844,25 @@ void Image::set_pixel(int p_x, int p_y, const Color &p_color) {
 			((uint32_t *)ptr)[ofs] = p_color.to_rgbe9995();
 
 		} break;
+		case FORMAT_GX_RGBA8: {
+			int block_x = p_x / 4;
+			int block_y = p_y / 4;
+			int width_in_blocks = get_width() / 4;
+//			int height_in_blocks = get_height() / 4;
+			int block_size = 16 * 4; // 16 pixels, 4 bytes each
+			int block_ofs = block_x + (block_y * width_in_blocks);
+			int x_in_block = p_x % 4;
+			int y_in_block = p_y % 4;
+			int ofs_in_block = x_in_block + (y_in_block * 4);
+			int ar_ofs = (block_ofs * block_size) + (ofs_in_block * 2);
+			int gb_ofs = ar_ofs + 32;
+
+			ptr[ar_ofs + 0] = 255 * p_color.a;
+			ptr[ar_ofs + 1] = 255 * p_color.r;
+			ptr[gb_ofs + 0] = 255 * p_color.g;
+			ptr[gb_ofs + 1] = 255 * p_color.b;
+		} break;
+		// TODO: Finish adding GX formats
 		default: {
 			ERR_FAIL_MSG("Can't set_pixel() on compressed image, sorry.");
 		}
@@ -3000,6 +3041,20 @@ void Image::_bind_methods() {
 	BIND_ENUM_CONSTANT(FORMAT_RGBH);
 	BIND_ENUM_CONSTANT(FORMAT_RGBAH);
 	BIND_ENUM_CONSTANT(FORMAT_RGBE9995);
+
+	// Wii formats
+	BIND_ENUM_CONSTANT(FORMAT_GX_I4);
+	BIND_ENUM_CONSTANT(FORMAT_GX_I8);
+	BIND_ENUM_CONSTANT(FORMAT_GX_IA4);
+	BIND_ENUM_CONSTANT(FORMAT_GX_IA8);
+	BIND_ENUM_CONSTANT(FORMAT_GX_RGB565);
+	BIND_ENUM_CONSTANT(FORMAT_GX_RGB5A3);
+	BIND_ENUM_CONSTANT(FORMAT_GX_RGBA8);
+	BIND_ENUM_CONSTANT(FORMAT_GX_CI4);
+	BIND_ENUM_CONSTANT(FORMAT_GX_CI8);
+	BIND_ENUM_CONSTANT(FORMAT_GX_CI14);
+	BIND_ENUM_CONSTANT(FORMAT_GX_CMPR);
+
 	BIND_ENUM_CONSTANT(FORMAT_DXT1); //s3tc bc1
 	BIND_ENUM_CONSTANT(FORMAT_DXT3); //bc2
 	BIND_ENUM_CONSTANT(FORMAT_DXT5); //bc3

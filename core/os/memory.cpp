@@ -72,7 +72,11 @@ void *Memory::alloc_static(size_t p_bytes, bool p_pad_align) {
 	bool prepad = p_pad_align;
 #endif
 
+#ifndef WII_ENABLED
 	void *mem = malloc(p_bytes + (prepad ? PAD_ALIGN : 0));
+#else // TODO: Add a method to PoolByteArray to allocate a 32-aligned buffer
+	void *mem = memalign(32, p_bytes + (prepad ? PAD_ALIGN : 0));
+#endif // WII_ENABLED
 
 	ERR_FAIL_COND_V(!mem, nullptr);
 

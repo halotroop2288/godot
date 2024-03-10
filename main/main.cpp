@@ -457,6 +457,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	bool force_res = false;
 	bool saw_vsync_via_compositor_override = false;
 	bool delta_smoothing_override = false;
+
 #ifdef TOOLS_ENABLED
 	bool found_project = false;
 #endif
@@ -904,6 +905,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		I = N;
 	}
 
+	OS::get_singleton()->set_cmdline(execpath, main_args);
+
 #ifdef TOOLS_ENABLED
 	if (editor && project_manager) {
 		OS::get_singleton()->print("Error: Command line arguments implied opening both editor and project manager, which is not possible. Aborting.\n");
@@ -1076,8 +1079,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	}
 
 	Logger::set_flush_stdout_on_print(ProjectSettings::get_singleton()->get("application/run/flush_stdout_on_print"));
-
-	OS::get_singleton()->set_cmdline(execpath, main_args);
 
 	GLOBAL_DEF_RST("rendering/quality/driver/driver_name", "GLES3");
 	ProjectSettings::get_singleton()->set_custom_property_info("rendering/quality/driver/driver_name", PropertyInfo(Variant::STRING, "rendering/quality/driver/driver_name", PROPERTY_HINT_ENUM, "GLES2,GLES3"));
