@@ -1,0 +1,305 @@
+#ifndef N3DS_MUTEX_H
+#define N3DS_MUTEX_H
+#define Thread CTRThread
+#include <3ds.h>
+#undef Thread
+#include <atomic>
+#include <new>
+namespace std {
+
+    template <typename Mutex>
+    class unique_lock {
+    public:
+        explicit unique_lock(Mutex& m) : m_(&m), owns_lock_(false) {
+            lock();
+        }
+
+        Mutex *mutex() {
+            return m_;
+        }
+
+        unique_lock(unique_lock&& other) noexcept : m_(other.m_), owns_lock_(other.owns_lock_) {
+            other.m_ = nullptr;
+            other.owns_lock_ = false;
+        }
+
+        ~unique_lock() {
+            if (owns_lock_) {
+                unlock();
+            }
+        }
+
+        void lock() {
+            if (!owns_lock_) {
+                m_->lock();
+                owns_lock_ = true;
+            }
+        }
+
+        bool try_lock() {
+            if (!owns_lock_ && m_->try_lock()) {
+                owns_lock_ = true;
+            }
+            return owns_lock_;
+        }
+
+        void unlock() {
+            if (owns_lock_) {
+                m_->unlock();
+                owns_lock_ = false;
+            }
+        }
+
+        bool owns_lock() const noexcept {
+            return owns_lock_;
+        }
+
+        unique_lock& operator=(unique_lock&& other) noexcept {
+            if (owns_lock_) {
+                unlock();
+            }
+            m_ = other.m_;
+            owns_lock_ = other.owns_lock_;
+            other.m_ = nullptr;
+            other.owns_lock_ = false;
+            return *this;
+        }
+
+
+
+    private:
+        Mutex* m_;
+        bool owns_lock_;
+    };
+    template <typename Mutex>
+    class lock_guard {
+    public:
+        explicit lock_guard(Mutex& m) : m_(&m) {
+            m_->lock();
+        }
+
+        ~lock_guard() {
+            m_->unlock();
+        }
+
+        lock_guard(const lock_guard&) = delete;
+        lock_guard& operator=(const lock_guard&) = delete;
+
+    private:
+        Mutex* m_;
+    };
+
+class condition_variable;
+
+class mutex {
+    private:
+        LightLock _lock;
+    public:
+        mutex(){
+            LightLock_Init(&_lock);
+            
+        }
+        void lock() {
+            LightLock_Lock(&_lock);
+        }
+        bool try_lock() {
+            return !LightLock_TryLock(&_lock);
+        }
+        void unlock() {
+            LightLock_Unlock(&_lock);
+        }
+        friend condition_variable;
+};
+
+class recursive_mutex {
+    private:
+        RecursiveLock _lock;
+    public:
+        recursive_mutex(){
+            RecursiveLock_Init(&_lock);
+        }
+        void lock() {
+            RecursiveLock_Lock(&_lock);
+        }
+        bool try_lock() {
+            return !RecursiveLock_TryLock(&_lock);
+        }
+        void unlock() {
+            RecursiveLock_Unlock(&_lock);
+        }
+        friend condition_variable;
+};
+
+class shared_timed_mutex {
+    atomic<int> refcount{0};
+    LightLock _lock;
+public:
+    shared_timed_mutex() {
+        LightLock_Init(&_lock);
+    }
+    void lock() // write lock
+    {
+        int val;
+        do {
+            val = 0; // Can only take a write lock when refcount == 0
+
+        } while (!refcount.compare_exchange_weak(val, -1, std::memory_order_acquire));
+        LightLock_Lock(&_lock);
+        // can memory_order_relaxed be used if only a single thread takes write locks ?
+    }
+
+    void unlock() // write unlock
+    {
+        refcount.store(0, std::memory_order_release);
+        LightLock_Unlock(&_lock);
+    }
+
+    void lock_shared() // read lock
+    {
+        int val;
+        do {
+            do {
+                val = refcount.load(std::memory_order_relaxed);
+
+            } while (val == -1); // spinning until the write lock is released
+
+        } while (!refcount.compare_exchange_weak(val, val+1, std::memory_order_acquire));
+        LightLock_Lock(&_lock);
+    }
+
+    bool try_lock() {
+        return !LightLock_TryLock(&_lock);
+    }
+    bool try_lock_shared() // read lock
+    {
+        int val;
+        do {
+            do {
+                val = refcount.load(std::memory_order_relaxed);
+
+            } while (val == -1); // spinning until the write lock is released
+
+        } while (!refcount.compare_exchange_weak(val, val+1, std::memory_order_acquire));
+        return !LightLock_TryLock(&_lock);
+    }
+
+    void unlock_shared() // read unlock
+    {
+        // This must be a release operation (see answer)
+        refcount.fetch_sub(1, std::memory_order_release);
+        LightLock_Unlock(&_lock);
+    }  
+};
+
+class condition_variable
+{
+    private:
+    CondVar condition_variable;
+    public:
+    void wait(std::mutex *_lock)
+    {
+        CondVar_Wait(&condition_variable,&_lock->_lock);
+    }
+    void wait(std::unique_lock<mutex> &_lock)
+    {     
+        wait(_lock.mutex());
+    }
+    void notify_one()
+    {
+        CondVar_Signal(&condition_variable);
+    }
+    void notify_all()
+    {
+        CondVar_Broadcast(&condition_variable);
+    }
+};
+}
+
+class RWLock {
+	mutable std::mutex rw_mutex;
+    mutable std::condition_variable rw_cv;
+    mutable uintmax_t readers = {0}, writers = {0};
+public:
+	// Lock the RWLock, block if locked by someone else.
+	inline void read_lock() const {
+	 std::unique_lock<std::mutex> lk(rw_mutex);
+    if (writers != 0) {
+      rw_cv.wait(lk);
+    }
+    readers++;
+	}
+
+	// Unlock the RWLock, let other threads continue.
+	inline void read_unlock() const {
+		std::lock_guard<std::mutex> lk(rw_mutex);
+    if (readers == 1) {  // I am the last one.
+      rw_cv.notify_all();
+    }
+    readers--;
+	}
+
+	// Attempt to lock the RWLock for reading. True on success, false means it can't lock.
+	inline bool read_try_lock() const {
+	bool succeeded = rw_mutex.try_lock();
+    if (writers != 0) {
+      rw_cv.wait(&rw_mutex);
+    }
+    readers++;
+    return succeeded;
+	}
+
+	// Lock the RWLock, block if locked by someone else.
+	inline void write_lock() {
+			std::unique_lock<std::mutex> lk(rw_mutex);
+    if (readers == 0 && writers == 0) {
+    } else {
+      rw_cv.wait(lk);
+    }
+    writers++;
+	}
+
+	// Unlock the RWLock, let other threads continue.
+	inline void write_unlock() {
+		std::lock_guard<std::mutex> lk(rw_mutex);
+    writers--;
+    rw_cv.notify_all();
+	}
+
+	// Attempt to lock the RWLock for writing. True on success, false means it can't lock.
+	inline bool write_try_lock() {
+		bool succeeded = rw_mutex.try_lock();
+    if (readers == 0 && writers == 0) {
+    } else {
+      rw_cv.wait(&rw_mutex);
+    }
+    writers++;
+    return succeeded;
+	}
+};
+
+class RWLockRead {
+	const RWLock &lock;
+
+public:
+    inline RWLockRead(const RWLock &p_lock) :
+			lock(p_lock) {
+		lock.read_lock();
+	}
+	inline ~RWLockRead() {
+		lock.read_unlock();
+	}
+};
+
+class RWLockWrite {
+	RWLock &lock;
+
+public:
+	inline RWLockWrite(RWLock &p_lock) :
+			lock(p_lock) {
+		lock.write_lock();
+	}
+	inline ~RWLockWrite() {
+		lock.write_unlock();
+	}
+};
+#endif

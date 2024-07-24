@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+
+Import("env")
+
+source_files = [
+    "dir_access_3ds.cpp",
+    "file_access_3ds.cpp",
+]
+
+objects = []
+
+for source_file in source_files:
+    objects.append(env.Object(source_file))
+
+Return("objects")

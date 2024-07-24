@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+import os
+Import("env")
+
+common_3ds = [
+    "os_3ds.cpp",
+    "platform_thread.cpp"
+]
+
+common_3ds += SConscript("filesystem/SCsub")
+prog = env.add_program("#bin/godot", ["godot_3ds.cpp"] + common_3ds)
+
+def generate_3dsx(target, source, env):
+    print("3ds debug build setup {0}".format(prog[0]))
+    os.system("{0} -s -R .comment -R .gnu.version --strip-unneeded {1}".format(env["STRIP"],prog[0]))
+    os.system("smdhtool --create \"Test Game\" \"Test game meant to ensure godot build properly\" \"SeleDreams\" \"platform/3ds/icon.png\" \"platform/3ds/godot.smdh\"")
+    os.system("3dsxtool --romfs=platform/3ds/romfs --smdh=platform/3ds/godot.smdh {0} {0}.3dsx".format(prog[0]))
+
+
+generate_3dsx_command = env.Command("generate_3dsx", [prog],generate_3dsx )
+command = env.AlwaysBuild(generate_3dsx_command)
+env.Depends(command, [prog])

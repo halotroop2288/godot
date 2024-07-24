@@ -38,9 +38,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Messenger;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -147,6 +149,13 @@ public class GodotFragment extends Fragment implements IDownloaderClient, GodotH
 
 	@CallSuper
 	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		godot.onConfigurationChanged(newConfig);
+	}
+
+	@CallSuper
+	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCallback != null) {
@@ -195,6 +204,12 @@ public class GodotFragment extends Fragment implements IDownloaderClient, GodotH
 			if (godotContainerLayout == null) {
 				throw new IllegalStateException("Unable to initialize engine render view");
 			}
+		} catch (IllegalStateException e) {
+			Log.e(TAG, "Engine initialization failed", e);
+			final String errorMessage = TextUtils.isEmpty(e.getMessage())
+					? getString(R.string.error_engine_setup_message)
+					: e.getMessage();
+			godot.alert(errorMessage, getString(R.string.text_error_title), godot::forceQuit);
 		} catch (IllegalArgumentException ignored) {
 			final Activity activity = getActivity();
 			Intent notifierIntent = new Intent(activity, activity.getClass());

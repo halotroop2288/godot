@@ -29,7 +29,9 @@
 RenderUpdateFlag Picture::Impl::load()
 {
     if (loader) {
-        if (!paint) {
+        if (paint) {
+            loader->sync();
+        } else {
             paint = loader->paint();
             if (paint) {
                 if (w != loader->w || h != loader->h) {
@@ -42,8 +44,7 @@ RenderUpdateFlag Picture::Impl::load()
                 }
                 return RenderUpdateFlag::None;
             }
-        } else loader->sync();
-
+        }
         if (!surface) {
             if ((surface = loader->bitmap())) {
                 return RenderUpdateFlag::Image;
@@ -69,18 +70,18 @@ bool Picture::Impl::needComposition(uint8_t opacity)
 }
 
 
-bool Picture::Impl::render(RenderMethod &renderer)
+bool Picture::Impl::render(RenderMethod* renderer)
 {
     bool ret = false;
-    if (surface) return renderer.renderImage(rd);
+    if (surface) return renderer->renderImage(rd);
     else if (paint) {
         Compositor* cmp = nullptr;
         if (needComp) {
-            cmp = renderer.target(bounds(renderer), renderer.colorSpace());
-            renderer.beginComposite(cmp, CompositeMethod::None, 255);
+            cmp = renderer->target(bounds(renderer), renderer->colorSpace());
+            renderer->beginComposite(cmp, CompositeMethod::None, 255);
         }
         ret = paint->pImpl->render(renderer);
-        if (cmp) renderer.endComposite(cmp);
+        if (cmp) renderer->endComposite(cmp);
     }
     return ret;
 }
@@ -95,9 +96,9 @@ bool Picture::Impl::size(float w, float h)
 }
 
 
-RenderRegion Picture::Impl::bounds(RenderMethod& renderer)
+RenderRegion Picture::Impl::bounds(RenderMethod* renderer)
 {
-    if (rd) return renderer.region(rd);
+    if (rd) return renderer->region(rd);
     if (paint) return paint->pImpl->bounds(renderer);
     return {0, 0, 0, 0};
 }

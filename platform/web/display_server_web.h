@@ -95,6 +95,7 @@ private:
 		Key physical_keycode = Key::NONE;
 		Key key_label = Key::NONE;
 		uint32_t unicode = 0;
+		KeyLocation location = KeyLocation::UNSPECIFIED;
 		int mod = 0;
 	};
 
@@ -103,6 +104,7 @@ private:
 
 	bool swap_cancel_ok = false;
 	bool tts = false;
+	NativeMenu *native_menu = nullptr;
 
 	// utilities
 	static void dom2godot_mod(Ref<InputEventWithModifiers> ev, int p_mod, Key p_keycode);
@@ -143,9 +145,10 @@ private:
 	static void _drop_files_js_callback(const Vector<String> &p_files);
 
 	void process_joypads();
+	void process_keys();
 
 	static Vector<String> get_rendering_drivers_func();
-	static DisplayServer *create_func(const String &p_rendering_driver, WindowMode p_window_mode, VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Error &r_error);
+	static DisplayServer *create_func(const String &p_rendering_driver, WindowMode p_window_mode, VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Context p_context, Error &r_error);
 
 	static void _dispatch_input_event(const Ref<InputEvent> &p_event);
 
@@ -275,7 +278,7 @@ public:
 	virtual void swap_buffers() override;
 
 	static void register_web_driver();
-	DisplayServerWeb(const String &p_rendering_driver, WindowMode p_window_mode, VSyncMode p_vsync_mode, uint32_t p_flags, const Point2i *p_position, const Size2i &p_resolution, int p_screen, Error &r_error);
+	DisplayServerWeb(const String &p_rendering_driver, WindowMode p_window_mode, VSyncMode p_vsync_mode, uint32_t p_flags, const Point2i *p_position, const Size2i &p_resolution, int p_screen, Context p_context, Error &r_error);
 	~DisplayServerWeb();
 };
 

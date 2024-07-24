@@ -77,11 +77,11 @@ void mpoolRetDashOutline(SwMpool* mpool, unsigned idx)
 }
 
 
-SwMpool* mpoolInit(unsigned threads)
+SwMpool* mpoolInit(uint32_t threads)
 {
     auto allocSize = threads + 1;
 
-    auto mpool = static_cast<SwMpool*>(calloc(sizeof(SwMpool), 1));
+    auto mpool = static_cast<SwMpool*>(calloc(1, sizeof(SwMpool)));
     mpool->outline = static_cast<SwOutline*>(calloc(1, sizeof(SwOutline) * allocSize));
     mpool->strokeOutline = static_cast<SwOutline*>(calloc(1, sizeof(SwOutline) * allocSize));
     mpool->dashOutline = static_cast<SwOutline*>(calloc(1, sizeof(SwOutline) * allocSize));

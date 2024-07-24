@@ -112,8 +112,9 @@ public:
 		int32_t buffer_barrier_count = 0;
 #endif
 		int32_t label_index = -1;
-		BitField<RDD::PipelineStageBits> src_stages;
-		BitField<RDD::PipelineStageBits> dst_stages;
+		BitField<RDD::PipelineStageBits> previous_stages;
+		BitField<RDD::PipelineStageBits> next_stages;
+		BitField<RDD::PipelineStageBits> self_stages;
 	};
 
 	struct RecordedBufferCopy {
@@ -128,8 +129,10 @@ public:
 
 	enum ResourceUsage {
 		RESOURCE_USAGE_NONE,
-		RESOURCE_USAGE_TRANSFER_FROM,
-		RESOURCE_USAGE_TRANSFER_TO,
+		RESOURCE_USAGE_COPY_FROM,
+		RESOURCE_USAGE_COPY_TO,
+		RESOURCE_USAGE_RESOLVE_FROM,
+		RESOURCE_USAGE_RESOLVE_TO,
 		RESOURCE_USAGE_UNIFORM_BUFFER_READ,
 		RESOURCE_USAGE_INDIRECT_BUFFER_READ,
 		RESOURCE_USAGE_TEXTURE_BUFFER_READ,
@@ -141,24 +144,26 @@ public:
 		RESOURCE_USAGE_TEXTURE_SAMPLE,
 		RESOURCE_USAGE_STORAGE_IMAGE_READ,
 		RESOURCE_USAGE_STORAGE_IMAGE_READ_WRITE,
-		RESOURCE_USAGE_ATTACHMENT_COLOR_READ,
 		RESOURCE_USAGE_ATTACHMENT_COLOR_READ_WRITE,
-		RESOURCE_USAGE_ATTACHMENT_DEPTH_STENCIL_READ,
 		RESOURCE_USAGE_ATTACHMENT_DEPTH_STENCIL_READ_WRITE
 	};
 
 	struct ResourceTracker {
 		uint32_t reference_count = 0;
 		int64_t command_frame = -1;
-		int32_t read_command_list_index = -1;
+		int32_t read_full_command_list_index = -1;
+		int32_t read_slice_command_list_index = -1;
 		int32_t write_command_or_list_index = -1;
 		int32_t draw_list_index = -1;
+		ResourceUsage draw_list_usage = RESOURCE_USAGE_NONE;
 		int32_t compute_list_index = -1;
+		ResourceUsage compute_list_usage = RESOURCE_USAGE_NONE;
 		ResourceUsage usage = RESOURCE_USAGE_NONE;
 		BitField<RDD::BarrierAccessBits> usage_access;
 		RDD::BufferID buffer_driver_id;
 		RDD::TextureID texture_driver_id;
 		RDD::TextureSubresourceRange texture_subresources;
+		uint32_t texture_usage = 0;
 		int32_t texture_slice_command_index = -1;
 		ResourceTracker *parent = nullptr;
 		ResourceTracker *dirty_shared_list = nullptr;
@@ -171,7 +176,8 @@ public:
 			if (new_command_frame != command_frame) {
 				usage_access.clear();
 				command_frame = new_command_frame;
-				read_command_list_index = -1;
+				read_full_command_list_index = -1;
+				read_slice_command_list_index = -1;
 				write_command_or_list_index = -1;
 				draw_list_index = -1;
 				compute_list_index = -1;
@@ -179,6 +185,20 @@ public:
 				write_command_list_enabled = false;
 			}
 		}
+	};
+
+	struct CommandBufferPool {
+		// Provided by RenderingDevice.
+		RDD::CommandPoolID pool;
+
+		// Created internally by RenderingDeviceGraph.
+		LocalVector<RDD::CommandBufferID> buffers;
+		LocalVector<RDD::SemaphoreID> semaphores;
+		uint32_t buffers_used = 0;
+	};
+
+	struct WorkaroundsState {
+		bool draw_list_found = false;
 	};
 
 private:
@@ -237,7 +257,7 @@ private:
 		int32_t next_list_index = -1;
 	};
 
-	struct RecordedWriteListNode {
+	struct RecordedSliceListNode {
 		int32_t command_index = -1;
 		int32_t next_list_index = -1;
 		Rect2i subresources;
@@ -320,7 +340,15 @@ private:
 	struct RecordedTextureCopyCommand : RecordedCommand {
 		RDD::TextureID from_texture;
 		RDD::TextureID to_texture;
-		RDD::TextureCopyRegion region;
+		uint32_t texture_copy_regions_count = 0;
+
+		_FORCE_INLINE_ RDD::TextureCopyRegion *texture_copy_regions() {
+			return reinterpret_cast<RDD::TextureCopyRegion *>(&this[1]);
+		}
+
+		_FORCE_INLINE_ const RDD::TextureCopyRegion *texture_copy_regions() const {
+			return reinterpret_cast<const RDD::TextureCopyRegion *>(&this[1]);
+		}
 	};
 
 	struct RecordedTextureGetDataCommand : RecordedCommand {
@@ -557,6 +585,7 @@ private:
 	};
 
 	RDD *driver = nullptr;
+	RenderingContextDriver::Device device;
 	int64_t tracking_frame = 0;
 	LocalVector<uint8_t> command_data;
 	LocalVector<uint32_t> command_data_offsets;
@@ -572,12 +601,15 @@ private:
 	uint32_t command_count = 0;
 	uint32_t command_label_count = 0;
 	LocalVector<RecordedCommandListNode> command_list_nodes;
-	LocalVector<RecordedWriteListNode> write_list_nodes;
+	LocalVector<RecordedSliceListNode> read_slice_list_nodes;
+	LocalVector<RecordedSliceListNode> write_slice_list_nodes;
 	int32_t command_timestamp_index = -1;
 	int32_t command_synchronization_index = -1;
 	bool command_synchronization_pending = false;
 	BarrierGroup barrier_group;
-	bool driver_honors_barriers = false;
+	bool driver_honors_barriers : 1;
+	bool driver_clears_with_copy_engine : 1;
+	WorkaroundsState workarounds_state;
 	TightLocalVector<Frame> frames;
 	uint32_t frame = 0;
 
@@ -590,7 +622,8 @@ private:
 	static RDD::BarrierAccessBits _usage_to_access_bits(ResourceUsage p_usage);
 	int32_t _add_to_command_list(int32_t p_command_index, int32_t p_list_index);
 	void _add_adjacent_command(int32_t p_previous_command_index, int32_t p_command_index, RecordedCommand *r_command);
-	int32_t _add_to_write_list(int32_t p_command_index, Rect2i suberesources, int32_t p_list_index);
+	int32_t _add_to_slice_read_list(int32_t p_command_index, Rect2i p_subresources, int32_t p_list_index);
+	int32_t _add_to_write_list(int32_t p_command_index, Rect2i p_subresources, int32_t p_list_index);
 	RecordedCommand *_allocate_command(uint32_t p_command_size, int32_t &r_command_index);
 	DrawListInstruction *_allocate_draw_list_instruction(uint32_t p_instruction_size);
 	ComputeListInstruction *_allocate_compute_list_instruction(uint32_t p_instruction_size);
@@ -603,7 +636,7 @@ private:
 	void _run_draw_list_command(RDD::CommandBufferID p_command_buffer, const uint8_t *p_instruction_data, uint32_t p_instruction_data_size);
 	void _run_secondary_command_buffer_task(const SecondaryCommandBuffer *p_secondary);
 	void _wait_for_secondary_command_buffer_tasks();
-	void _run_render_commands(RDD::CommandBufferID p_command_buffer, int32_t p_level, const RecordedCommandSort *p_sorted_commands, uint32_t p_sorted_commands_count, int32_t &r_current_label_index, int32_t &r_current_label_level);
+	void _run_render_commands(int32_t p_level, const RecordedCommandSort *p_sorted_commands, uint32_t p_sorted_commands_count, RDD::CommandBufferID &r_command_buffer, CommandBufferPool &r_command_buffer_pool, int32_t &r_current_label_index, int32_t &r_current_label_level);
 	void _run_label_command_change(RDD::CommandBufferID p_command_buffer, int32_t p_new_label_index, int32_t p_new_level, bool p_ignore_previous_value, bool p_use_label_for_empty, const RecordedCommandSort *p_sorted_commands, uint32_t p_sorted_commands_count, int32_t &r_current_label_index, int32_t &r_current_label_level);
 	void _boost_priority_for_render_commands(RecordedCommandSort *p_sorted_commands, uint32_t p_sorted_commands_count, uint32_t &r_boosted_priority);
 	void _group_barriers_for_render_commands(RDD::CommandBufferID p_command_buffer, const RecordedCommandSort *p_sorted_commands, uint32_t p_sorted_commands_count, bool p_full_memory_barrier);
@@ -614,7 +647,8 @@ private:
 public:
 	RenderingDeviceGraph();
 	~RenderingDeviceGraph();
-	void initialize(RDD *p_driver, uint32_t p_frame_count, uint32_t p_secondary_command_buffers_per_frame);
+	void initialize(RDD *p_driver, RenderingContextDriver::Device p_device, uint32_t p_frame_count, RDD::CommandQueueFamilyID p_secondary_command_queue_family, uint32_t p_secondary_command_buffers_per_frame);
+	void finalize();
 	void begin();
 	void add_buffer_clear(RDD::BufferID p_dst, ResourceTracker *p_dst_tracker, uint32_t p_offset, uint32_t p_size);
 	void add_buffer_copy(RDD::BufferID p_src, ResourceTracker *p_src_tracker, RDD::BufferID p_dst, ResourceTracker *p_dst_tracker, RDD::BufferCopyRegion p_region);
@@ -650,15 +684,15 @@ public:
 	void add_draw_list_usages(VectorView<ResourceTracker *> p_trackers, VectorView<ResourceUsage> p_usages);
 	void add_draw_list_end();
 	void add_texture_clear(RDD::TextureID p_dst, ResourceTracker *p_dst_tracker, const Color &p_color, const RDD::TextureSubresourceRange &p_range);
-	void add_texture_copy(RDD::TextureID p_src, ResourceTracker *p_src_tracker, RDD::TextureID p_dst, ResourceTracker *p_dst_tracker, RDD::TextureCopyRegion p_region);
-	void add_texture_get_data(RDD::TextureID p_src, ResourceTracker *p_src_tracker, RDD::BufferID p_dst, VectorView<RDD::BufferTextureCopyRegion> p_buffer_texture_copy_regions);
+	void add_texture_copy(RDD::TextureID p_src, ResourceTracker *p_src_tracker, RDD::TextureID p_dst, ResourceTracker *p_dst_tracker, VectorView<RDD::TextureCopyRegion> p_texture_copy_regions);
+	void add_texture_get_data(RDD::TextureID p_src, ResourceTracker *p_src_tracker, RDD::BufferID p_dst, VectorView<RDD::BufferTextureCopyRegion> p_buffer_texture_copy_regions, ResourceTracker *p_dst_tracker = nullptr);
 	void add_texture_resolve(RDD::TextureID p_src, ResourceTracker *p_src_tracker, RDD::TextureID p_dst, ResourceTracker *p_dst_tracker, uint32_t p_src_layer, uint32_t p_src_mipmap, uint32_t p_dst_layer, uint32_t p_dst_mipmap);
-	void add_texture_update(RDD::TextureID p_dst, ResourceTracker *p_dst_tracker, VectorView<RecordedBufferToTextureCopy> p_buffer_copies);
+	void add_texture_update(RDD::TextureID p_dst, ResourceTracker *p_dst_tracker, VectorView<RecordedBufferToTextureCopy> p_buffer_copies, VectorView<ResourceTracker *> p_buffer_trackers = VectorView<ResourceTracker *>());
 	void add_capture_timestamp(RDD::QueryPoolID p_query_pool, uint32_t p_index);
 	void add_synchronization();
 	void begin_label(const String &p_label_name, const Color &p_color);
 	void end_label();
-	void end(RDD::CommandBufferID p_command_buffer, bool p_reorder_commands, bool p_full_barriers);
+	void end(bool p_reorder_commands, bool p_full_barriers, RDD::CommandBufferID &r_command_buffer, CommandBufferPool &r_command_buffer_pool);
 	static ResourceTracker *resource_tracker_create();
 	static void resource_tracker_free(ResourceTracker *tracker);
 };

@@ -69,7 +69,7 @@ namespace Godot
         public readonly Aabb Abs()
         {
             Vector3 end = End;
-            Vector3 topLeft = new Vector3(Mathf.Min(_position.X, end.X), Mathf.Min(_position.Y, end.Y), Mathf.Min(_position.Z, end.Z));
+            Vector3 topLeft = end.Min(_position);
             return new Aabb(topLeft, _size.Abs());
         }
 
@@ -98,11 +98,11 @@ namespace Godot
             Vector3 dstMax = with._position + with._size;
 
             return srcMin.X <= dstMin.X &&
-                   srcMax.X > dstMax.X &&
+                   srcMax.X >= dstMax.X &&
                    srcMin.Y <= dstMin.Y &&
-                   srcMax.Y > dstMax.Y &&
+                   srcMax.Y >= dstMax.Y &&
                    srcMin.Z <= dstMin.Z &&
-                   srcMax.Z > dstMax.Z;
+                   srcMax.Z >= dstMax.Z;
         }
 
         /// <summary>
@@ -318,9 +318,9 @@ namespace Godot
             Vector3 ofs = _position + halfExtents;
 
             return ofs + new Vector3(
-                dir.X > 0f ? -halfExtents.X : halfExtents.X,
-                dir.Y > 0f ? -halfExtents.Y : halfExtents.Y,
-                dir.Z > 0f ? -halfExtents.Z : halfExtents.Z);
+                dir.X > 0f ? halfExtents.X : -halfExtents.X,
+                dir.Y > 0f ? halfExtents.Y : -halfExtents.Y,
+                dir.Z > 0f ? halfExtents.Z : -halfExtents.Z);
         }
 
         /// <summary>
@@ -733,10 +733,7 @@ namespace Godot
         /// Converts this <see cref="Aabb"/> to a string.
         /// </summary>
         /// <returns>A string representation of this AABB.</returns>
-        public override readonly string ToString()
-        {
-            return $"{_position}, {_size}";
-        }
+        public override readonly string ToString() => ToString(null);
 
         /// <summary>
         /// Converts this <see cref="Aabb"/> to a string with the given <paramref name="format"/>.

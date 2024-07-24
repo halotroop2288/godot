@@ -23,9 +23,9 @@
 #ifndef _TVG_RENDER_H_
 #define _TVG_RENDER_H_
 
-#include <mutex>
 #include "tvgCommon.h"
 #include "tvgArray.h"
+#include "tvgLock.h"
 
 namespace tvg
 {
@@ -54,12 +54,12 @@ struct Surface
         uint32_t* buf32;            //for explicit 32bits channels
         uint8_t*  buf8;             //for explicit 8bits grayscale
     };
-    mutex mtx;                      //used for thread safety
+    Key key;                        //a reserved lock for the thread safety
     uint32_t stride = 0;
     uint32_t w = 0, h = 0;
     ColorSpace cs = ColorSpace::Unsupported;
     uint8_t channelSize = 0;
-    bool premultiplied = 0;         //Alpha-premultiplied
+    bool premultiplied = false;         //Alpha-premultiplied
 
     Surface()
     {
@@ -100,42 +100,19 @@ struct RenderRegion
 {
     int32_t x, y, w, h;
 
-    void intersect(const RenderRegion& rhs)
+    void intersect(const RenderRegion& rhs);
+    void add(const RenderRegion& rhs);
+
+    bool operator==(const RenderRegion& rhs) const
     {
-        auto x1 = x + w;
-        auto y1 = y + h;
-        auto x2 = rhs.x + rhs.w;
-        auto y2 = rhs.y + rhs.h;
-
-        x = (x > rhs.x) ? x : rhs.x;
-        y = (y > rhs.y) ? y : rhs.y;
-        w = ((x1 < x2) ? x1 : x2) - x;
-        h = ((y1 < y2) ? y1 : y2) - y;
-
-        if (w < 0) w = 0;
-        if (h < 0) h = 0;
-    }
-
-    void add(const RenderRegion& rhs)
-    {
-        if (rhs.x < x) {
-            w += (x - rhs.x);
-            x = rhs.x;
-        }
-        if (rhs.y < y) {
-            h += (y - rhs.y);
-            y = rhs.y;
-        }
-        if (rhs.x + rhs.w > x + w) w = (rhs.x + rhs.w) - x;
-        if (rhs.y + rhs.h > y + h) h = (rhs.y + rhs.h) - y;
+        if (x == rhs.x && y == rhs.y && w == rhs.w && h == rhs.h) return true;
+        return false;
     }
 };
 
 struct RenderTransform
 {
-    Matrix m;             //3x3 Matrix Elements
-    float x = 0.0f;
-    float y = 0.0f;
+    Matrix m;
     float degree = 0.0f;  //rotation degree
     float scale = 1.0f;   //scale factor
     bool overriding = false;  //user transform?
@@ -143,7 +120,11 @@ struct RenderTransform
     void update();
     void override(const Matrix& m);
 
-    RenderTransform() {}
+    RenderTransform()
+    {
+        m.e13 = m.e23 = 0.0f;
+    }
+
     RenderTransform(const RenderTransform* lhs, const RenderTransform* rhs);
 };
 
@@ -163,6 +144,7 @@ struct RenderStroke
     struct {
         float begin = 0.0f;
         float end = 1.0f;
+        bool simultaneous = true;
     } trim;
 
     ~RenderStroke()
@@ -261,7 +243,14 @@ struct RenderShape
 
 class RenderMethod
 {
+private:
+    uint32_t refCnt = 0;        //reference count
+    Key key;
+
 public:
+    uint32_t ref();
+    uint32_t unref();
+
     virtual ~RenderMethod() {}
     virtual RenderData prepare(const RenderShape& rshape, RenderData data, const RenderTransform* transform, Array<RenderData>& clips, uint8_t opacity, RenderUpdateFlag flags, bool clipper) = 0;
     virtual RenderData prepare(const Array<RenderData>& scene, RenderData data, const RenderTransform* transform, Array<RenderData>& clips, uint8_t opacity, RenderUpdateFlag flags) = 0;
@@ -270,12 +259,13 @@ public:
     virtual bool renderShape(RenderData data) = 0;
     virtual bool renderImage(RenderData data) = 0;
     virtual bool postRender() = 0;
-    virtual bool dispose(RenderData data) = 0;
+    virtual void dispose(RenderData data) = 0;
     virtual RenderRegion region(RenderData data) = 0;
     virtual RenderRegion viewport() = 0;
     virtual bool viewport(const RenderRegion& vp) = 0;
     virtual bool blend(BlendMethod method) = 0;
     virtual ColorSpace colorSpace() = 0;
+    virtual const Surface* mainSurface() = 0;
 
     virtual bool clear() = 0;
     virtual bool sync() = 0;
@@ -322,7 +312,7 @@ static inline uint8_t CHANNEL_SIZE(ColorSpace cs)
     }
 }
 
-static inline ColorSpace COMPOSITE_TO_COLORSPACE(RenderMethod& renderer, CompositeMethod method)
+static inline ColorSpace COMPOSITE_TO_COLORSPACE(RenderMethod* renderer, CompositeMethod method)
 {
     switch(method) {
         case CompositeMethod::AlphaMask:
@@ -335,7 +325,7 @@ static inline ColorSpace COMPOSITE_TO_COLORSPACE(RenderMethod& renderer, Composi
         //TODO: Optimize Luma/InvLuma colorspace to Grayscale8
         case CompositeMethod::LumaMask:
         case CompositeMethod::InvLumaMask:
-            return renderer.colorSpace();
+            return renderer->colorSpace();
         default:
             TVGERR("RENDERER", "Unsupported Composite Size! = %d", (int)method);
             return ColorSpace::Unsupported;

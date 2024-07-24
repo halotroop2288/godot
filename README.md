@@ -1,3 +1,42 @@
+# Godot Engine 4 for 3DS
+
+## What is it?
+
+This repository contains an unfinished port of the Godot 4 game engine for the Nintendo 3DS.
+
+The goal is to be able to develop 3DS games using the Godot Engine.
+
+The renderer is not yet functional, however, the engine does start and run gdscript code headless.
+
+## How does this work
+
+The godot runtime gets bundled in a 3DSX with the content romfs directory present in platform/3ds/romfs.
+
+Godot, when starting uses the arguments `--main-pack romfs:/Game.pck --display-driver 3ds --audio-driver Dummy`
+
+As such, if you want to change the project loaded by godot on startup, you will need to change the Game.pck that is bundled in the romfs directory.
+
+## Is this legal?
+
+Only open source SDKs are used for the development of this port.
+
+No Nintendo SDKs are used in any part of it, as such there are no legal issues with it.
+
+## Building
+
+In order to build it, you will need to have Scons as well as Devkitpro's SDKs installed with the DevkitARM toolchain and libctru.
+
+You will also need to have the following portlibs installed : 3ds-freetype, 3ds-bzip2, 3ds-libpng and 3ds-zlib.
+
+Devkitpro's install instructions are available at : https://devkitpro.org/wiki/Getting_Started
+
+Ensure that devkitpro/tools/bin is in your environment PATH so that 3dsxtool and picasso can be called by the build system (I do plan to make it instead rely on the devkitpro path defined to make it easier in the long run).
+
+You can check if it is the case by typing `3dsxtool` in the command line, if you get an error that says it isn't found, you'll need to add the path to your PATH environment variable.
+
+Once you have everything, you should be able to build godot 3DS using
+`scons platform=3ds target=template_release devkitpro=/path/to/devkitpro`
+
 # Godot Engine
 
 <p align="center">

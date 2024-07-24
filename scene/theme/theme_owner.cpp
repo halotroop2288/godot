@@ -69,18 +69,18 @@ bool ThemeOwner::has_owner_node() const {
 void ThemeOwner::set_owner_context(ThemeContext *p_context, bool p_propagate) {
 	ThemeContext *default_context = ThemeDB::get_singleton()->get_default_theme_context();
 
-	if (owner_context && owner_context->is_connected("changed", callable_mp(this, &ThemeOwner::_owner_context_changed))) {
-		owner_context->disconnect("changed", callable_mp(this, &ThemeOwner::_owner_context_changed));
-	} else if (default_context->is_connected("changed", callable_mp(this, &ThemeOwner::_owner_context_changed))) {
-		default_context->disconnect("changed", callable_mp(this, &ThemeOwner::_owner_context_changed));
+	if (owner_context && owner_context->is_connected(CoreStringName(changed), callable_mp(this, &ThemeOwner::_owner_context_changed))) {
+		owner_context->disconnect(CoreStringName(changed), callable_mp(this, &ThemeOwner::_owner_context_changed));
+	} else if (default_context->is_connected(CoreStringName(changed), callable_mp(this, &ThemeOwner::_owner_context_changed))) {
+		default_context->disconnect(CoreStringName(changed), callable_mp(this, &ThemeOwner::_owner_context_changed));
 	}
 
 	owner_context = p_context;
 
 	if (owner_context) {
-		owner_context->connect("changed", callable_mp(this, &ThemeOwner::_owner_context_changed));
+		owner_context->connect(CoreStringName(changed), callable_mp(this, &ThemeOwner::_owner_context_changed));
 	} else {
-		default_context->connect("changed", callable_mp(this, &ThemeOwner::_owner_context_changed));
+		default_context->connect(CoreStringName(changed), callable_mp(this, &ThemeOwner::_owner_context_changed));
 	}
 
 	if (p_propagate) {
@@ -250,7 +250,7 @@ void ThemeOwner::get_theme_type_dependencies(const Node *p_for_node, const Strin
 }
 
 Variant ThemeOwner::get_theme_item_in_types(Theme::DataType p_data_type, const StringName &p_name, const List<StringName> &p_theme_types) {
-	ERR_FAIL_COND_V_MSG(p_theme_types.size() == 0, Variant(), "At least one theme type must be specified.");
+	ERR_FAIL_COND_V_MSG(p_theme_types.is_empty(), Variant(), "At least one theme type must be specified.");
 
 	// First, look through each control or window node in the branch, until no valid parent can be found.
 	// Only nodes with a theme resource attached are considered.
@@ -286,7 +286,7 @@ Variant ThemeOwner::get_theme_item_in_types(Theme::DataType p_data_type, const S
 }
 
 bool ThemeOwner::has_theme_item_in_types(Theme::DataType p_data_type, const StringName &p_name, const List<StringName> &p_theme_types) {
-	ERR_FAIL_COND_V_MSG(p_theme_types.size() == 0, false, "At least one theme type must be specified.");
+	ERR_FAIL_COND_V_MSG(p_theme_types.is_empty(), false, "At least one theme type must be specified.");
 
 	// First, look through each control or window node in the branch, until no valid parent can be found.
 	// Only nodes with a theme resource attached are considered.

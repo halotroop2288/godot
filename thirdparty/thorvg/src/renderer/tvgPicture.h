@@ -70,9 +70,9 @@ struct Picture::Impl
 
     RenderTransform resizeTransform(const RenderTransform* pTransform);
     bool needComposition(uint8_t opacity);
-    bool render(RenderMethod &renderer);
+    bool render(RenderMethod* renderer);
     bool size(float w, float h);
-    RenderRegion bounds(RenderMethod& renderer);
+    RenderRegion bounds(RenderMethod* renderer);
     Result load(ImageLoader* ploader);
 
     Impl(Picture* p) : picture(p)
@@ -82,31 +82,29 @@ struct Picture::Impl
     ~Impl()
     {
         LoaderMgr::retrieve(loader);
+        if (surface) {
+            if (auto renderer = PP(picture)->renderer) {
+                renderer->dispose(rd);
+            }
+        }
         delete(paint);
     }
 
-    bool dispose(RenderMethod& renderer)
+    RenderData update(RenderMethod* renderer, const RenderTransform* pTransform, Array<RenderData>& clips, uint8_t opacity, RenderUpdateFlag pFlag, bool clipper)
     {
-        if (paint) paint->pImpl->dispose(renderer);
-        else if (surface) renderer.dispose(rd);
-        rd = nullptr;
-        return true;
-    }
-
-    RenderData update(RenderMethod &renderer, const RenderTransform* pTransform, Array<RenderData>& clips, uint8_t opacity, RenderUpdateFlag pFlag, bool clipper)
-    {
-        auto flag = load();
+        auto flag = static_cast<RenderUpdateFlag>(pFlag | load());
 
         if (surface) {
+            if (flag == RenderUpdateFlag::None) return rd;
             auto transform = resizeTransform(pTransform);
-            rd = renderer.prepare(surface, &rm, rd, &transform, clips, opacity, static_cast<RenderUpdateFlag>(pFlag | flag));
+            rd = renderer->prepare(surface, &rm, rd, &transform, clips, opacity, flag);
         } else if (paint) {
             if (resizing) {
                 loader->resize(paint, w, h);
                 resizing = false;
             }
             needComp = needComposition(opacity) ? true : false;
-            rd = paint->pImpl->update(renderer, pTransform, clips, opacity, static_cast<RenderUpdateFlag>(pFlag | flag), clipper);
+            rd = paint->pImpl->update(renderer, pTransform, clips, opacity, flag, clipper);
         }
         return rd;
     }
@@ -203,6 +201,7 @@ struct Picture::Impl
         if (loader) {
             dup->loader = loader;
             ++dup->loader->sharing;
+            PP(ret)->renderFlag |= RenderUpdateFlag::Image;
         }
 
         dup->surface = surface;

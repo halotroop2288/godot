@@ -56,7 +56,6 @@ class Texture2D : public Texture {
 
 protected:
 	static void _bind_methods();
-
 	GDVIRTUAL0RC(int, _get_width)
 	GDVIRTUAL0RC(int, _get_height)
 	GDVIRTUAL2RC(bool, _is_pixel_opaque, int, int)

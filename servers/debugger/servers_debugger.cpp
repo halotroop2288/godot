@@ -97,12 +97,10 @@ Array ServersDebugger::ServersProfilerFrame::serialize() {
 	arr.push_back(script_time);
 
 	arr.push_back(servers.size());
-	for (int i = 0; i < servers.size(); i++) {
-		ServerInfo &s = servers[i];
+	for (const ServerInfo &s : servers) {
 		arr.push_back(s.name);
 		arr.push_back(s.functions.size() * 2);
-		for (int j = 0; j < s.functions.size(); j++) {
-			ServerFunctionInfo &f = s.functions[j];
+		for (const ServerFunctionInfo &f : s.functions) {
 			arr.push_back(f.name);
 			arr.push_back(f.time);
 		}
@@ -198,7 +196,7 @@ class ServersDebugger::ScriptsProfiler : public EngineProfiler {
 	typedef ServersDebugger::ScriptFunctionInfo FunctionInfo;
 	struct ProfileInfoSort {
 		bool operator()(ScriptLanguage::ProfilingInfo *A, ScriptLanguage::ProfilingInfo *B) const {
-			return A->total_time < B->total_time;
+			return A->total_time > B->total_time;
 		}
 	};
 	Vector<ScriptLanguage::ProfilingInfo> info;
@@ -342,10 +340,12 @@ public:
 		}
 		ServerInfo &srv = server_data[name];
 
-		ServerFunctionInfo fi;
-		fi.name = p_data[1];
-		fi.time = p_data[2];
-		srv.functions.push_back(fi);
+		for (int idx = 1; idx < p_data.size() - 1; idx += 2) {
+			ServerFunctionInfo fi;
+			fi.name = p_data[idx];
+			fi.time = p_data[idx + 1];
+			srv.functions.push_back(fi);
+		}
 	}
 
 	void tick(double p_frame_time, double p_process_time, double p_physics_time, double p_physics_frame_time) {
